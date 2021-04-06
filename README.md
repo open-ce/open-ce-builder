@@ -5,7 +5,7 @@
 </p>
 
 [![Builder Unit Tests](https://github.com/open-ce/open-ce/workflows/Open-CE%20Builder%20Unit%20Tests/badge.svg)](https://github.com/open-ce/open-ce-builder/actions?query=workflow%3A%22Open-CE+Builder+Unit+Tests%22+branch%3Amain)
-[![Builder Unit Test Coverage](https://codecov.io/gh/open-ce/open-ce/branch/main/graph/badge.svg)](https://codecov.io/gh/open-ce/open-ce)
+[![Builder Unit Test Coverage](https://codecov.io/gh/open-ce/open-ce-builder/branch/main/graph/badge.svg)](https://codecov.io/gh/open-ce/open-ce-builder)
 [![Python Support](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue.svg)](#requirements)
 [![Cuda Support](https://img.shields.io/badge/cuda-10.2%20%7C%2011.0-blue)](doc/README.cuda_support.md)
 [![GitHub Licence](https://img.shields.io/github/license/open-ce/open-ce.svg)](LICENSE)
