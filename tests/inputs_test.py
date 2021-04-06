@@ -33,7 +33,7 @@ def test_create_env_config_paths(mocker):
     Test the _create_env_config_paths function.
     '''
     mocker.patch('os.path.exists', return_value=0)
-    envs_repo = "open-ce-environments"
+    envs_repo = "open-ce"
 
     parser = make_parser([Argument.ENV_FILE, Argument.GIT_LOCATION, Argument.GIT_TAG_FOR_ENV])
 

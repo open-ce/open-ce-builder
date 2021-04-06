@@ -34,10 +34,10 @@ In this context, an "environment" is a fully-built core package along with all
 of its dependencies, each of which is found in a separate "feedstock" repository
 within the broader open-ce project.
 Default environment files are provided for each of several environments in the open-ce
-repository, within [https://github.com/open-ce/open-ce-environments/envs](https://github.com/open-ce/open-ce-environments/tree/main/envs)
+repository, within [https://github.com/open-ce/open-ce/envs](https://github.com/open-ce/open-ce/tree/main/envs)
 These files are named for their package environments, e.g.
-[tensorflow-env.yaml](https://github.com/open-ce/open-ce-environments/blob/main/envs/tensorflow-env.yaml)
-or [pytorch-env.yaml](https://github.com/open-ce/open-ce-environments/blob/main/envs/pytorch-env.yaml),
+[tensorflow-env.yaml](https://github.com/open-ce/open-ce/blob/main/envs/tensorflow-env.yaml)
+or [pytorch-env.yaml](https://github.com/open-ce/open-ce/blob/main/envs/pytorch-env.yaml),
 among others. You can review these files as examples.
 
 There are a number of keywords that can be used in the environment files, each one
@@ -69,7 +69,7 @@ only infrequently, typically to override defaults.
 In the most common basic case, each environment file has a `packages` stanza
 which lists a number of feedstock repositories that are needed to build as
 requisites. Each feedstock dependency is listed on a separate line in the stanza.
-For example, in [xgboost-env.yaml](https://github.com/open-ce/open-ce-environments/blob/main/envs/xgboost-env.yaml):
+For example, in [xgboost-env.yaml](https://github.com/open-ce/open-ce/blob/main/envs/xgboost-env.yaml):
 
 ```yaml
 packages:
@@ -138,7 +138,7 @@ packages:
 
 This field specifies the list of patches that are to be applied to the feedstock.
 Patches to be applied are expected to be present in `feedstock-patches` directory
-within `open-ce-environments` repository. Ideal way is to have the patches placed in the directory named
+within `open-ce` repository. Ideal way is to have the patches placed in the directory named
 as the feedstock, within `feedstock-patches` directory.
 An example might look something like this:
 
@@ -206,7 +206,7 @@ represents the recipe for each separate package.
 
 Another stanza type that you might see in some environment files is
 `imported_envs`. An example found in
-[horovod-env.yaml](https://github.com/open-ce/open-ce-environments/blob/main/envs/horovod-env.yaml)
+[horovod-env.yaml](https://github.com/open-ce/open-ce/blob/main/envs/horovod-env.yaml)
 looks like:
 
 ```yaml
@@ -226,7 +226,7 @@ a local PyTorch env, and a TensorFlow env pulled directly from GitHub.
 ```yaml
 imported_envs:
   - pytorch-env.yaml
-  - https://raw.githubusercontent.com/open-ce/open-ce-environments/main/envs/tensorflow-env.yaml
+  - https://raw.githubusercontent.com/open-ce/open-ce/main/envs/tensorflow-env.yaml
 ```
 
 ### channels

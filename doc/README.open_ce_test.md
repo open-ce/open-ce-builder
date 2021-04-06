@@ -82,11 +82,11 @@ positional arguments:
   env_config_file       Path to the environment configuration YAML file. The configuration
                         file describes the package environment you wish to build.
 
-                        A collection of files exist at https://github.com/open-ce/open-ce-environments.
+                        A collection of files exist at https://github.com/open-ce/open-ce.
 
                         This argument can be a URL, in which case imported_envs and the conda_build_config
                         will be automatically discovered in the same remote directory. E.g.:
-                        >$ open-ce build env https://raw.githubusercontent.com/open-ce/open-ce-environments/main/envs/opence-env.yaml
+                        >$ open-ce build env https://raw.githubusercontent.com/open-ce/open-ce/main/envs/opence-env.yaml
 
                         For complete documentation on Open-CE environment files see:
                         https://github.com/open-ce/open-ce/blob/main/doc/README.yaml.md

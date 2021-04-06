@@ -36,7 +36,7 @@ DEFAULT_CUDA_VERS = "10.2"
 CONDA_BUILD_CONFIG_FILE = "conda_build_config.yaml"
 DEFAULT_CONDA_BUILD_CONFIG = os.path.abspath(os.path.join(os.getcwd(), CONDA_BUILD_CONFIG_FILE))
 DEFAULT_GIT_LOCATION = "https://github.com/open-ce"
-DEFAULT_ENVS_REPO = "open-ce-environments"
+DEFAULT_ENVS_REPO = "open-ce"
 SUPPORTED_GIT_PROTOCOLS = ["https:", "http:", "git@"]
 DEFAULT_RECIPE_CONFIG_FILE = "config/build-config.yaml"
 CONDA_ENV_FILENAME_PREFIX = "opence-conda-env-"
@@ -71,7 +71,7 @@ def check_if_conda_build_exists():
     try:
         pkg_resources.get_distribution('conda-build')
     except pkg_resources.DistributionNotFound:
-        print("Cannot find `conda_build`, please see https://github.com/open-ce/open-ce#requirements"
+        print("Cannot find `conda_build`, please see https://github.com/open-ce/open-ce-builder#requirements"
               " for a list of requirements.")
         sys.exit(1)
 
