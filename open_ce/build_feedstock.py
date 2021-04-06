@@ -167,6 +167,10 @@ def build_feedstock(args):
                            cudatoolkit=args.cuda_versions,
                            channels=args.channels_list)
 
+    # Before we build, ensure CUDA_HOME is set and warn if there is a version mismatch
+    if 'cuda' in command.build_type:
+        utils.check_cuda_version_match(command)
+
     build_feedstock_from_command(command,
                                  recipe_config_file=args.recipe_config_file,
                                  output_folder=args.output_folder,
