@@ -59,7 +59,7 @@ jobs:
         shell: bash -l {0}
         run: |
           # Use yamllint to check the actual yaml files.
-          yamllint .github/actions/*/*.yml .github/workflows/*.yml
+          yamllint .github/workflows/*.yml
       - name: Test with pytest and Generate coverage report
         shell: bash -l {0}
         run: |
