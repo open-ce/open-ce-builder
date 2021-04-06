@@ -49,8 +49,8 @@ about:
       configuration and build scripts which are foundational to building 
       the underlying software component packages (feedstocks) which comprise
       the greater Open-CE package ecosystem.
-  doc_url: https://github.com/open-ce/open-ce
-  dev_url: https://github.com/open-ce/open-ce
+  doc_url: https://github.com/open-ce/open-ce-builder
+  dev_url: https://github.com/open-ce/open-ce-builder
 
 extra:
   recipe-maintainers:

@@ -44,7 +44,7 @@ these images are located in the [images directory](../open_ce/images)
 To build these images manually, use the command below.
 
 ```shell
-docker build open-ce/open_ce/images/build-cuda-x86_64
+docker build open-ce-builder/open_ce/images/build-cuda-x86_64
 ```
 
 The Open-CE build image presets the `CUDA_HOME` environment variable to the appropriate location.

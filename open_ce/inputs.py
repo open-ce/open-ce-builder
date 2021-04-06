@@ -64,14 +64,14 @@ class Argument(Enum):
                                         help="""R|Path to the environment configuration YAML file. The configuration
 file describes the package environment you wish to build.
 
-A collection of files exist at https://github.com/open-ce/open-ce-environments.
+A collection of files exist at https://github.com/open-ce/open-ce.
 
 This argument can be a URL, in which case imported_envs and the conda_build_config
 will be automatically discovered in the same remote directory. E.g.:
->$ open-ce build env https://raw.githubusercontent.com/open-ce/open-ce-environments/main/envs/opence-env.yaml
+>$ open-ce build env https://raw.githubusercontent.com/open-ce/open-ce/main/envs/opence-env.yaml
 
 If the provided file doesn't exist locally, a URL will be generated to pull down from
-https://raw.githubusercontent.com/open-ce/open-ce-environments/main/envs. If the --git_tag_for_env argument
+https://raw.githubusercontent.com/open-ce/open-ce/main/envs. If the --git_tag_for_env argument
 is provided, it will pull down from the provided tag instead of main. E.g:
 >$ open-ce build env opence-env
 

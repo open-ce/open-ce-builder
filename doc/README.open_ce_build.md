@@ -6,7 +6,7 @@
 
 ## Installing these tools
 
-Installation information can be found in the main [README](https://github.com/open-ce/open-ce#installing-the-open-ce-build-tools). The examples in this document assume installation via pip.
+Installation information can be found in the main [README](../README.md#installing-the-open-ce-build-tools).
 
 ## `open-ce build env` sub command
 
@@ -15,20 +15,20 @@ a build is achieved by executing the script `open-ce build env`. This will extra
 and build all of the individual required components within the various Open-CE
 feedstock repository trees required for the requested package environment.
 In other words, if you simply want to build a package such as tensorflow or
-pytorch (or any other; see the `open-ce-environments/envs` subdirectory), with dependencies
+pytorch (or any other; see the `open-ce/envs` subdirectory), with dependencies
 automatically handled, you can do so using a single `open-ce build env` command.
 
 For example:
 In the simplest case, a build for tensorflow may look like this:
 
 ```shell
-    open-ce build env open-ce-environments/envs/tensorflow-env.yaml
+    open-ce build env tensorflow-env.yaml
 ```
 
 while a similar build for pytorch may look like this:
 
 ```shell
-    open-ce build env open-ce-environments/envs/pytorch-env.yaml
+    open-ce build env pytorch-env.yaml
 ```
 
 Other environment files for other packages can also be found in the `envs`
@@ -52,20 +52,20 @@ to set container build options like environment variables or other settings
 like cpusets.
 
 ```shell
-    open-ce build env --container_build --container_tool podman --container_build_args="--build-arg ENV1=test1 --cpuset-cpus 0,1" open-ce-environments/envs/pytorch-env.yaml
+    open-ce build env --container_build --container_tool podman --container_build_args="--build-arg ENV1=test1 --cpuset-cpus 0,1" pytorch-env
 ```
 
 As part of this process of container build, it will copy a local_files directory that is in the
 current working directory into the container, if the directory exists.
 
 The paths to the `env_config_file`s and `--conda_build_config` must point to
-files within the `open-ce-environments` directory and be relative to the directory
+files within the `open-ce` directory and be relative to the directory
 containing the root level `open-ce` directory.
 
 ### Use System MPI
 
 By default, building the entire
-[Open-CE environment file](https://github.com/open-ce/open-ce-environments/blob/main/envs/opence-env.yaml)
+[Open-CE environment file](https://github.com/open-ce/open-ce/blob/main/envs/opence-env.yaml)
 will include a build of [OpenMPI](https://github.com/open-ce/openmpi-feedstock)
 which will be used for packages that need MPI, like
 [Horovod](https://github.com/open-ce/horovod-feedstock). To use a system install of
@@ -95,14 +95,14 @@ positional arguments:
   env_config_file       Path to the environment configuration YAML file. The configuration
                         file describes the package environment you wish to build.
 
-                        A collection of files exist at https://github.com/open-ce/open-ce-environments.
+                        A collection of files exist at https://github.com/open-ce/open-ce.
 
                         This argument can be a URL, in which case imported_envs and the conda_build_config
                         will be automatically discovered in the same remote directory. E.g.:
-                        >$ open-ce build env https://raw.githubusercontent.com/open-ce/open-ce-environments/main/envs/opence-env.yaml
+                        >$ open-ce build env https://raw.githubusercontent.com/open-ce/open-ce/main/envs/opence-env.yaml
 
                         If the provided file doesn't exist locally, a URL will be generated to pull down from
-                        https://raw.githubusercontent.com/open-ce/open-ce-environments/main/envs. If the --git_tag_for_env argument
+                        https://raw.githubusercontent.com/open-ce/open-ce/main/envs. If the --git_tag_for_env argument
                         is provided, it will pull down from the provided tag instead of main. E.g:
                         >$ open-ce build env opence-env
 
@@ -181,7 +181,7 @@ optional arguments:
 
 ```shell
     open-ce build env --python_versions=3.7 --build_type=cuda --mpi_type=openmpi
-    open-ce-environments/envs/tensorflow-env.yaml
+    tensorflow-env.yaml
 ```
 
  The above command will output `open-ce-conda-env-py3.7-cuda-openmpi.yaml` in the specified
@@ -213,8 +213,7 @@ However, in some cases you may want to just build a selected individual package
 from its own feedstock repo.  In that case, you can run `open-ce build feedstock`
 directly.
 
-Note that a local clone of the desired feedstock repository will need to be present
-in addition to the Open-CE `open-ce` repository (in which this script is found).  
+Note that a local clone of the desired feedstock repository will need to be present.  
 By contrast, if you were to use `open-ce build env`, the script will clone any necessary 
 dependency repositories for you.
 
