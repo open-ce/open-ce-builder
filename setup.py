@@ -33,7 +33,7 @@ REQUIRED_PACKAGES = [
 ]
 
 setup(
-    name="open-ce",
+    name="open-ce-builder",
     version=open_ce.__version__,
     description="Open-CE tools for building feedstocks",
     long_description=get_readme(),
@@ -41,7 +41,7 @@ setup(
     author="Open-CE Dev Team",
     author_email="",
     packages = find_packages(),
-    scripts = ["open_ce/open-ce"],
+    scripts = ["open_ce/open-ce", "open_ce/open-ce-builder"],
     include_package_data=True,
     package_data={
         "open_ce": [

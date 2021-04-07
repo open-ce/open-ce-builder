@@ -1,4 +1,4 @@
-{% set name = "open-ce" %}
+{% set name = "open-ce-builder" %}
 {% set version = "2.0.0" %}
 
 package:
@@ -29,7 +29,7 @@ requirements:
 test:
   commands:
     - open-ce -h
-    - open-ce build env -h
+    - open-ce-builder build env -h
     - open-ce build feedstock -h
     - open-ce build image -h
   imports:

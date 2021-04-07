@@ -22,7 +22,7 @@ from importlib.machinery import SourceFileLoader
 
 test_dir = pathlib.Path(__file__).parent.absolute()
 
-spec = spec_from_loader("opence", SourceFileLoader("opence", os.path.join(test_dir, '..', 'open_ce', 'open-ce')))
+spec = spec_from_loader("opence", SourceFileLoader("opence", os.path.join(test_dir, '..', 'open_ce', 'open-ce-builder')))
 opence = module_from_spec(spec)
 spec.loader.exec_module(opence)
 
