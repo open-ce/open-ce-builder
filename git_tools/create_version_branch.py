@@ -40,7 +40,7 @@ from open_ce import build_feedstock
 
 def _make_parser():
     ''' Parser input arguments '''
-    parser = inputs.make_parser([git_utils.Argument.REPO_DIR],
+    parser = inputs.make_parser([git_utils.Argument.REPO_DIR, inputs.Argument.CONDA_BUILD_CONFIG],
                                     description = 'Create a version branch for a feedstock.')
 
     parser.add_argument(
@@ -63,7 +63,7 @@ def _make_parser():
 
     return parser
 
-def _get_repo_version(repo_path):
+def _get_repo_version(repo_path, variant_config_files=None):
     '''
     Get the version of the first package that appears in the recipes list for the feedstock.
     '''
@@ -73,7 +73,7 @@ def _get_repo_version(repo_path):
     build_config_data, _ = build_feedstock.load_package_config()
 
     for recipe in build_config_data["recipes"]:
-        rendered_recipe = conda_utils.render_yaml(recipe["path"])
+        rendered_recipe = conda_utils.render_yaml(recipe["path"], variant_config_files=variant_config_files)
         for meta, _, _ in rendered_recipe:
             package_version = meta.meta['package']['version']
             if package_version and package_version != "None":
@@ -88,7 +88,7 @@ def _get_repo_name(repo_url):
         repo_url += ".git"
     return os.path.splitext(os.path.basename(repo_url))[0]
 
-def _create_version_branch(arg_strings=None):
+def _create_version_branch(arg_strings=None):# pylint: disable=too-many-branches
     parser = _make_parser()
     args = parser.parse_args(arg_strings)
 
@@ -108,35 +108,42 @@ def _create_version_branch(arg_strings=None):
     if args.commit:
         git_utils.checkout(repo_path, args.commit)
     current_commit = git_utils.get_current_branch(repo_path)
+    config_file = None
+    if args.conda_build_config:
+        config_file = [args.conda_build_config]
+    try:
+        git_utils.checkout(repo_path, "HEAD~")
+        previous_version = _get_repo_version(repo_path, config_file)
 
-    git_utils.checkout(repo_path, "HEAD~")
-    previous_version = _get_repo_version(repo_path)
+        git_utils.checkout(repo_path, current_commit)
+        current_version = _get_repo_version(repo_path, config_file)
 
-    git_utils.checkout(repo_path, current_commit)
-    current_version = _get_repo_version(repo_path)
-
-    if args.branch_if_changed and current_version == previous_version:
-        print("The version has not changed, no branch created.")
-    else:
-        if args.branch_if_changed:
-            print("The version has changed, creating branch.")
-            git_utils.checkout(repo_path, "HEAD~")
-            branch_name = "r" + previous_version
+        if args.branch_if_changed and current_version == previous_version:
+            print("The version has not changed, no branch created.")
         else:
-            print("Creating branch.")
-            branch_name = "r" + current_version
+            if args.branch_if_changed:
+                print("The version has changed, creating branch.")
+                git_utils.checkout(repo_path, "HEAD~")
+                branch_name = "r" + previous_version
+            else:
+                print("Creating branch.")
+                branch_name = "r" + current_version
 
-        if git_utils.branch_exists(repo_path, branch_name):
-            print("The branch {} already exists.".format(branch_name))
-        else:
-            git_utils.create_branch(repo_path, branch_name)
-            git_utils.push_branch(repo_path, branch_name)
+            if git_utils.branch_exists(repo_path, branch_name):
+                print("The branch {} already exists.".format(branch_name))
+            else:
+                git_utils.create_branch(repo_path, branch_name)
+                git_utils.push_branch(repo_path, branch_name)
 
+            if args.branch_if_changed:
+                git_utils.checkout(repo_path, current_commit)
+
+        if args.repository:
+            shutil.rmtree(repo_path)
+    except Exception as exc:# pylint: disable=broad-except
         if args.branch_if_changed:
             git_utils.checkout(repo_path, current_commit)
-
-    if args.repository:
-        shutil.rmtree(repo_path)
+        raise exc
 
 if __name__ == '__main__':
     try:
