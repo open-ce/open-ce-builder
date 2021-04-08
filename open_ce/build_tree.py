@@ -295,7 +295,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
                     seen.add(package_name)
                     package_info = conda_utils.get_latest_package_info(self._channels, package)
                     dep_graph.add_node(DependencyNode({package}))
-                    for dep in package_info['depends']:
+                    for dep in package_info['dependencies']:
                         dep_name = utils.remove_version(dep)
                         local_dest = {dest_node for dest_node in dep_graph.nodes()
                                                 if dep_name in map(utils.remove_version, dest_node.packages)}

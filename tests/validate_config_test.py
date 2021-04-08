@@ -26,22 +26,43 @@ opence = imp.load_source('opence', os.path.join(test_dir, '..', 'open_ce', 'open
 import open_ce.validate_config as validate_config
 from open_ce.errors import OpenCEError
 
-def conda_search_json(package):
-    retval = '{\n'
-    retval += '  "{}": ['.format(package)
-    retval += '''
-    {
-      "arch": null,
-      "build": "py36habc2bb6_0",
-      "build_number": 0,
-      "channel": "https://repo.anaconda.com/pkgs/main/linux-ppc64le",
-      "constrains": [],
-      "depends": [],
-      "timestamp": 1580920230562
-    }
-  ]
-}'''
-    return retval
+def conda_search_result():
+    output = '''
+Loading channels: done
+some_package 0.3.10 0
+-----------------
+file name   : some_package-0.3.10-0.conda
+name        : some_package
+version     : 0.3.10
+build       : 0
+build number: 0
+size        : 20 KB
+license     : BSD
+subdir      : linux-ppc64le
+url         : https://repo.anaconda.com/pkgs/main/linux-ppc64le/
+md5         : 4691146ff587f371f83f0e7bab93b63b
+timestamp   : 2020-07-08 07:05:32 UTC
+dependencies: 
+
+some_package 0.3.13 h6ffa863_0
+--------------------------
+file name   : some_package-0.3.13-h6ffa863_0.conda
+name        : some_package
+version     : 0.3.13
+build       : h6ffa863_0
+build number: 0
+size        : 21 KB
+license     : BSD
+subdir      : linux-ppc64le
+url         : https://repo.anaconda.com/pkgs/main/linux-ppc64le/
+md5         : 37995ea3f8a1432752243716118cf9e1
+timestamp   : 2021-03-22 19:19:31 UTC
+dependencies: 
+
+
+
+'''
+    return output, "", 0
 
 def test_validate_config(mocker):
     '''
@@ -65,8 +86,8 @@ def test_validate_config(mocker):
                                                        retval=[True, "", ""]))
     )
     mocker.patch(
-        'open_ce.conda_utils.conda_package_info',
-        side_effect=(lambda channels, package: conda_search_json(package))
+        'conda.cli.python_api.run_command',
+        side_effect=(lambda command, *arguments, **kwargs: conda_search_result())
     )
     mocker.patch(
         'os.getcwd',
@@ -120,8 +141,8 @@ def test_validate_negative(mocker):
                                                        retval=[False, "", ""]))
     )
     mocker.patch(
-        'open_ce.conda_utils.conda_package_info',
-        side_effect=(lambda channels, package: conda_search_json(package))
+        'conda.cli.python_api.run_command',
+        side_effect=(lambda command, *arguments, **kwargs: conda_search_result())
     )
     mocker.patch(
         'os.getcwd',
