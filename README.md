@@ -45,7 +45,7 @@ To get the Open-CE build tools, one can either install it via `conda`, via `pip`
 
 ```bash
 # Conda install from the open-ce channel
-conda install -c open-ce open-ce
+conda install -c open-ce open-ce-builder
 ```
 OR
 ```bash
