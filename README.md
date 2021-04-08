@@ -41,21 +41,24 @@ When building packages that use CUDA, a tar package of TensorRT for the intended
 
 ### Installing the Open-CE Build Tools
 
-To get the Open-CE build tools, one can either clone the source code from [github](https://github.com/open-ce/open-ce-builder) or install it via `pip` as below - 
+To get the Open-CE build tools, one can either install it via `conda`, via `pip` or clone the source code from [github](https://github.com/open-ce/open-ce-builder) as below - 
 
+```bash
+# Conda install from the open-ce channel
+conda install -c open-ce open-ce-builder
+```
+OR
+```bash
+# Pip install from the main branch
+pip install git+https://github.com/open-ce/open-ce-builder.git@main
+```
+OR
 ```bash
 # Clone Open-CE from GitHub
 git clone https://github.com/open-ce/open-ce-builder.git
 cd open-ce-builder
 pip install -e .
 ```
-OR 
-```bash
-# Pip install
-pip install git+https://github.com/open-ce/open-ce-builder.git@main
-```
-where `main` is the branch from where pip package of Open-CE tools should be created. It can be changed to a different branch name if needed.
-
 
 ### Building a Collection of Packages
 To build an entire integrated and functional conda channel using Open-CE, start by installing the needed tools in the [Requirements](#requirements) section above.

@@ -23,6 +23,6 @@ jobs:
           conda create -y -n test_opence python=3.7
           source /home/runner/.profile
           conda activate test_opence
-          conda install -y open-ce -c file://$(pwd)/open-ce-conda-pkg
-          conda list open-ce
+          conda install -y open-ce-builder -c file://$(pwd)/open-ce-conda-pkg
+          conda list open-ce-builder
           open-ce build env -h
