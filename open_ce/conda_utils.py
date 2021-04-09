@@ -19,6 +19,7 @@ import os
 import pathlib
 from logging import ERROR, getLogger
 from datetime import datetime
+import functools
 
 import yaml
 
@@ -110,6 +111,15 @@ def conda_package_info(channels, package):
         raise OpenCEError(Error.CONDA_PACKAGE_INFO, str(search_args), std_out)
     return entries
 
+# Turn the channels argument into a tuple so that it can be hashable. This will allow the results
+# of get_latest_package_info to be memoizable using lru_cache.
+def _make_hashable_args(function):
+    def wrapper(channels, package):
+        return function(tuple(channels), package)
+    return wrapper
+
+@_make_hashable_args
+@functools.lru_cache(maxsize=1024)
 def get_latest_package_info(channels, package):
     '''
     Get the conda package info for the most recent search result.
