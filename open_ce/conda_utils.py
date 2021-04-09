@@ -130,6 +130,6 @@ def get_latest_package_info(channels, package):
     package_infos = conda_package_info(channels, package)
     retval = package_infos[0]
     for package_info in package_infos:
-      if package_info["timestamp"] > retval["timestamp"]:
-          retval = package_info
+        if package_info["timestamp"] > retval["timestamp"]:
+            retval = package_info
     return retval
