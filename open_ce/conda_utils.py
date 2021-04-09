@@ -105,6 +105,8 @@ def conda_package_info(channels, package):
             # Convert time string into a timestamp (if there is a timestamp)
             if "timestamp" in entry:
               entry["timestamp"] = datetime.timestamp(datetime.strptime(entry["timestamp"], '%Y-%m-%d %H:%M:%S %Z'))
+            else:
+              entry["timestamp"] = 0 
             if not entry["dependencies"]:
                 entry["dependencies"] = []
             entries.append(entry)
@@ -128,11 +130,6 @@ def get_latest_package_info(channels, package):
     package_infos = conda_package_info(channels, package)
     retval = package_infos[0]
     for package_info in package_infos:
-        # sometimes packages are missing timestamps; assume we don't want those
-        if "timestamp" in package_info:
-          if "timestamp" not in retval:
-             retval = package_info
-          else:
-            if package_info["timestamp"] > retval["timestamp"]:
-                retval = package_info
+      if package_info["timestamp"] > retval["timestamp"]:
+          retval = package_info
     return retval
