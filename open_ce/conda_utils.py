@@ -128,7 +128,7 @@ def get_latest_package_info(channels, package):
     package_infos = conda_package_info(channels, package)
     retval = package_infos[0]
     for package_info in package_infos:
-        # sometimes packages are missing timestamps; assume we done want those
+        # sometimes packages are missing timestamps; assume we don't want those
         if "timestamp" in package_info:
           if "timestamp" not in retval:
              retval = package_info
