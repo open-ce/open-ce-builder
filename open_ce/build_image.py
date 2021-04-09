@@ -54,11 +54,11 @@ def build_image(local_conda_channel, conda_env_file, container_tool, container_b
     build_cmd += "-f " + os.path.join(RUNTIME_IMAGE_PATH, "Dockerfile") + " "
     build_cmd += "-t " + image_name + " "
     build_cmd += "--build-arg OPENCE_USER=" + OPENCE_USER + " "
-    build_cmd += "--build-arg LOCAL_CONDA_CHANNEL=" + local_conda_channel + " "
+    build_cmd += "--build-arg LOCAL_CONDA_CHANNEL=" + "./ "
     build_cmd += "--build-arg CONDA_ENV_FILE=" + conda_env_file + " "
     build_cmd += "--build-arg TARGET_DIR=" + TARGET_DIR + " "
     build_cmd += container_build_args + " "
-    build_cmd += BUILD_CONTEXT
+    build_cmd += local_conda_channel
 
     print("Container build command: ", build_cmd)
     if os.system(build_cmd):
@@ -98,11 +98,6 @@ def build_runtime_container_image(args):
         except shutil.SameFileError:
             print("Info: Environment file already in local conda channel.")
         utils.replace_conda_env_channels(conda_env_runtime_file, r'file:.*', "file:/{}".format(TARGET_DIR))
-
-        # Check if input local conda channel path is absolute
-        if os.path.isabs(args.local_conda_channel):
-            # make it relative to BUILD CONTEXT
-            args.local_conda_channel = os.path.relpath(args.local_conda_channel, start=BUILD_CONTEXT)
 
         image_name = build_image(args.local_conda_channel, os.path.basename(conda_env_runtime_file),
                                  args.container_tool, args.container_build_args)
