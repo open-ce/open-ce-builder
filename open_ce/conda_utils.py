@@ -104,9 +104,9 @@ def conda_package_info(channels, package):
             entry = yaml.safe_load(file_name + rest)
             # Convert time string into a timestamp (if there is a timestamp)
             if "timestamp" in entry:
-              entry["timestamp"] = datetime.timestamp(datetime.strptime(entry["timestamp"], '%Y-%m-%d %H:%M:%S %Z'))
+                entry["timestamp"] = datetime.timestamp(datetime.strptime(entry["timestamp"], '%Y-%m-%d %H:%M:%S %Z'))
             else:
-              entry["timestamp"] = 0 
+                entry["timestamp"] = 0
             if not entry["dependencies"]:
                 entry["dependencies"] = []
             entries.append(entry)
