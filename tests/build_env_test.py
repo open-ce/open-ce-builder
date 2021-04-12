@@ -124,7 +124,7 @@ def test_build_env(mocker, capsys):
 
     env_file = os.path.join(test_dir, 'test-env2.yaml')
     opence._main(["build", build_env.COMMAND, env_file, "--python_versions", py_version, "--run_tests"])
-    validate_conda_env_files(py_version)
+    validate_and_remove_conda_env_files(py_version)
 
     #---The second test specifies a python version that is supported in the env file by package21.
     py_version = "2.1"
@@ -150,7 +150,7 @@ def test_build_env(mocker, capsys):
 
     env_file = os.path.join(test_dir, 'test-env2.yaml')
     opence._main(["build", build_env.COMMAND, env_file, "--python_versions", py_version, "--channels", channel])
-    validate_conda_env_files(py_version)
+    validate_and_remove_conda_env_files(py_version)
 
     #---The third test verifies that the repository_folder argument is working properly.
     buildTracker = PackageBuildTracker()
@@ -162,7 +162,7 @@ def test_build_env(mocker, capsys):
     py_version = "2.1"
     env_file = os.path.join(test_dir, 'test-env2.yaml')
     opence._main(["build", build_env.COMMAND, env_file, "--repository_folder", "repo_folder", "--python_versions", py_version])
-    validate_conda_env_files(py_version)
+    validate_and_remove_conda_env_files(py_version)
 
     #---The fourth test verifies that builds are skipped properly if they already exist.
     mocker.patch(
@@ -171,6 +171,7 @@ def test_build_env(mocker, capsys):
 
     captured = capsys.readouterr()
     opence._main(["build", build_env.COMMAND, env_file])
+    validate_and_remove_conda_env_files()
     captured = capsys.readouterr()
     assert "Skipping build of" in captured.out
     mocker.patch(
@@ -205,7 +206,7 @@ def test_build_env(mocker, capsys):
 
     env_file = os.path.join(test_dir, 'test-env2.yaml')
     opence._main(["build", build_env.COMMAND, env_file, "--cuda_versions", cuda_version, "--run_tests"])
-    validate_conda_env_files(cuda_versions=cuda_version)
+    validate_and_remove_conda_env_files(cuda_versions=cuda_version)
 
     #---The sixth test specifies a cuda version that is supported in the env file by package21.
     cuda_version = "9.2"
@@ -230,7 +231,7 @@ def test_build_env(mocker, capsys):
 
     env_file = os.path.join(test_dir, 'test-env2.yaml')
     opence._main(["build", build_env.COMMAND, env_file, "--cuda_versions", cuda_version])
-    validate_conda_env_files(cuda_versions=cuda_version)
+    validate_and_remove_conda_env_files(cuda_versions=cuda_version)
 
     #---The seventh test specifies specific packages that should be built (plus their dependencies)
     package_deps = {"package11": ["package15"],
@@ -259,6 +260,7 @@ def test_build_env(mocker, capsys):
     env_file = os.path.join(test_dir, 'test-env2.yaml')
     captured = capsys.readouterr()
     opence._main(["build", build_env.COMMAND, env_file, "--python_versions", py_version, "--packages", "package14,package35"])
+    validate_and_remove_conda_env_files(py_version)
     captured = capsys.readouterr()
     assert "No recipes were found for package35" in captured.out
 
@@ -287,11 +289,12 @@ def test_build_env(mocker, capsys):
 
     env_file = 'https://test.com/test-env2.yaml'
     opence._main(["build", build_env.COMMAND, env_file])
+    validate_and_remove_conda_env_files()
 
-def validate_conda_env_files(py_versions=utils.DEFAULT_PYTHON_VERS,
-                             build_types=utils.DEFAULT_BUILD_TYPES,
-                             mpi_types=utils.DEFAULT_MPI_TYPES,
-                             cuda_versions=utils.DEFAULT_CUDA_VERS):
+def validate_and_remove_conda_env_files(py_versions=utils.DEFAULT_PYTHON_VERS,
+                                        build_types=utils.DEFAULT_BUILD_TYPES,
+                                        mpi_types=utils.DEFAULT_MPI_TYPES,
+                                        cuda_versions=utils.DEFAULT_CUDA_VERS):
     # Check if conda env files are created for given python versions and build variants
     variants = utils.make_variants(py_versions, build_types, mpi_types, cuda_versions)
     for variant in variants:
@@ -374,12 +377,13 @@ def test_build_env_container_build_cuda_versions(mocker):
     )
     mocker.patch('open_ce.container_build.build_with_container_tool', return_value=0)
     mocker.patch('os.path.exists', return_value=1)
+    mocker.patch('os.remove', return_value=1)
 
     cuda_version = "10.2"
     arg_strings = ["build", build_env.COMMAND, "--container_build",
                    "--cuda_versions", cuda_version, "my-env.yaml"]
     opence._main(arg_strings)
-    validate_conda_env_files(cuda_versions=cuda_version)
+    validate_and_remove_conda_env_files(cuda_versions=cuda_version)
 
 def test_build_env_container_build_with_build_args(mocker):
     '''
