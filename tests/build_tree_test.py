@@ -28,6 +28,58 @@ import open_ce.env_config as env_config
 from open_ce.errors import OpenCEError
 import helpers
 
+def conda_search_result():
+    output = '''
+Loading channels: done
+some_package 0.3.10 0
+-----------------
+file name   : some_package-0.3.10-0.conda
+name        : some_package
+version     : 0.3.10
+build       : 0
+build number: 0
+size        : 20 KB
+license     : BSD
+subdir      : linux-ppc64le
+url         : https://repo.anaconda.com/pkgs/main/linux-ppc64le/
+md5         : 4691146ff587f371f83f0e7bab93b63b
+dependencies: 
+
+some_package 0.3.10 0
+-----------------
+file name   : some_package-0.3.10-1.conda
+name        : some_package
+version     : 0.3.10
+build       : 0
+build number: 0
+size        : 20 KB
+license     : BSD
+subdir      : linux-ppc64le
+url         : https://repo.anaconda.com/pkgs/main/linux-ppc64le/
+md5         : 4691146ff587f371f83f0e7bab93b63b
+timestamp   : 2020-07-08 07:05:32 UTC
+dependencies: 
+
+some_package 0.3.13 h6ffa863_0
+--------------------------
+file name   : some_package-0.3.13-h6ffa863_0.conda
+name        : some_package
+version     : 0.3.13
+build       : h6ffa863_0
+build number: 0
+size        : 21 KB
+license     : BSD
+subdir      : linux-ppc64le
+url         : https://repo.anaconda.com/pkgs/main/linux-ppc64le/
+md5         : 37995ea3f8a1432752243716118cf9e1
+timestamp   : 2021-03-22 19:19:31 UTC
+dependencies: 
+
+
+
+'''
+    return output,0,0
+
 class TestBuildTree(build_tree.BuildTree):
     __test__ = False
     def __init__(self, #pylint: disable=super-init-not-called
@@ -523,3 +575,16 @@ def test_get_build_copmmand_dependencies():
     assert "" in results
     assert "'recipe2-py2-6-cpu-openmpi-10-2'" in results
     assert "'recipe2-py2-6-cpu-openmpi-10-2', 'recipe3'" in results or "'recipe3', 'recipe2-py2-6-cpu-openmpi-10-2'" in results
+
+def test_search_no_timestamp(mocker):
+    from open_ce import conda_utils
+
+    mocker.patch(
+        'conda.cli.python_api.run_command',
+        side_effect=(lambda command, *arguments, **kwargs: conda_search_result())
+    )
+
+    package = "some_package 0.3"
+    package_info = conda_utils.get_latest_package_info([], package)
+
+    print("Package Info: ", package_info)

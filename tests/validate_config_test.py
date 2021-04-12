@@ -41,6 +41,20 @@ license     : BSD
 subdir      : linux-ppc64le
 url         : https://repo.anaconda.com/pkgs/main/linux-ppc64le/
 md5         : 4691146ff587f371f83f0e7bab93b63b
+dependencies: 
+
+some_package 0.3.10 0
+-----------------
+file name   : some_package-0.3.10-1.conda
+name        : some_package
+version     : 0.3.10
+build       : 0
+build number: 0
+size        : 20 KB
+license     : BSD
+subdir      : linux-ppc64le
+url         : https://repo.anaconda.com/pkgs/main/linux-ppc64le/
+md5         : 4691146ff587f371f83f0e7bab93b63b
 timestamp   : 2020-07-08 07:05:32 UTC
 dependencies: 
 
