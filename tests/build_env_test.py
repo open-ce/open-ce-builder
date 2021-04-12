@@ -171,6 +171,7 @@ def test_build_env(mocker, capsys):
 
     captured = capsys.readouterr()
     opence._main(["build", build_env.COMMAND, env_file])
+    validate_conda_env_files()
     captured = capsys.readouterr()
     assert "Skipping build of" in captured.out
     mocker.patch(
@@ -259,6 +260,7 @@ def test_build_env(mocker, capsys):
     env_file = os.path.join(test_dir, 'test-env2.yaml')
     captured = capsys.readouterr()
     opence._main(["build", build_env.COMMAND, env_file, "--python_versions", py_version, "--packages", "package14,package35"])
+    validate_conda_env_files(py_version)
     captured = capsys.readouterr()
     assert "No recipes were found for package35" in captured.out
 
@@ -287,6 +289,7 @@ def test_build_env(mocker, capsys):
 
     env_file = 'https://test.com/test-env2.yaml'
     opence._main(["build", build_env.COMMAND, env_file])
+    validate_conda_env_files()
 
 def validate_conda_env_files(py_versions=utils.DEFAULT_PYTHON_VERS,
                              build_types=utils.DEFAULT_BUILD_TYPES,
@@ -374,6 +377,7 @@ def test_build_env_container_build_cuda_versions(mocker):
     )
     mocker.patch('open_ce.container_build.build_with_container_tool', return_value=0)
     mocker.patch('os.path.exists', return_value=1)
+    mocker.patch('os.remove', return_value=1)
 
     cuda_version = "10.2"
     arg_strings = ["build", build_env.COMMAND, "--container_build",
