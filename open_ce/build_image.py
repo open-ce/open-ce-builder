@@ -19,6 +19,7 @@
 
 import os
 import shutil
+import platform
 from open_ce import utils
 from open_ce import __version__ as open_ce_version
 from open_ce.inputs import Argument, parse_arg_list
@@ -33,10 +34,11 @@ ARGUMENTS = [Argument.LOCAL_CONDA_CHANNEL,
 
 OPEN_CE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "."))
 RUNTIME_IMAGE_NAME = "opence-runtime"
-RUNTIME_IMAGE_PATH = os.path.join(OPEN_CE_PATH, "images", RUNTIME_IMAGE_NAME)
+RUNTIME_IMAGE_PATH = os.path.join(OPEN_CE_PATH, "images",
+                                  RUNTIME_IMAGE_NAME, platform.machine())
 REPO_NAME = "open-ce"
 IMAGE_NAME = "open-ce-" + open_ce_version
-BUILD_CONTEXT = "."
+TEMP_FILES = "temp_dir"
 
 OPENCE_USER = "opence"
 LOCAL_CONDA_CHANNEL_IN_IMG = "opence-local-conda-channel"
@@ -49,9 +51,14 @@ def build_image(local_conda_channel, conda_env_file, container_tool, container_b
     """
     variant = os.path.splitext(conda_env_file)[0].replace(utils.CONDA_ENV_FILENAME_PREFIX, "", 1)
     variant = variant.replace("-runtime", "")
+
+    # Docker version on ppc64le rhel doesn't allow Dockerfiles to be out of build context
+    if platform.machine() == "ppc64le":
+        create_copy_in_temp(os.path.join(RUNTIME_IMAGE_PATH, "Dockerfile"),
+                            os.path.join(local_conda_channel, TEMP_FILES, "Dockerfile"))
     image_name = REPO_NAME + ":" + IMAGE_NAME + "-" + variant
-    build_cmd = container_tool + " build "
-    build_cmd += "-f " + os.path.join(RUNTIME_IMAGE_PATH, "Dockerfile") + " "
+    build_cmd = container_tool + " build --no-cache "
+    build_cmd += "-f " + os.path.join(local_conda_channel, "Dockerfile") + " "
     build_cmd += "-t " + image_name + " "
     build_cmd += "--build-arg OPENCE_USER=" + OPENCE_USER + " "
     build_cmd += "--build-arg LOCAL_CONDA_CHANNEL=" + "./ "
@@ -66,16 +73,6 @@ def build_image(local_conda_channel, conda_env_file, container_tool, container_b
 
     return image_name
 
-def _validate_input_paths(local_conda_channel, conda_env_file):
-
-    # Check if path exists
-    if not os.path.exists(local_conda_channel) or not os.path.exists(conda_env_file):
-        raise OpenCEError(Error.INCORRECT_INPUT_PATHS)
-
-    # Check if local conda channel path is subdir of the container build context
-    if not utils.is_subdir(local_conda_channel, os.path.abspath(BUILD_CONTEXT)):
-        raise OpenCEError(Error.LOCAL_CHANNEL_NOT_IN_CONTEXT)
-
 def build_runtime_container_image(args):
     """
     Create a runtime image which will have a conda environment created
@@ -86,28 +83,40 @@ def build_runtime_container_image(args):
         raise OpenCEError(Error.NO_CONTAINER_TOOL_FOUND)
 
     local_conda_channel = os.path.abspath(args.local_conda_channel)
+    if not os.path.exists(local_conda_channel):
+        raise OpenCEError(Error.INCORRECT_INPUT_PATHS)
+
+    if not os.path.exists(os.path.join(local_conda_channel, TEMP_FILES)):
+        os.mkdir(os.path.join(local_conda_channel, TEMP_FILES))
     for conda_env_file in parse_arg_list(args.conda_env_files):
         conda_env_file = os.path.abspath(conda_env_file)
-        _validate_input_paths(local_conda_channel, conda_env_file)
+        if not os.path.exists(conda_env_file):
+            raise OpenCEError(Error.INCORRECT_INPUT_PATHS)
 
         # Copy the conda environment file into the local conda channel with a new name and modify it
         conda_env_runtime_filename = os.path.splitext(os.path.basename(conda_env_file))[0]+'-runtime.yaml'
-        conda_env_runtime_file = os.path.join(local_conda_channel, os.path.basename(conda_env_runtime_filename))
-        try:
-            shutil.copy(conda_env_file, conda_env_runtime_file)
-        except shutil.SameFileError:
-            print("Info: Environment file already in local conda channel.")
+        conda_env_runtime_file = os.path.join(local_conda_channel, TEMP_FILES, conda_env_runtime_filename)
+        create_copy_in_temp(conda_env_file, conda_env_runtime_file)
         utils.replace_conda_env_channels(conda_env_runtime_file, r'file:.*', "file:/{}".format(TARGET_DIR))
 
         image_name = build_image(args.local_conda_channel, os.path.basename(conda_env_runtime_file),
                                  args.container_tool, args.container_build_args)
-
-        # Remove the copied environment file
-        try:
-            os.remove(conda_env_runtime_file)
-        except OSError:
-            print("Info: Temporary environment file cannot be removed.")
-
         print("Docker image with name {} is built successfully.".format(image_name))
+
+    cleanup(local_conda_channel)
+
+def create_copy_in_temp(src_file, dest_file):
+    try:
+        shutil.copy(src_file, dest_file)        
+    except shutil.SameFileError:
+        print("INFO: File ", src_file, "already in local conda channel.")
+
+def cleanup(local_conda_channel):
+    # Remove the copied files from TEMP_FILES
+    try:
+        shutil.rmtree(os.path.join(local_conda_channel, TEMP_FILES))
+    except OSError:
+        print("INFO: Error removing temporary files created during build image.")
+
 
 ENTRY_FUNCTION = build_runtime_container_image
