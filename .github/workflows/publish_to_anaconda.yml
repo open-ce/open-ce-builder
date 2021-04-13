@@ -1,0 +1,27 @@
+name: Publish package to Anaconda.org on release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    name: Upload package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'
+      - uses: conda-incubator/setup-miniconda@v2.0.0
+        with:
+          auto-update-conda: true
+          python-version: "3.8"
+      - name: Build and upload the conda package
+        id: build_upload
+        env:
+          ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
+        run: |
+          conda install -y conda-build anaconda-client
+          conda config --set anaconda_upload yes
+          export ANACONDA_API_TOKEN=$ANACONDA_TOKEN
+          ./packaging_scripts/create_conda_package.sh

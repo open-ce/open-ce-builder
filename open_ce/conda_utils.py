@@ -17,12 +17,15 @@
 """
 import os
 import pathlib
-import subprocess
-import json
+from logging import ERROR, getLogger
+from datetime import datetime
+import functools
+
+import yaml
 
 # Disabling pylint warning "cyclic-import" locally here doesn't work. So, added it in .pylintrc
 # according to https://github.com/PyCQA/pylint/issues/59
-from open_ce.utils import validate_dict_schema, check_if_conda_build_exists, run_command_capture, generalize_version # pylint: disable=cyclic-import
+from open_ce.utils import validate_dict_schema, check_if_conda_build_exists, generalize_version # pylint: disable=cyclic-import
 from open_ce.errors import OpenCEError, Error
 
 check_if_conda_build_exists()
@@ -31,6 +34,7 @@ check_if_conda_build_exists()
 import conda_build.api
 from conda_build.config import get_or_merge_config
 import conda_build.metadata
+import conda.cli.python_api
 # pylint: enable=wrong-import-position,wrong-import-order
 
 def render_yaml(path, variants=None, variant_config_files=None, schema=None, permit_undefined_jinja=False):
@@ -80,22 +84,50 @@ def conda_package_info(channels, package):
     '''
     Get conda package info.
     '''
-    pkg_args = "\"{}\"".format(generalize_version(package))
-    channel_args = " ".join({"-c \"{}\"".format(channel) for channel in channels})
 
-    cli = "conda search --json {} {} --info".format(channel_args, pkg_args)
-    ret_code, std_out, _ = run_command_capture(cli, stderr=subprocess.STDOUT)
-    if not ret_code:
-        raise OpenCEError(Error.CONDA_PACKAGE_INFO, cli, std_out)
-    return std_out
+    # Call "conda search --info" through conda's cli.python_api
+    channel_args = sum((["-c", channel] for channel in channels), [])
+    search_args = ["--info", generalize_version(package)] + channel_args
+    # Setting the logging level allows us to ignore unnecessary output
+    conda_logger = getLogger("conda.common.io")
+    conda_logger.setLevel(ERROR)
+    std_out, _, ret_code = conda.cli.python_api.run_command(conda.cli.python_api.Commands.SEARCH,
+                               search_args, use_exception_handler=True, stderr=None)
 
+    # Parsing the normal output from "conda search --info" instead of using the json flag. Using the json
+    # flag adds a lot of extra time due to a slow regex in the conda code that is attempting to parse out
+    # URL tokens.
+    entries = []
+    for entry in std_out.split("\n\n"):
+        _, file_name, rest = entry.partition("file name")
+        if file_name:
+            entry = yaml.safe_load(file_name + rest)
+            # Convert time string into a timestamp (if there is a timestamp)
+            if "timestamp" in entry:
+                entry["timestamp"] = datetime.timestamp(datetime.strptime(entry["timestamp"], '%Y-%m-%d %H:%M:%S %Z'))
+            else:
+                entry["timestamp"] = 0
+            if not entry["dependencies"]:
+                entry["dependencies"] = []
+            entries.append(entry)
+    if ret_code:
+        raise OpenCEError(Error.CONDA_PACKAGE_INFO, str(search_args), std_out)
+    return entries
+
+# Turn the channels argument into a tuple so that it can be hashable. This will allow the results
+# of get_latest_package_info to be memoizable using lru_cache.
+def _make_hashable_args(function):
+    def wrapper(channels, package):
+        return function(tuple(channels), package)
+    return wrapper
+
+@_make_hashable_args
+@functools.lru_cache(maxsize=1024)
 def get_latest_package_info(channels, package):
     '''
     Get the conda package info for the most recent search result.
     '''
-    results = json.loads(conda_package_info(channels, package))
-    # Get all the package infos for the first package, there should only be one anyway.
-    package_infos = results[list(results.keys())[0]]
+    package_infos = conda_package_info(channels, package)
     retval = package_infos[0]
     for package_info in package_infos:
         if package_info["timestamp"] > retval["timestamp"]:

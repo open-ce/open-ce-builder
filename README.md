@@ -4,10 +4,12 @@
   <img src="https://avatars0.githubusercontent.com/u/68873540?s=400&u=a02dc4156e50cdffb23172aba7133e44381885d4&v=4" alt="Open-CE Logo" width="30%">
 </p>
 
-[![Builder Unit Tests](https://github.com/open-ce/open-ce/workflows/Open-CE%20Builder%20Unit%20Tests/badge.svg)](https://github.com/open-ce/open-ce-builder/actions?query=workflow%3A%22Open-CE+Builder+Unit+Tests%22+branch%3Amain)
-[![Builder Unit Test Coverage](https://codecov.io/gh/open-ce/open-ce-builder/branch/main/graph/badge.svg)](https://codecov.io/gh/open-ce/open-ce-builder)
+[![Installation Options](https://img.shields.io/badge/Install%20with-conda%20%7C%20pip-brightgreen)](#installing-the-open-ce-build-tools)
 [![Python Support](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue.svg)](#requirements)
 [![Cuda Support](https://img.shields.io/badge/cuda-10.2%20%7C%2011.0-blue)](doc/README.cuda_support.md)
+
+[![Builder Unit Tests](https://github.com/open-ce/open-ce/workflows/Open-CE%20Builder%20Unit%20Tests/badge.svg)](https://github.com/open-ce/open-ce-builder/actions?query=workflow%3A%22Open-CE+Builder+Unit+Tests%22+branch%3Amain)
+[![Builder Unit Test Coverage](https://codecov.io/gh/open-ce/open-ce-builder/branch/main/graph/badge.svg)](https://codecov.io/gh/open-ce/open-ce-builder)
 [![GitHub Licence](https://img.shields.io/github/license/open-ce/open-ce.svg)](LICENSE)
 ---
 
@@ -41,21 +43,24 @@ When building packages that use CUDA, a tar package of TensorRT for the intended
 
 ### Installing the Open-CE Build Tools
 
-To get the Open-CE build tools, one can either clone the source code from [github](https://github.com/open-ce/open-ce-builder) or install it via `pip` as below - 
+To get the Open-CE build tools, one can either install them via `conda` from the [Open-CE channel](https://conda.anaconda.org/open-ce), install them via `pip` from [github](https://github.com/open-ce/open-ce-builder) or clone the source code from [github](https://github.com/open-ce/open-ce-builder) as below - 
 
+```bash
+# Conda install from the open-ce channel
+conda install -c open-ce open-ce-builder
+```
+OR
+```bash
+# Pip install from the main branch
+pip install git+https://github.com/open-ce/open-ce-builder.git@main
+```
+OR
 ```bash
 # Clone Open-CE from GitHub
 git clone https://github.com/open-ce/open-ce-builder.git
 cd open-ce-builder
 pip install -e .
 ```
-OR 
-```bash
-# Pip install
-pip install git+https://github.com/open-ce/open-ce-builder.git@main
-```
-where `main` is the branch from where pip package of Open-CE tools should be created. It can be changed to a different branch name if needed.
-
 
 ### Building a Collection of Packages
 To build an entire integrated and functional conda channel using Open-CE, start by installing the needed tools in the [Requirements](#requirements) section above.
