@@ -119,14 +119,18 @@ def test_channel_update_in_conda_env(mocker):
         'os.remove',
         return_value=0
     )
-
+    mocker.patch(
+        'shutil.rmtree',
+        return_value=1
+    )
     channel_index_before, _ = get_channel_being_modified(TEST_CONDA_ENV_FILE)
 
     arg_strings = ["build", build_image.COMMAND, "--local_conda_channel", TEST_LOCAL_CONDA_CHANNEL_DIR, "--conda_env_file", TEST_CONDA_ENV_FILE]
     opence._main(arg_strings)
 
     # We copy conda environment file to the passed local conda channel before updating it
-    channel_index_after, channel_modified = get_channel_being_modified(os.path.join(TEST_LOCAL_CONDA_CHANNEL_DIR, "test-conda-env-runtime.yaml"))
+    channel_index_after, channel_modified = get_channel_being_modified(os.path.join(TEST_LOCAL_CONDA_CHANNEL_DIR, build_image.TEMP_FILES, "test-conda-env-runtime.yaml"))
+
 
     assert channel_modified == "file:/{}".format(build_image.TARGET_DIR)
     assert channel_index_before == channel_index_after
@@ -188,8 +192,9 @@ def test_build_image_name(mocker):
     container_tool = utils.DEFAULT_CONTAINER_TOOL
 
     mocker.patch('os.system', return_value=0)
+    os.mkdir(os.path.join(TEST_LOCAL_CONDA_CHANNEL_DIR, build_image.TEMP_FILES))
     image_name = build_image.build_image(TEST_LOCAL_CONDA_CHANNEL_DIR,
-                                         build_image.TEMP_FILES,
                                          os.path.basename(TEST_CONDA_ENV_FILE),
                                          container_tool)
     assert image_name == intended_image_name
+    build_image.cleanup(TEST_LOCAL_CONDA_CHANNEL_DIR)
