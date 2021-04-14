@@ -131,7 +131,7 @@ def test_get_branch_of_tag(mocker):
     sample_output = "main\n  remotes/origin/main\n* remotes/origin/r2.4.1   \n"
     mocker.patch('open_ce.utils.run_command_capture', side_effect=[(True, sample_output, ""), (False, sample_output, "")])
 
-    assert utils._get_branch_of_tag("mytag") == "remotes/origin/r2.4.1"
+    assert utils.get_branch_of_tag("mytag") == "remotes/origin/r2.4.1"
 
-    assert utils._get_branch_of_tag("mytag") == "mytag"
+    assert utils.get_branch_of_tag("mytag") == "mytag"
 
