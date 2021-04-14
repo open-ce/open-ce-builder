@@ -45,10 +45,12 @@ def _make_parser():
     ''' Parser input arguments '''
     parser = inputs.make_parser([git_utils.Argument.PUBLIC_ACCESS_TOKEN, git_utils.Argument.REPO_DIR,
                                     git_utils.Argument.BRANCH, git_utils.Argument.ORG, git_utils.Argument.SKIPPED_REPOS],
-                                    description = """Tag all repos in an organization using the following logic:
+                                    description = """
+                                    Tag all repos in an organization using the following logic:
                                     1- If the branch argument is passed in and that branch exists in the repo, the tag will be made at the tip of that branch.
                                     2- Otherwise, if a previous-tag is passed, the tag will be made at the tip of the latest branch which contains that tag.
-                                    3- Finally, if none of these cases hold, the tag is made at the tip of the default branch.""")
+                                    3- Finally, if none of these cases hold, the tag is made at the tip of the default branch.
+                                    """)
 
     parser.add_argument(
         '--tag',
