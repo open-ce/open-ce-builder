@@ -45,7 +45,10 @@ def _make_parser():
     ''' Parser input arguments '''
     parser = inputs.make_parser([git_utils.Argument.PUBLIC_ACCESS_TOKEN, git_utils.Argument.REPO_DIR,
                                     git_utils.Argument.BRANCH, git_utils.Argument.ORG, git_utils.Argument.SKIPPED_REPOS],
-                                    description = 'Tag all repos in an organization.')
+                                    description = """Tag all repos in an organization using the following logic:
+                                    1- If the branch argument is passed in and that branch exists in the repo, the tag will be made at the tip of that branch.
+                                    2- Otherwise, if a previous-tag is passed, the tag will be made at the tip of the latest branch which contains that tag.
+                                    3- Finally, if none of these cases hold, the tag is made in the default branch.""")
 
     parser.add_argument(
         '--tag',
@@ -59,9 +62,16 @@ def _make_parser():
         required=True,
         help="""Tag message to use.""")
 
+    parser.add_argument(
+        '--previous-tag',
+        '--prev-tag',
+        type=str,
+        default=None,
+        help="""Previous tag to find the branch to tag.""")
+
     return parser
 
-def tag_all_repos(github_org, tag, tag_msg, branch, repo_dir, pat, skipped_repos): # pylint: disable=too-many-arguments
+def tag_all_repos(github_org, tag, tag_msg, branch, repo_dir, pat, skipped_repos, prev_tag): # pylint: disable=too-many-arguments
     '''
     Clones, then tags all repos with a given tag, and pushes back to remote.
     These steps are performed in separate loops to make debugging easier.
@@ -75,7 +85,14 @@ def tag_all_repos(github_org, tag, tag_msg, branch, repo_dir, pat, skipped_repos
         print("--->Making clone location: " + repo_path)
         os.makedirs(repo_path, exist_ok=True)
         print("--->Cloning {}".format(repo["name"]))
-        git_utils.clone_repo(repo["ssh_url"], repo_path, branch)
+        git_utils.clone_repo(repo["ssh_url"], repo_path)
+        if branch and git_utils.branch_exists(repo_path, branch):
+            print("--->Branch '{}' exists, checking it out.".format(branch))
+            git_utils.checkout(repo_path, branch)
+        elif prev_tag:
+            repo_branch = git_utils.get_tag_branch(repo_path, prev_tag)
+            print("--->Checking out branch '{}' which contains tag '{}'.".format(repo_branch, prev_tag))
+            git_utils.checkout(repo_path, repo_branch)
 
     print("---------------------------Tagging all Repos")
     for repo in repos:
@@ -104,7 +121,14 @@ def tag_all_repos(github_org, tag, tag_msg, branch, repo_dir, pat, skipped_repos
 def _main(arg_strings=None):
     parser = _make_parser()
     args = parser.parse_args(arg_strings)
-    tag_all_repos(args.github_org, args.tag, args.tag_msg, args.branch, args.repo_dir, args.pat, args.skipped_repos)
+    tag_all_repos(args.github_org,
+                  args.tag,
+                  args.tag_msg,
+                  args.branch,
+                  args.repo_dir,
+                  args.pat,
+                  args.skipped_repos,
+                  args.previous_tag)
 
 if __name__ == '__main__':
     try:
