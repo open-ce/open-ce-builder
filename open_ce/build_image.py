@@ -59,7 +59,7 @@ def build_image(local_conda_channel, conda_env_file, container_tool, container_b
     create_copy(os.path.join(RUNTIME_IMAGE_PATH, "Dockerfile"),
                             dockerfile_path)
     image_name = REPO_NAME + ":" + IMAGE_NAME + "-" + variant
-    build_cmd = container_tool + " build --no-cache "
+    build_cmd = container_tool + " build "
     build_cmd += "-f " + dockerfile_path + " "
     build_cmd += "-t " + image_name + " "
     build_cmd += "--build-arg OPENCE_USER=" + OPENCE_USER + " "
