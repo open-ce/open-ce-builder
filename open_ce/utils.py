@@ -312,7 +312,7 @@ def replace_conda_env_channels(conda_env_file, original_channel, new_channel):
     with open(conda_env_file, 'w') as file_handle:
         yaml.safe_dump(env_info, file_handle)
 
-def _get_branch_of_tag(git_tag):
+def get_branch_of_tag(git_tag):
     """
     Find the most recent branch that contains git_tag.
     """
@@ -343,7 +343,7 @@ def git_clone(git_url, git_tag, location, up_to_date=False):
         if git_tag:
             os.chdir(location)
             if up_to_date:
-                git_tag = _get_branch_of_tag(git_tag)
+                git_tag = get_branch_of_tag(git_tag)
             checkout_cmd = "git checkout " + git_tag
             print("Checkout branch/tag command: ", checkout_cmd)
             checkout_res = os.system(checkout_cmd)
