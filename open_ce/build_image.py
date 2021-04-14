@@ -19,6 +19,7 @@
 
 import os
 import shutil
+import re
 from open_ce import utils
 from open_ce import __version__ as open_ce_version
 from open_ce.inputs import Argument, parse_arg_list
@@ -42,14 +43,14 @@ OPENCE_USER = "opence"
 LOCAL_CONDA_CHANNEL_IN_IMG = "opence-local-conda-channel"
 TARGET_DIR = "/home/{}/{}".format(OPENCE_USER, LOCAL_CONDA_CHANNEL_IN_IMG)
 
-def build_image(local_conda_channel, conda_env_file, container_tool, container_build_args=""):
+def build_image(local_conda_channel, conda_env_file, container_tool, image_version, container_build_args=""):
     """
     Build a container image from the Dockerfile in RUNTIME_IMAGE_PATH.
     Returns a result code and the name of the new image.
     """
     variant = os.path.splitext(conda_env_file)[0].replace(utils.CONDA_ENV_FILENAME_PREFIX, "", 1)
     variant = variant.replace("-runtime", "")
-    image_name = REPO_NAME + ":" + IMAGE_NAME + "-" + variant
+    image_name = REPO_NAME + ":" + image_version + "-" + variant
     build_cmd = container_tool + " build "
     build_cmd += "-f " + os.path.join(RUNTIME_IMAGE_PATH, "Dockerfile") + " "
     build_cmd += "-t " + image_name + " "
@@ -61,11 +62,28 @@ def build_image(local_conda_channel, conda_env_file, container_tool, container_b
     build_cmd += BUILD_CONTEXT
 
     print("Container build command: ", build_cmd)
-    if os.system(build_cmd):
-        raise OpenCEError(Error.BUILD_IMAGE, image_name)
+#    if os.system(build_cmd):
+#        raise OpenCEError(Error.BUILD_IMAGE, image_name)
 
     return image_name
 
+def get_image_version(conda_env_file):
+    conda_file = None
+    version = "open-ce"
+    try:
+        conda_file = open(conda_env_file,'r')
+        for line in conda_file:
+            matched = re.match(r'(($"Open-CE Version: ")(.*))')
+            if matched:
+                version = matched.group(2)
+                break
+    except Exception:  # pylint: disable=broad-except
+        print("WARNING: Could not read version from " + conda_env_file)
+    finally:
+        if conda_file:
+            conda_file.close()
+        return version
+    
 def _validate_input_paths(local_conda_channel, conda_env_file):
 
     # Check if path exists
@@ -104,8 +122,9 @@ def build_runtime_container_image(args):
             # make it relative to BUILD CONTEXT
             args.local_conda_channel = os.path.relpath(args.local_conda_channel, start=BUILD_CONTEXT)
 
+        image_version = get_image_version(conda_env_runtime_file) 
         image_name = build_image(args.local_conda_channel, os.path.basename(conda_env_runtime_file),
-                                 args.container_tool, args.container_build_args)
+                                 args.container_tool, image_version, args.container_build_args)
 
         # Remove the copied environment file
         try:
