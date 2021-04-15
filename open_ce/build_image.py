@@ -71,19 +71,22 @@ def get_image_version(conda_env_file):
     conda_file = None
     version = "open-ce"
     try:
-        conda_file = open(conda_env_file,'r')
-        for line in conda_file:
-            matched = re.match(r'(($"Open-CE Version: ")(.*))')
-            if matched:
-                version = matched.group(2)
-                break
-    except Exception:  # pylint: disable=broad-except
-        print("WARNING: Could not read version from " + conda_env_file)
+        with open(conda_env_file, 'r') as conda_file:
+            lines = conda_file.readlines()
+            for line in lines:
+                matched = re.match(r'(# '+utils.OPEN_CE_VERSION_STRING+':(.*))', line)
+                if matched:
+                    version = matched.group(2).strip()
+                    break
+
+    except IOError:
+        print("WARNING: IO error occurred while reading version information from conda environment file.")
     finally:
         if conda_file:
             conda_file.close()
         return version
-    
+
+
 def _validate_input_paths(local_conda_channel, conda_env_file):
 
     # Check if path exists
@@ -122,7 +125,7 @@ def build_runtime_container_image(args):
             # make it relative to BUILD CONTEXT
             args.local_conda_channel = os.path.relpath(args.local_conda_channel, start=BUILD_CONTEXT)
 
-        image_version = get_image_version(conda_env_runtime_file) 
+        image_version = get_image_version(conda_env_file) 
         image_name = build_image(args.local_conda_channel, os.path.basename(conda_env_runtime_file),
                                  args.container_tool, image_version, args.container_build_args)
 

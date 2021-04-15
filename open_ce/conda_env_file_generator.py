@@ -65,7 +65,7 @@ class CondaEnvFileGenerator():
         )
         with open(conda_env_file, 'w') as outfile:
             outfile.write("#" + utils.OPEN_CE_VARIANT + ":" + variant_string + "\n")
-            outfile.write("# Open-CE Version: " + git_tag_for_env + "\n" )
+            outfile.write("#" + utils.OPEN_CE_VERSION_STRING + ":" + git_tag_for_env + "\n" )
             yaml.dump(data, outfile, default_flow_style=False)
             file_name = conda_env_file
 
