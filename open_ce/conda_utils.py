@@ -21,7 +21,7 @@ from logging import ERROR, getLogger
 from datetime import datetime
 import functools
 
-import yaml
+import yaml_utils
 
 # Disabling pylint warning "cyclic-import" locally here doesn't work. So, added it in .pylintrc
 # according to https://github.com/PyCQA/pylint/issues/59
@@ -101,7 +101,7 @@ def conda_package_info(channels, package):
     for entry in std_out.split("\n\n"):
         _, file_name, rest = entry.partition("file name")
         if file_name:
-            entry = yaml.safe_load(file_name + rest)
+            entry = yaml_utils.load(file_name + rest)
             # Convert time string into a timestamp (if there is a timestamp)
             if "timestamp" in entry:
                 entry["timestamp"] = datetime.timestamp(datetime.strptime(entry["timestamp"], '%Y-%m-%d %H:%M:%S %Z'))

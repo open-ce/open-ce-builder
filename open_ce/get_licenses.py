@@ -28,7 +28,7 @@ import urllib.parse
 from collections import defaultdict
 
 import requests
-import yaml
+import yaml_utils
 from jinja2 import Environment, FileSystemLoader
 
 from open_ce import utils
@@ -144,7 +144,7 @@ class LicenseGenerator():
             return
 
         with open(license_file) as file_stream:
-            license_data = yaml.safe_load(file_stream)
+            license_data = yaml_utils.load(file_stream)
 
         utils.validate_dict_schema(license_data, _OPEN_CE_INFO_SCHEMA)
 
@@ -301,7 +301,7 @@ def _get_source_from_conda_package(pkg_dir):
 
         # Find the recipe's meta.yaml file and download the values within the "source" field.
         with open(os.path.join(pkg_dir, "info", "recipe", "meta.yaml")) as file_stream:
-            recipe_data = yaml.safe_load(file_stream)
+            recipe_data = yaml_utils.load(file_stream)
 
         if not recipe_data.get("source"):
             return source_folder

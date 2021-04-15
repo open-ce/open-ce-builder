@@ -264,15 +264,15 @@ def replace_conda_env_channels(conda_env_file, original_channel, new_channel):
     Regex 'original_channel' is replaced with 'new_channel'
     '''
     #pylint: disable=import-outside-toplevel
-    import yaml
+    import yaml_utils
 
     with open(conda_env_file, 'r') as file_handle:
-        env_info = yaml.safe_load(file_handle)
+        env_info = yaml_utils.load(file_handle)
 
     env_info['channels'] = [re.sub(original_channel, new_channel, channel) for channel in env_info['channels']]
 
     with open(conda_env_file, 'w') as file_handle:
-        yaml.safe_dump(env_info, file_handle)
+        yaml_utils.dump(env_info, file_handle)
 
 def get_branch_of_tag(git_tag):
     """
