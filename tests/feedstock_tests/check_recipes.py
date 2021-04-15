@@ -16,16 +16,13 @@
 # limitations under the License.
 # *****************************************************************
 
-import argparse
 import sys
 import os
 import pathlib
 
 import conda_build.api
-from conda_build.config import get_or_merge_config
 
 sys.path.append(os.path.join(pathlib.Path(__file__).parent.absolute(), '..'))
-import open_ce.build_feedstock as build_feedstock  # pylint: disable=wrong-import-position
 import open_ce.utils as utils # pylint: disable=wrong-import-position
 import open_ce.inputs as inputs # pylint: disable=wrong-import-position
 from check_build_numbers import get_configs, make_parser
