@@ -20,15 +20,10 @@ import sys
 import os
 import pathlib
 
-import conda_build.api
-
 sys.path.append(os.path.join(pathlib.Path(__file__).parent.absolute(), '..'))
 import open_ce.utils as utils # pylint: disable=wrong-import-position
 import open_ce.inputs as inputs # pylint: disable=wrong-import-position
-from check_build_numbers import get_configs, make_parser
-
-def _check_recipes(build_config_data, config, variant):
-    return all(conda_build.api.check(recipe['path'], config=config, variants=variant) for recipe in build_config_data["recipes"])
+from common import get_configs, make_parser, check_recipes
 
 def main(arg_strings=None):
     '''
@@ -38,12 +33,14 @@ def main(arg_strings=None):
     args = inputs.parse_args(parser, arg_strings)
     variants = utils.make_variants(args.python_versions, args.build_types, args.mpi_types, args.cuda_versions)
 
-    check_results = list()
+    check_result = True
     for variant in variants:
         main_build_config_data, main_config = get_configs(variant, args.conda_build_config)
-        check_results += [_check_recipes(main_build_config_data, main_config, variant)]
+        if not check_recipes(main_build_config_data, main_config, variant):
+            check_result = False
+            print("Recipe validation failed for variant '{}'.".format(variant))
 
-    assert all(check_results), "All recipes must be valid."
+    assert check_result, "All recipes must be valid."
 
 if __name__ == '__main__':
     try:
