@@ -109,7 +109,8 @@ def _main(arg_strings=None):
                                 branch=args.branch,
                                 repo_dir=args.repo_dir,
                                 pat=args.pat,
-                                skipped_repos=args.primary_repo)
+                                skipped_repos=args.primary_repo,
+                                prev_tag=None)
 
     release = git_utils.ask_for_input("Would you like to create a github release?")
     if release.startswith("y"):
