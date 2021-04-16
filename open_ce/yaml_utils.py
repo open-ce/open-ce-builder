@@ -16,22 +16,31 @@
 # *****************************************************************
 """
 
-try:
-    import yaml
-except ImportError:
-    print("Cannot find `pyyaml`, please see https://github.com/open-ce/open-ce-builder#requirements"
-              " for a list of requirements.")
-    sys.exit(1)
+import open_ce.utils
 
+open_ce.utils.check_if_package_exists('pyyaml')
+
+#pylint: disable=wrong-import-position
+import yaml
+
+# Determine if the yaml package contains the C loaders/dumpers. If so, use
+# the C versions. Otherwise, use the python versions.
 try:
     safe_loader = yaml.CSafeLoader
     safe_dumper = yaml.CSafeDumper
+# pylint: disable=bare-except
 except:
     safe_loader = yaml.SafeLoader
     safe_dumper = yaml.SafeDumper
 
 def load(stream):
+    """
+    Use pyyaml's safe loader. If available, the C based verion of the loader will be used.
+    """
     return yaml.load(stream, Loader=safe_loader)
 
 def dump(data, stream=None):
+    """
+    Use pyyaml's safe dumper. If available, the C based version of the dumper will be used.
+    """
     return yaml.dump(data, stream, Dumper=safe_dumper)

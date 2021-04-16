@@ -92,7 +92,7 @@ def build_env(args):
         return
 
     # Checking conda-build existence if --container_build is not specified
-    utils.check_if_conda_build_exists()
+    utils.check_if_package_exists('conda-build')
 
     # Here, importing BuildTree is intentionally done after checking
     # existence of conda-build as BuildTree uses conda_build APIs.
