@@ -74,9 +74,10 @@ def get_image_version(conda_env_file):
         with open(conda_env_file, 'r') as conda_file:
             lines = conda_file.readlines()
             for line in lines:
-                matched = re.match(r'(# '+utils.OPEN_CE_VERSION_STRING+':(.*))', line)
+                matched = re.match(r'(#'+utils.OPEN_CE_VERSION_STRING+':(.*))', line)
                 if matched:
-                    version = matched.group(2).strip()
+                    print("matched.group(2): ",  matched.group(2))
+                    version = matched.group(2)
                     break
 
     except IOError:
