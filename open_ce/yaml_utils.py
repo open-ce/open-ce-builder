@@ -35,7 +35,7 @@ except:
 
 def load(stream):
     """
-    Use pyyaml's safe loader. If available, the C based verion of the loader will be used.
+    Use pyyaml's safe loader. If available, the C based version of the loader will be used.
     """
     return yaml.load(stream, Loader=safe_loader)
 
