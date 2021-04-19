@@ -64,6 +64,8 @@ def build_image(build_image_path, dockerfile, container_tool, cuda_version=None,
     build_cmd = container_tool + " build "
     build_cmd += "-f " + dockerfile + " "
     build_cmd += "-t " + image_name + " "
+    build_cmd += "--build-arg BUILD_ID=" + str(os.getuid()) + " "
+    build_cmd += "--build-arg GROUP_ID=" + str(os.getgid()) + " "
 
     build_cmd += container_build_args + " "
     build_cmd += build_image_path
@@ -128,9 +130,10 @@ def _start_container(container_name, container_tool):
         raise OpenCEError(Error.START_CONTAINER, container_name)
 
 def _execute_in_container(container_name, command, container_tool):
-    container_cmd = container_tool + " exec " + container_name + " "
-    if container_tool == "docker":
-        container_cmd += "--user " + str(os.getuid()) + ":" + str(os.getgid()) + " "
+    container_cmd = container_tool + " exec "
+    if container_tool == "podman" or os.getuid() == 0:
+        container_cmd += "--user root "
+    container_cmd += container_name + " "
     # Change to home directory
     container_cmd += "bash -c 'cd " + HOME_PATH + "; " + command + "'"
 
