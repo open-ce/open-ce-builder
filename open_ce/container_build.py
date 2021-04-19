@@ -20,6 +20,7 @@ import os
 import datetime
 import platform
 import argparse
+import glob
 
 from open_ce import utils
 from open_ce.errors import OpenCEError, Error
@@ -31,7 +32,6 @@ BUILD_IMAGE_PATH = os.path.join(OPEN_CE_PATH, "images", BUILD_IMAGE_NAME)
 BUILD_CUDA_IMAGE_NAME = "builder-cuda-" + platform.machine()
 BUILD_CUDA_IMAGE_PATH = os.path.join(OPEN_CE_PATH, "images", BUILD_CUDA_IMAGE_NAME)
 LOCAL_FILES_PATH = os.path.join(os.path.join(os.getcwd(), "local_files"))
-HOME_PATH = "/root"
 
 REPO_NAME = "open-ce"
 IMAGE_NAME = "open-ce-builder"
@@ -51,6 +51,12 @@ def make_parser():
         argument(parser)
 
     return parser
+
+def _use_root_user(container_tool):
+    return container_tool == "podman" or os.getuid() == 0
+
+def _home_path(container_tool):
+    return "/root" if _use_root_user(container_tool) else "/home/builder"
 
 def build_image(build_image_path, dockerfile, container_tool, cuda_version=None, container_build_args=""):
     """
@@ -105,17 +111,20 @@ def _create_container(container_name, image_name, output_folder, env_folders, co
 
     # Add output folder
     container_cmd += _add_volume(os.path.abspath(output_folder),
-                              os.path.abspath(os.path.join(HOME_PATH, utils.DEFAULT_OUTPUT_FOLDER)))
+                              os.path.abspath(os.path.join(_home_path(container_tool), utils.DEFAULT_OUTPUT_FOLDER)))
 
     # Add cache directory
-    container_cmd += _add_volume(None, os.path.join(HOME_PATH, ".cache"))
+    container_cmd += _add_volume(None, os.path.join(_home_path(container_tool), ".cache"))
 
     # Add conda-bld directory
     container_cmd += _add_volume(None, "/opt/conda/conda-bld")
 
     # Add env file directory
     for env_folder in env_folders:
-        container_cmd += _add_volume(env_folder, os.path.abspath(os.path.join(HOME_PATH, "envs", _mount_name(env_folder))))
+        container_cmd += _add_volume(env_folder,
+                                     os.path.abspath(os.path.join(_home_path(container_tool),
+                                                                  "envs",
+                                                                  _mount_name(env_folder))))
 
     container_cmd += image_name + " bash"
     if os.system(container_cmd):
@@ -131,11 +140,11 @@ def _start_container(container_name, container_tool):
 
 def _execute_in_container(container_name, command, container_tool):
     container_cmd = container_tool + " exec "
-    if container_tool == "podman" or os.getuid() == 0:
+    if _use_root_user(container_tool):
         container_cmd += "--user root "
     container_cmd += container_name + " "
     # Change to home directory
-    container_cmd += "bash -c 'cd " + HOME_PATH + "; " + command + "'"
+    container_cmd += "bash -c 'cd " + _home_path(container_tool) + "; " + command + "'"
 
     if os.system(container_cmd):
         raise OpenCEError(Error.BUILD_IN_CONTAINER, container_name)
@@ -157,7 +166,7 @@ def build_in_container(image_name, args, arg_strings):
 
     #use set comprehension to remove duplicates
     env_folders = {os.path.dirname(env_file) for env_file in env_files if not utils.is_url(env_file)}
-    env_files_in_container = {os.path.join(HOME_PATH,
+    env_files_in_container = {os.path.join(_home_path(args.container_tool),
                                            "envs",
                                            _mount_name(os.path.dirname(env_file)),
                                            os.path.basename(env_file))
@@ -169,22 +178,23 @@ def build_in_container(image_name, args, arg_strings):
     _create_container(container_name, image_name, output_folder, env_folders, args.container_tool)
 
     # Add the open-ce directory
-    _copy_to_container(OPEN_CE_PATH, HOME_PATH, container_name, args.container_tool)
+    _copy_to_container(OPEN_CE_PATH, _home_path(args.container_tool), container_name, args.container_tool)
 
     # Add the conda_build_config
-    _copy_to_container(conda_build_config, HOME_PATH, container_name, args.container_tool)
-    config_in_container = os.path.join(HOME_PATH, os.path.basename(conda_build_config))
+    _copy_to_container(conda_build_config, _home_path(args.container_tool), container_name, args.container_tool)
+    config_in_container = os.path.join(_home_path(args.container_tool), os.path.basename(conda_build_config))
     arg_strings = arg_strings + ["--conda_build_config", config_in_container]
 
     # Add local_files directory (if it exists)
     if os.path.isdir(LOCAL_FILES_PATH):
-        _copy_to_container(LOCAL_FILES_PATH, HOME_PATH, container_name, args.container_tool)
+        _copy_to_container(LOCAL_FILES_PATH, _home_path(args.container_tool), container_name, args.container_tool)
 
 
     _start_container(container_name, args.container_tool)
 
     # Execute build command
-    cmd = "source $HOME/.bashrc; python {} {} {} {}".format(os.path.join(HOME_PATH, "open_ce", "open-ce"),
+    cmd = "source $HOME/.bashrc; python {} {} {} {}".format(
+                                      os.path.join(_home_path(args.container_tool), "open_ce", "open-ce"),
                                       args.command,
                                       args.sub_command,
                                       ' '.join(arg_strings[0:]))
@@ -245,4 +255,11 @@ def build_with_container_tool(args, arg_strings):
     else:
         raise OpenCEError(Error.INCOMPAT_CUDA, utils.get_driver_level(), args.cuda_versions)
 
-    build_in_container(image_name, args, unused_args)
+    try:
+        build_in_container(image_name, args, unused_args)
+    finally:
+        for conda_env_file in glob.glob(os.path.join(args.output_folder, "*.yaml")):
+            utils.replace_conda_env_channels(conda_env_file,
+                                             os.path.abspath(os.path.join(_home_path(args.container_tool),
+                                                                          utils.DEFAULT_OUTPUT_FOLDER)),
+                                                 os.path.abspath(args.output_folder))
