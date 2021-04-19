@@ -31,7 +31,7 @@ BUILD_IMAGE_PATH = os.path.join(OPEN_CE_PATH, "images", BUILD_IMAGE_NAME)
 BUILD_CUDA_IMAGE_NAME = "builder-cuda-" + platform.machine()
 BUILD_CUDA_IMAGE_PATH = os.path.join(OPEN_CE_PATH, "images", BUILD_CUDA_IMAGE_NAME)
 LOCAL_FILES_PATH = os.path.join(os.path.join(os.getcwd(), "local_files"))
-HOME_PATH = "/home/builder"
+HOME_PATH = "/root"
 
 REPO_NAME = "open-ce"
 IMAGE_NAME = "open-ce-builder"
@@ -64,8 +64,6 @@ def build_image(build_image_path, dockerfile, container_tool, cuda_version=None,
     build_cmd = container_tool + " build "
     build_cmd += "-f " + dockerfile + " "
     build_cmd += "-t " + image_name + " "
-    build_cmd += "--build-arg BUILD_ID=" + str(os.getuid()) + " "
-    build_cmd += "--build-arg GROUP_ID=" + str(os.getgid()) + " "
 
     build_cmd += container_build_args + " "
     build_cmd += build_image_path
@@ -100,7 +98,7 @@ def _create_container(container_name, image_name, output_folder, env_folders, co
     Create a container
     """
     # Create the container
-    container_cmd = container_tool + " create" + (" --userns=keep-id" if container_tool=="podman" else "" )\
+    container_cmd = container_tool + " create"\
                  + " -i --rm --name " + container_name + " "
 
     # Add output folder
@@ -131,6 +129,8 @@ def _start_container(container_name, container_tool):
 
 def _execute_in_container(container_name, command, container_tool):
     container_cmd = container_tool + " exec " + container_name + " "
+    if container_tool == "docker":
+        container_cmd += "--user " + str(os.getuid()) + ":" + str(os.getgid()) + " "
     # Change to home directory
     container_cmd += "bash -c 'cd " + HOME_PATH + "; " + command + "'"
 
