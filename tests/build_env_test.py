@@ -70,7 +70,8 @@ def test_build_env(mocker, capsys):
         side_effect=dirTracker.validate_chdir
     )
     mocker.patch(
-        'open_ce.validate_config.validate_build_tree'
+        'open_ce.utils.run_command_capture',
+        return_val=(True, "", "")
     )
     #            +-------+
     #     +------+   15  +-----+
