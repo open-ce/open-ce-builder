@@ -35,7 +35,7 @@ ARGUMENTS = [Argument.LOCAL_CONDA_CHANNEL,
 OPEN_CE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "."))
 RUNTIME_IMAGE_NAME = "opence-runtime"
 RUNTIME_IMAGE_PATH = os.path.join(OPEN_CE_PATH, "images",
-                                  RUNTIME_IMAGE_NAME, platform.machine())
+                                  RUNTIME_IMAGE_NAME)
 REPO_NAME = "open-ce"
 IMAGE_NAME = "open-ce-" + open_ce_version
 TEMP_FILES = "temp_dir"
@@ -52,12 +52,13 @@ def build_image(local_conda_channel, conda_env_file, container_tool, container_b
     variant = os.path.splitext(conda_env_file)[0].replace(utils.CONDA_ENV_FILENAME_PREFIX, "", 1)
     variant = variant.replace("-runtime", "")
 
-    # Docker version on ppc64le rhel doesn't allow Dockerfiles to be out of build context.
-    # Hence, copying it in temp_dir inside the build context. On x86, this isn't needed but
-    # but to be consistent, doing this on x86 too.
+    # Docker version on ppc64le rhel7 doesn't allow Dockerfiles to be out of build context.
+    # Hence, copying it in temp_dir inside the build context. This isn't needed with newer 
+    # docker versions or podman needed but to be consistent, doing this in all cases.
     dockerfile_path = os.path.join(local_conda_channel, TEMP_FILES, "Dockerfile")
-    create_copy(os.path.join(RUNTIME_IMAGE_PATH, "Dockerfile"),
-                            dockerfile_path)
+    runtime_img_file = _get_runtime_image_file(container_tool)
+    create_copy(runtime_img_file, dockerfile_path)
+    
     image_name = REPO_NAME + ":" + IMAGE_NAME + "-" + variant
     build_cmd = container_tool + " build "
     build_cmd += "-f " + dockerfile_path + " "
@@ -74,6 +75,19 @@ def build_image(local_conda_channel, conda_env_file, container_tool, container_b
         raise OpenCEError(Error.BUILD_IMAGE, image_name)
 
     return image_name
+
+def _get_runtime_image_file(container_tool):
+    tool_ver = utils.get_container_tool_ver(container_tool)
+    tool_ver = tool_ver.replace(".", "")
+    if (container_tool == "docker" and int(tool_ver) <= 1131) or \
+       (container_tool == "podman" and int(tool_ver) < 200):
+        # Use the older docker supported Dockerfile
+        image_file = os.path.join(RUNTIME_IMAGE_PATH, "docker/Dockerfile")
+    else:
+#    elif (container_tool == "podman" and int(tool_ver) >= 200) or
+#       (container_tool == "docker" and int(tool_ver) >= 20103):
+        image_file = os.path.join(RUNTIME_IMAGE_PATH, "podman/Dockerfile")
+    return image_file
 
 def build_runtime_container_image(args):
     """

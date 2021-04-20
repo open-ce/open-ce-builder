@@ -315,3 +315,15 @@ def git_clone(git_url, git_tag, location, up_to_date=False):
         raise OpenCEError(Error.CLONE_REPO, git_url)
 
     return clone_successful
+
+def get_container_tool_ver(tool):
+    '''
+    Returns the version of the tool
+    '''
+    cmd = tool + " version"
+    output = get_output(cmd)
+    for line in output.split("\n"):
+        matched = re.match(r'(Version:\s* (.*))', line)
+        if matched:
+            version = matched.group(2)
+            return version.strip()
