@@ -117,7 +117,7 @@ def test_cuda_driver_installed_failures(mocker):
     mocker.patch('subprocess.check_output',side_effect=OSError(errno.ENOENT,"" ))
     with pytest.raises(OpenCEError) as exc:
         utils.cuda_driver_installed()
-    assert "lsmod command not found" in str(exc.value)    
+    assert "lsmod command not found" in str(exc.value)
 
     mocker.patch('subprocess.check_output',side_effect=OSError(errno.EPERM,"" ))
     with pytest.raises(OpenCEError) as exc:
