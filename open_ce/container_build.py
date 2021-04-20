@@ -70,8 +70,9 @@ def build_image(build_image_path, dockerfile, container_tool, cuda_version=None,
     build_cmd = container_tool + " build "
     build_cmd += "-f " + dockerfile + " "
     build_cmd += "-t " + image_name + " "
-    build_cmd += "--build-arg BUILD_ID=" + str(os.getuid()) + " "
-    build_cmd += "--build-arg GROUP_ID=" + str(os.getgid()) + " "
+    if not _use_root_user(container_tool):
+        build_cmd += "--build-arg BUILD_ID=" + str(os.getuid()) + " "
+        build_cmd += "--build-arg GROUP_ID=" + str(os.getgid()) + " "
 
     build_cmd += container_build_args + " "
     build_cmd += build_image_path
@@ -113,11 +114,13 @@ def _create_container(container_name, image_name, output_folder, env_folders, co
     container_cmd += _add_volume(os.path.abspath(output_folder),
                               os.path.abspath(os.path.join(_home_path(container_tool), utils.DEFAULT_OUTPUT_FOLDER)))
 
-    # Add cache directory
-    container_cmd += _add_volume(None, os.path.join(_home_path(container_tool), ".cache"))
+    if container_tool == "docker":
+        # Store temporary data in an anonymous volume
+        # Add cache directory
+        container_cmd += _add_volume(None, os.path.join(_home_path(container_tool), ".cache"))
 
-    # Add conda-bld directory
-    container_cmd += _add_volume(None, "/opt/conda/conda-bld")
+        # Add conda-bld directory
+        container_cmd += _add_volume(None, "/opt/conda/conda-bld")
 
     # Add env file directory
     for env_folder in env_folders:

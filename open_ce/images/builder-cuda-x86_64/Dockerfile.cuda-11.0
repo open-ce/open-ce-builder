@@ -14,18 +14,6 @@ ARG BUILD_ID=1084
 # Remove preinclude system compilers
 RUN rpm -e --nodeps --verbose gcc gcc-c++
 
-FROM registry.access.redhat.com/ubi7/ubi
-
-ENV CONDA_HOME=${CONDA_HOME:-/opt/conda}
-ENV PATH=$CONDA_HOME/bin:$PATH
-
-ENV OPEN_CE_CONDA_BUILD=3.20.5
-
-ENV CICD_GROUP=cicd
-ARG GROUP_ID=1500
-ENV BUILD_USER=builder
-ARG BUILD_ID=1084
-
 RUN export ARCH="$(uname -m)" && \
     yum repolist && yum install -y rsync && \
     # Create CICD Group
