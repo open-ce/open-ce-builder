@@ -323,7 +323,8 @@ def get_container_tool_ver(tool):
     cmd = tool + " version"
     output = get_output(cmd)
     for line in output.split("\n"):
-        matched = re.match(r'(Version:\s* (.*))', line)
+        print("line: ", line)
+        matched = re.match(r'(\s*Version:\s* (.*))', line)
         if matched:
             version = matched.group(2)
             return version.strip()

@@ -58,7 +58,7 @@ def build_image(local_conda_channel, conda_env_file, container_tool, container_b
     dockerfile_path = os.path.join(local_conda_channel, TEMP_FILES, "Dockerfile")
     runtime_img_file = _get_runtime_image_file(container_tool)
     create_copy(runtime_img_file, dockerfile_path)
-    
+ 
     image_name = REPO_NAME + ":" + IMAGE_NAME + "-" + variant
     build_cmd = container_tool + " build "
     build_cmd += "-f " + dockerfile_path + " "
@@ -79,14 +79,13 @@ def build_image(local_conda_channel, conda_env_file, container_tool, container_b
 def _get_runtime_image_file(container_tool):
     tool_ver = utils.get_container_tool_ver(container_tool)
     tool_ver = tool_ver.replace(".", "")
-    if (container_tool == "docker" and int(tool_ver) <= 1131) or \
+    if (container_tool == "docker" and int(tool_ver) < 1709) or \
        (container_tool == "podman" and int(tool_ver) < 200):
         # Use the older docker supported Dockerfile
         image_file = os.path.join(RUNTIME_IMAGE_PATH, "docker/Dockerfile")
     else:
-#    elif (container_tool == "podman" and int(tool_ver) >= 200) or
-#       (container_tool == "docker" and int(tool_ver) >= 20103):
         image_file = os.path.join(RUNTIME_IMAGE_PATH, "podman/Dockerfile")
+    print("Dockerfile being used: ", image_file)
     return image_file
 
 def build_runtime_container_image(args):
