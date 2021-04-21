@@ -27,11 +27,11 @@ import yaml
 # the C versions. Otherwise, use the python versions.
 try:
     safe_loader = yaml.CSafeLoader
-    safe_dumper = yaml.CSafeDumper
+    dumper = yaml.CDumper
 # pylint: disable=bare-except
 except:
     safe_loader = yaml.SafeLoader
-    safe_dumper = yaml.SafeDumper
+    dumper = yaml.Dumper
 
 def load(stream):
     """
@@ -39,8 +39,8 @@ def load(stream):
     """
     return yaml.load(stream, Loader=safe_loader)
 
-def dump(data, stream=None):
+def dump(data, stream=None, **kwds):
     """
-    Use pyyaml's safe dumper. If available, the C based version of the dumper will be used.
+    Use pyyaml's dumper. If available, the C based version of the dumper will be used.
     """
-    return yaml.dump(data, stream, Dumper=safe_dumper)
+    return yaml.dump(data, stream, Dumper=dumper, **kwds)
