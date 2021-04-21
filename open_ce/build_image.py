@@ -78,13 +78,19 @@ def build_image(local_conda_channel, conda_env_file, container_tool, container_b
 
 def _get_runtime_image_file(container_tool):
     tool_ver = utils.get_container_tool_ver(container_tool)
+    image_file = os.path.join(RUNTIME_IMAGE_PATH, "docker/Dockerfile")
+    if not tool_ver:
+        print("WARNING: Could not retrieve version of {} container tool".format(container_tool))
+        # If we couldn't get the version of the tool, should use the older docker
+        # supported Dockerfile
+        return image_file
+
     tool_ver = tool_ver.replace(".", "")
-    if (container_tool == "docker" and int(tool_ver) < 1709) or \
-       (container_tool == "podman" and int(tool_ver) < 200):
+    if (container_tool == "docker" and int(tool_ver) >= 1709) or \
+       (container_tool == "podman" and int(tool_ver) >= 200):
         # Use the older docker supported Dockerfile
-        image_file = os.path.join(RUNTIME_IMAGE_PATH, "docker/Dockerfile")
-    else:
         image_file = os.path.join(RUNTIME_IMAGE_PATH, "podman/Dockerfile")
+
     print("Dockerfile being used: ", image_file)
     return image_file
 
