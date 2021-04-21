@@ -106,18 +106,20 @@ def _create_container(container_name, image_name, output_folder, env_folders, co
     """
     Create a container
     """
+    home_path = _home_path(container_tool)
+
     # Create the container
     container_cmd = container_tool + " create"\
                  + " -i --rm --name " + container_name + " "
 
     # Add output folder
     container_cmd += _add_volume(os.path.abspath(output_folder),
-                              os.path.abspath(os.path.join(_home_path(container_tool), utils.DEFAULT_OUTPUT_FOLDER)))
+                              os.path.abspath(os.path.join(home_path, utils.DEFAULT_OUTPUT_FOLDER)))
 
     if container_tool == "docker":
         # Store temporary data in an anonymous volume
         # Add cache directory
-        container_cmd += _add_volume(None, os.path.join(_home_path(container_tool), ".cache"))
+        container_cmd += _add_volume(None, os.path.join(home_path, ".cache"))
 
         # Add conda-bld directory
         container_cmd += _add_volume(None, "/opt/conda/conda-bld")
@@ -125,7 +127,7 @@ def _create_container(container_name, image_name, output_folder, env_folders, co
     # Add env file directory
     for env_folder in env_folders:
         container_cmd += _add_volume(env_folder,
-                                     os.path.abspath(os.path.join(_home_path(container_tool),
+                                     os.path.abspath(os.path.join(home_path,
                                                                   "envs",
                                                                   _mount_name(env_folder))))
 
@@ -166,10 +168,11 @@ def build_in_container(image_name, args, arg_strings):
     output_folder = os.path.abspath(args.output_folder)
     env_files = [os.path.abspath(e) if not utils.is_url(e) else e for e in args.env_config_file]
     conda_build_config = os.path.abspath(args.conda_build_config)
+    home_path = _home_path(args.container_tool)
 
     #use set comprehension to remove duplicates
     env_folders = {os.path.dirname(env_file) for env_file in env_files if not utils.is_url(env_file)}
-    env_files_in_container = {os.path.join(_home_path(args.container_tool),
+    env_files_in_container = {os.path.join(home_path,
                                            "envs",
                                            _mount_name(os.path.dirname(env_file)),
                                            os.path.basename(env_file))
@@ -181,23 +184,22 @@ def build_in_container(image_name, args, arg_strings):
     _create_container(container_name, image_name, output_folder, env_folders, args.container_tool)
 
     # Add the open-ce directory
-    _copy_to_container(OPEN_CE_PATH, _home_path(args.container_tool), container_name, args.container_tool)
+    _copy_to_container(OPEN_CE_PATH, home_path, container_name, args.container_tool)
 
     # Add the conda_build_config
-    _copy_to_container(conda_build_config, _home_path(args.container_tool), container_name, args.container_tool)
-    config_in_container = os.path.join(_home_path(args.container_tool), os.path.basename(conda_build_config))
+    _copy_to_container(conda_build_config, home_path, container_name, args.container_tool)
+    config_in_container = os.path.join(home_path, os.path.basename(conda_build_config))
     arg_strings = arg_strings + ["--conda_build_config", config_in_container]
 
     # Add local_files directory (if it exists)
     if os.path.isdir(LOCAL_FILES_PATH):
-        _copy_to_container(LOCAL_FILES_PATH, _home_path(args.container_tool), container_name, args.container_tool)
+        _copy_to_container(LOCAL_FILES_PATH, home_path, container_name, args.container_tool)
 
 
     _start_container(container_name, args.container_tool)
 
     # Execute build command
-    cmd = "source $HOME/.bashrc; python {} {} {} {}".format(
-                                      os.path.join(_home_path(args.container_tool), "open_ce", "open-ce"),
+    cmd = "source $HOME/.bashrc; python {} {} {} {}".format(os.path.join(home_path, "open_ce", "open-ce"),
                                       args.command,
                                       args.sub_command,
                                       ' '.join(arg_strings[0:]))
