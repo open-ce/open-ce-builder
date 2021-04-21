@@ -220,7 +220,6 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
             self._initial_nodes += variant_start_nodes
 
             validate_args.append((self._tree, external_deps, variant_start_nodes))
-            #validate_config.validate_build_tree(self._tree, external_deps, variant_start_nodes)
             installable_packages = get_installable_packages(self._tree, external_deps, variant_start_nodes)
 
             filtered_packages = [package for package in installable_packages
