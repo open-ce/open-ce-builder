@@ -78,6 +78,9 @@ def traverse_build_commands(build_tree, starting_nodes=None, return_node=False):
                     yield current.build_command
 
 def is_independent(node, tree):
+    """
+    Returns true if the node does not depend on any internal build commands.
+    """
     return not {x for x in networkx.descendants(tree, node) if x.build_command is not None}
 
 def get_independent_runtime_deps(tree, node):
