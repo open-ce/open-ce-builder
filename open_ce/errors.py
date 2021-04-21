@@ -63,6 +63,10 @@ class OpenCEError(Exception):
     Exception class for errors that occur in an Open-CE tool.
     """
     def __init__(self, error, *additional_args, **kwargs):
-        msg = "[OPEN-CE-ERROR-{}] {}".format(error.value[0], error.value[1].format(*additional_args))
+        # When pickling, error can already be a string.
+        if isinstance(error, str):
+            msg = error
+        else:
+            msg = "[OPEN-CE-ERROR-{}] {}".format(error.value[0], error.value[1].format(*additional_args))
         super().__init__(msg, **kwargs)
         self.msg = msg

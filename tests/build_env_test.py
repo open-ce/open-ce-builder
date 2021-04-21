@@ -71,7 +71,7 @@ def test_build_env(mocker, capsys):
     )
     mocker.patch(
         'open_ce.utils.run_command_capture',
-        return_val=(True, "", "")
+        return_value=(True, "", "")
     )
     #            +-------+
     #     +------+   15  +-----+
