@@ -93,9 +93,9 @@ def get_independent_runtime_deps(tree, node):
         run_deps = {x for x in node.build_command.run_dependencies
                                 if utils.remove_version(x) not in map(utils.remove_version, node.packages)}
         for run_dep in run_deps:
-            dep_node = next(x for x in tree.successors(node)
+            run_dep_node = next(x for x in tree.successors(node)
                                     if utils.remove_version(run_dep) in map(utils.remove_version, x.packages))
-            if is_independent(dep_node, tree):
+            if is_independent(run_dep_node, tree):
                 deps.add(run_dep)
     return deps
 
@@ -192,7 +192,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
             try:
                 variant_tree, external_deps = self._create_nodes(variant)
                 variant_tree = _create_edges(variant_tree)
-                variant_tree = _create_remote_deps(variant_tree, self._channels)
+                variant_tree = self._create_remote_deps(variant_tree)
                 self._tree = networkx.compose(self._tree, variant_tree)
             except OpenCEError as exc:
                 raise OpenCEError(Error.CREATE_BUILD_TREE, exc.msg) from exc
@@ -299,6 +299,35 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
             retval = networkx.compose(retval, current_config_graph)
         return retval, external_deps
 
+    def _create_remote_deps(self, dep_graph):
+        #pylint: disable=import-outside-toplevel
+        from open_ce import conda_utils
+        deps = {dep for dep in dep_graph.nodes() if dep.build_command is None}
+        seen = set()
+        try:
+            while deps:
+                node = deps.pop()
+                for package in node.packages:
+                    package_name = utils.remove_version(package)
+                    if package_name in seen:
+                        continue
+                    seen.add(package_name)
+                    package_info = conda_utils.get_latest_package_info(self._channels + node.channels, package)
+                    dep_graph.add_node(DependencyNode({package}))
+                    for dep in package_info['dependencies']:
+                        dep_name = utils.remove_version(dep)
+                        local_dest = {dest_node for dest_node in dep_graph.nodes()
+                                                if dep_name in map(utils.remove_version, dest_node.packages)}
+                        if local_dest:
+                            dep_graph.add_edge(node, local_dest.pop())
+                        else:
+                            new_dep = DependencyNode({dep})
+                            dep_graph.add_edge(node, new_dep)
+                            deps.add(new_dep)
+            return dep_graph
+        except OpenCEError as err:
+            raise OpenCEError(Error.REMOTE_PACKAGE_DEPENDENCIES, deps, err.msg) from err
+
     def _clone_repo(self, git_url, repo_dir, env_config_data, package):
         """
         Clone the git repo at repository.
@@ -403,35 +432,6 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         '''
         return ", ".join("'{}'".format(dep.build_command.name()) for dep in networkx.descendants(self._tree, node)
                                                                     if dep.build_command)
-
-def _create_remote_deps(dep_graph, channels):
-    #pylint: disable=import-outside-toplevel
-    from open_ce import conda_utils
-    deps = {dep for dep in dep_graph.nodes() if dep.build_command is None}
-    seen = set()
-    try:
-        while deps:
-            node = deps.pop()
-            for package in node.packages:
-                package_name = utils.remove_version(package)
-                if package_name in seen:
-                    continue
-                seen.add(package_name)
-                package_info = conda_utils.get_latest_package_info(channels + node.channels, package)
-                dep_graph.add_node(DependencyNode({package}))
-                for dep in package_info['dependencies']:
-                    dep_name = utils.remove_version(dep)
-                    local_dest = {dest_node for dest_node in dep_graph.nodes()
-                                            if dep_name in map(utils.remove_version, dest_node.packages)}
-                    if local_dest:
-                        dep_graph.add_edge(node, local_dest.pop())
-                    else:
-                        new_dep = DependencyNode({dep})
-                        dep_graph.add_edge(node, new_dep)
-                        deps.add(new_dep)
-        return dep_graph
-    except OpenCEError as err:
-        raise OpenCEError(Error.REMOTE_PACKAGE_DEPENDENCIES, deps, err.msg) from err
 
 def _create_edges(tree):
     # Use set() to create a copy of the nodes since they change during the loop.
