@@ -276,6 +276,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         create_commands_args = []
         # Create recipe dictionaries for each repository in the environment file
         for env_config_data in env_config_data_list:
+            channels = self._channels + env_config_data.get(env_config.Key.channels.name, [])
             feedstocks = env_config_data.get(env_config.Key.packages.name, [])
             if not feedstocks:
                 feedstocks = []
