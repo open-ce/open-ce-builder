@@ -220,6 +220,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
 
             filtered_packages = [package for package in installable_packages
                                      if utils.remove_version(package) in {x for node in variant_start_nodes
+                                                                                     if node.build_command
                                                                             for x in node.build_command.packages} or
                                         utils.remove_version(package) in utils.KNOWN_VARIANT_PACKAGES]
 
@@ -264,7 +265,6 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         retval = networkx.DiGraph()
         # Create recipe dictionaries for each repository in the environment file
         for env_config_data in env_config_data_list:
-            current_config_graph = networkx.DiGraph()
             channels = self._channels + env_config_data.get(env_config.Key.channels.name, [])
             feedstocks = env_config_data.get(env_config.Key.packages.name, [])
             if not feedstocks:
@@ -275,7 +275,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
 
                 repo_dir = self._get_repo(env_config_data, feedstock)
                 runtime_package = feedstock.get(env_config.Key.runtime_package.name, True)
-                current_config_graph = networkx.compose(current_config_graph,
+                retval = networkx.compose(retval,
                                           _create_commands(repo_dir,
                                                             runtime_package,
                                                             feedstock.get(env_config.Key.recipe_path.name),
@@ -288,15 +288,12 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
 
             current_deps = env_config_data.get(env_config.Key.external_dependencies.name, [])
             for dep in current_deps:
+                #Add external dependencies as top level nodes in the graph.
                 new_dep = DependencyNode({dep}, channels=channels)
-                current_config_graph.add_node(new_dep)
-                for node in current_config_graph.nodes():
-                    current_config_graph.add_edge(node, new_dep)
+                retval.add_node(new_dep)
 
             if current_deps:
                 external_deps += current_deps
-
-            retval = networkx.compose(retval, current_config_graph)
         return retval, external_deps
 
     def _create_remote_deps(self, dep_graph):
