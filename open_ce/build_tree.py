@@ -32,9 +32,13 @@ class DependencyNode():
     """
     def __init__(self,
                  packages=None,
-                 build_command=None):
+                 build_command=None,
+                 channels=None):
         self.packages = packages
         self.build_command = build_command
+        self.channels = channels
+        if not self.channels:
+            self.channels = []
 
     def __repr__(self):
         return str(self)
@@ -73,6 +77,12 @@ def traverse_build_commands(build_tree, starting_nodes=None, return_node=False):
                 else:
                     yield current.build_command
 
+def is_independent(node, tree):
+    """
+    Returns true if the node does not depend on any internal build commands.
+    """
+    return not {x for x in networkx.descendants(tree, node) if x.build_command is not None}
+
 def get_independent_runtime_deps(tree, node):
     """
     This function gets all run dependencies of a node that don't depend on
@@ -85,7 +95,7 @@ def get_independent_runtime_deps(tree, node):
         for run_dep in run_deps:
             run_dep_node = next(x for x in tree.successors(node)
                                     if utils.remove_version(run_dep) in map(utils.remove_version, x.packages))
-            if not {x for x in networkx.descendants(tree, run_dep_node) if x.build_command is not None}:
+            if is_independent(run_dep_node, tree):
                 deps.add(run_dep)
     return deps
 
@@ -210,6 +220,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
 
             filtered_packages = [package for package in installable_packages
                                      if utils.remove_version(package) in {x for node in variant_start_nodes
+                                                                                     if node.build_command
                                                                             for x in node.build_command.packages} or
                                         utils.remove_version(package) in utils.KNOWN_VARIANT_PACKAGES]
 
@@ -276,6 +287,11 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
                 feedstocks_seen.add(_make_hash(feedstock))
 
             current_deps = env_config_data.get(env_config.Key.external_dependencies.name, [])
+            for dep in current_deps:
+                #Add external dependencies as top level nodes in the graph.
+                new_dep = DependencyNode({dep}, channels=channels)
+                retval.add_node(new_dep)
+
             if current_deps:
                 external_deps += current_deps
         return retval, external_deps
@@ -293,7 +309,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
                     if package_name in seen:
                         continue
                     seen.add(package_name)
-                    package_info = conda_utils.get_latest_package_info(self._channels, package)
+                    package_info = conda_utils.get_latest_package_info(self._channels + node.channels, package)
                     dep_graph.add_node(DependencyNode({package}))
                     for dep in package_info['dependencies']:
                         dep_name = utils.remove_version(dep)
@@ -543,5 +559,7 @@ def get_installable_packages(build_commands, external_deps, starting_nodes=None,
                                                         for i, package in enumerate(build_command.packages)],
                                                     retval)
 
-    retval = check_and_add(external_deps, retval)
+    for dep in external_deps:
+        if is_independent(DependencyNode({dep}), build_commands):
+            retval = check_and_add({dep}, retval)
     return sorted(retval, key=len)
