@@ -87,10 +87,10 @@ def _get_runtime_image_file(container_tool):
     tool_ver = tool_ver.replace(".", "")
     if (container_tool == "docker" and int(tool_ver) >= 1709) or \
        (container_tool == "podman" and int(tool_ver) >= 200):
-        # Use the older docker supported Dockerfile
+        # Use the newer docker/podman supported Dockerfile
         image_file = os.path.join(RUNTIME_IMAGE_PATH, "podman/Dockerfile")
 
-    print("Dockerfile being used: ", image_file)
+    print("INFO: Dockerfile being used: ", image_file)
     return image_file
 
 def build_runtime_container_image(args):
