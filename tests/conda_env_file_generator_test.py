@@ -25,6 +25,8 @@ import open_ce.build_tree as build_tree
 import open_ce.conda_env_file_generator as conda_env_file_generator
 import open_ce.utils as utils
 
+external_deps = ["external_pac1    1.2", "external_pack2", "external_pack3=1.2.3"]
+
 def sample_build_commands() :
     retval = networkx.DiGraph()
     node1 = build_tree.DependencyNode(packages=["package1a", "package1b"], build_command=build_tree.BuildCommand("recipe1",
@@ -66,9 +68,10 @@ def sample_build_commands() :
     retval.add_node(node3)
     retval.add_node(node4)
 
-    return retval
+    for dep in external_deps:
+        retval.add_node(build_tree.DependencyNode({dep}))
 
-external_deps = ["external_pac1    1.2", "external_pack2", "external_pack3=1.2.3"]
+    return retval
 
 def test_conda_env_file_content():
     '''
