@@ -54,7 +54,7 @@ def build_image(local_conda_channel, conda_env_file, container_tool, container_b
 
     # Docker version on ppc64le rhel7 doesn't allow Dockerfiles to be out of build context.
     # Hence, copying it in temp_dir inside the build context. This isn't needed with newer 
-    # docker versions or podman needed but to be consistent, doing this in all cases.
+    # docker versions or podman but to be consistent, doing this in all cases.
     dockerfile_path = os.path.join(local_conda_channel, TEMP_FILES, "Dockerfile")
     runtime_img_file = _get_runtime_image_file(container_tool)
     create_copy(runtime_img_file, dockerfile_path)
