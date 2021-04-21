@@ -20,7 +20,7 @@ import open_ce.utils
 
 open_ce.utils.check_if_package_exists('pyyaml')
 
-#pylint: disable=wrong-import-position
+#pylint: disable=wrong-import-position, wrong-import-order
 import yaml
 
 # Determine if the yaml package contains the C loaders/dumpers. If so, use
