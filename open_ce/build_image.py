@@ -50,7 +50,6 @@ def build_image(local_conda_channel, conda_env_file, container_tool, image_versi
     variant = os.path.splitext(conda_env_file)[0].replace(utils.CONDA_ENV_FILENAME_PREFIX, "", 1)
     variant = variant.replace("-runtime", "")
     image_name = REPO_NAME + ":" + image_version + "-" + variant
-    print("Image name: ", image_name)
     # Docker version on ppc64le rhel7 doesn't allow Dockerfiles to be out of build context.
     # Hence, copying it in temp_dir inside the build context. This isn't needed with newer
     # docker versions or podman but to be consistent, doing this in all cases.
@@ -121,7 +120,6 @@ def build_runtime_container_image(args):
         utils.replace_conda_env_channels(conda_env_runtime_file, r'file:.*', "file:/{}".format(TARGET_DIR))
 
         image_version = utils.get_open_ce_version(conda_env_file)
-        print("image version: ", image_version)
         image_name = build_image(args.local_conda_channel, os.path.basename(conda_env_runtime_file),
                                  args.container_tool, image_version, args.container_build_args)
         print("Docker image with name {} is built successfully.".format(image_name))
