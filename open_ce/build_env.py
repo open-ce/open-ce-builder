@@ -19,7 +19,6 @@
 
 import os
 import sys
-import glob
 
 from open_ce import build_feedstock
 from open_ce import container_build
@@ -89,18 +88,11 @@ def build_env(args):
     if args.container_build:
         if len(args.cuda_versions.split(',')) > 1:
             raise OpenCEError(Error.TOO_MANY_CUDA)
-        try:
-            container_build.build_with_container_tool(args, sys.argv)
-        finally:
-            for conda_env_file in glob.glob(os.path.join(args.output_folder, "*.yaml")):
-                utils.replace_conda_env_channels(conda_env_file,
-                                                 os.path.abspath(os.path.join(container_build.HOME_PATH,
-                                                                              utils.DEFAULT_OUTPUT_FOLDER)),
-                                                 os.path.abspath(args.output_folder))
+        container_build.build_with_container_tool(args, sys.argv)
         return
 
     # Checking conda-build existence if --container_build is not specified
-    utils.check_if_conda_build_exists()
+    utils.check_if_package_exists('conda-build')
 
     # Here, importing BuildTree is intentionally done after checking
     # existence of conda-build as BuildTree uses conda_build APIs.

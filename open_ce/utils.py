@@ -67,13 +67,13 @@ def remove_version(package):
     '''Remove conda version from dependency.'''
     return package.split()[0].split("=")[0]
 
-def check_if_conda_build_exists():
+def check_if_package_exists(package):
     '''Checks if conda-build is installed and exits if it is not'''
     try:
-        pkg_resources.get_distribution('conda-build')
+        pkg_resources.get_distribution(package)
     except pkg_resources.DistributionNotFound:
-        print("Cannot find `conda_build`, please see https://github.com/open-ce/open-ce-builder#requirements"
-              " for a list of requirements.")
+        print("Cannot find `{}`, please see https://github.com/open-ce/open-ce-builder#requirements"
+              " for a list of requirements.".format(package))
         sys.exit(1)
 
 def make_schema_type(data_type,required=False):
@@ -265,17 +265,17 @@ def replace_conda_env_channels(conda_env_file, original_channel, new_channel):
     Regex 'original_channel' is replaced with 'new_channel'
     '''
     #pylint: disable=import-outside-toplevel
-    import yaml
+    import open_ce.yaml_utils
 
     with open(conda_env_file, 'r') as file_handle:
-        env_info = yaml.safe_load(file_handle)
+        env_info = open_ce.yaml_utils.load(file_handle)
 
     env_info['channels'] = [re.sub(original_channel, new_channel, channel) for channel in env_info['channels']]
 
     with open(conda_env_file, 'w') as file_handle:
-        yaml.safe_dump(env_info, file_handle)
+        open_ce.yaml_utils.dump(env_info, file_handle)
 
-def _get_branch_of_tag(git_tag):
+def get_branch_of_tag(git_tag):
     """
     Find the most recent branch that contains git_tag.
     """
@@ -306,7 +306,7 @@ def git_clone(git_url, git_tag, location, up_to_date=False):
         if git_tag:
             os.chdir(location)
             if up_to_date:
-                git_tag = _get_branch_of_tag(git_tag)
+                git_tag = get_branch_of_tag(git_tag)
             checkout_cmd = "git checkout " + git_tag
             print("Checkout branch/tag command: ", checkout_cmd)
             checkout_res = os.system(checkout_cmd)
@@ -316,3 +316,19 @@ def git_clone(git_url, git_tag, location, up_to_date=False):
         raise OpenCEError(Error.CLONE_REPO, git_url)
 
     return clone_successful
+
+def get_container_tool_ver(tool):
+    '''
+    Returns the version of the tool
+    '''
+    cmd = tool + " version"
+    output = get_output(cmd)
+    version = None
+    for line in output.split("\n"):
+        matched = re.match(r'(\s*Version:\s* (.*))', line)
+        if matched:
+            version = matched.group(2)
+            version = version.strip()
+            break
+
+    return version

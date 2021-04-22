@@ -117,7 +117,7 @@ def test_cuda_driver_installed_failures(mocker):
     mocker.patch('subprocess.check_output',side_effect=OSError(errno.ENOENT,"" ))
     with pytest.raises(OpenCEError) as exc:
         utils.cuda_driver_installed()
-    assert "lsmod command not found" in str(exc.value)    
+    assert "lsmod command not found" in str(exc.value)
 
     mocker.patch('subprocess.check_output',side_effect=OSError(errno.EPERM,"" ))
     with pytest.raises(OpenCEError) as exc:
@@ -131,7 +131,16 @@ def test_get_branch_of_tag(mocker):
     sample_output = "main\n  remotes/origin/main\n* remotes/origin/r2.4.1   \n"
     mocker.patch('open_ce.utils.run_command_capture', side_effect=[(True, sample_output, ""), (False, sample_output, "")])
 
-    assert utils._get_branch_of_tag("mytag") == "remotes/origin/r2.4.1"
+    assert utils.get_branch_of_tag("mytag") == "remotes/origin/r2.4.1"
 
-    assert utils._get_branch_of_tag("mytag") == "mytag"
+    assert utils.get_branch_of_tag("mytag") == "mytag"
+
+def test_get_container_tool_ver(mocker):
+    '''
+    Simple test to check get_container_tool_ver
+    '''
+    sample_output = "Client:\n Version: 1.2.3 \n Some Field: x.y.z\n"
+    mocker.patch('open_ce.utils.get_output', return_value=sample_output ) 
+
+    assert utils.get_container_tool_ver("container_tool") == "1.2.3"
 

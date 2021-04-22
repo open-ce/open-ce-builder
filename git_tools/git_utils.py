@@ -169,12 +169,17 @@ def request_pr_review(github_org, repo, token, pull_number, reviewers=None, team
 
 def clone_repo(git_url, repo_dir, git_tag=None):
     '''Clone a repo to the given location.'''
-    if git_tag is None:
-        clone_cmd = "git clone " + git_url + " " + repo_dir
-    else:
-        clone_cmd = "git clone -b " + git_tag + " --single-branch " + git_url + " " + repo_dir
-    if utils.run_and_log(clone_cmd) != 0:
-        raise Exception("Unable to clone repository: {}".format(git_url))
+    utils.git_clone(git_url, git_tag, repo_dir)
+
+def get_tag_branch(repo_path, git_tag):
+    """
+    Find the most recent branch that contains git_tag.
+    """
+    saved_working_directory = os.getcwd()
+    os.chdir(repo_path)
+    retval = utils.get_branch_of_tag(git_tag)
+    os.chdir(saved_working_directory)
+    return retval
 
 def _execute_git_command(repo_path, git_cmd):
     saved_working_directory = os.getcwd()

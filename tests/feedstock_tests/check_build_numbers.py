@@ -16,50 +16,15 @@
 # limitations under the License.
 # *****************************************************************
 
-import argparse
 import sys
 import os
 import pathlib
 
-import conda_build.api
-from conda_build.config import get_or_merge_config
-
 sys.path.append(os.path.join(pathlib.Path(__file__).parent.absolute(), '..'))
-import open_ce.build_feedstock as build_feedstock  # pylint: disable=wrong-import-position
 import open_ce.utils as utils # pylint: disable=wrong-import-position
 import open_ce.inputs as inputs # pylint: disable=wrong-import-position
 
-def make_parser():
-    ''' Parser for input arguments '''
-    arguments = [inputs.Argument.PYTHON_VERSIONS, inputs.Argument.BUILD_TYPES, inputs.Argument.MPI_TYPES,
-                 inputs.Argument.CUDA_VERSIONS, inputs.Argument.CONDA_BUILD_CONFIG]
-    parser = argparse.ArgumentParser(arguments)
-    for argument in arguments:
-        argument(parser)
-    return parser
-
-def _get_build_numbers(build_config_data, config, variant):
-    build_numbers = dict()
-    for recipe in build_config_data["recipes"]:
-        metas = conda_build.api.render(recipe['path'],
-                                    config=config,
-                                    variants=variant,
-                                    bypass_env_check=True,
-                                    finalize=False)
-        for meta,_,_ in metas:
-            build_numbers[meta.meta['package']['name']] = {"version" : meta.meta['package']['version'],
-                                                           "number" : meta.meta['build']['number']}
-    return build_numbers
-
-def _get_configs(variant, conda_build_config=utils.DEFAULT_CONDA_BUILD_CONFIG):
-    build_config_data, _ = build_feedstock.load_package_config(variants=variant)
-    config = get_or_merge_config(None)
-    config.variant_config_files = [conda_build_config]
-    config.verbose = False
-    recipe_conda_build_config = build_feedstock.get_conda_build_config()
-    if recipe_conda_build_config:
-        config.variant_config_files.append(recipe_conda_build_config)
-    return build_config_data, config
+from common import get_configs, make_parser, get_build_numbers
 
 def main(arg_strings=None):
     '''
@@ -76,12 +41,12 @@ def main(arg_strings=None):
     variant_build_results = dict()
     for variant in variants:
         utils.run_and_log("git checkout {}".format(default_branch))
-        main_build_config_data, main_config = _get_configs(variant, args.conda_build_config)
-        main_build_numbers = _get_build_numbers(main_build_config_data, main_config, variant)
+        main_build_config_data, main_config = get_configs(variant, args.conda_build_config)
+        main_build_numbers = get_build_numbers(main_build_config_data, main_config, variant)
 
         utils.run_and_log("git checkout {}".format(pr_branch))
-        pr_build_config_data, pr_config = _get_configs(variant, args.conda_build_config)
-        current_pr_build_numbers = _get_build_numbers(pr_build_config_data, pr_config, variant)
+        pr_build_config_data, pr_config = get_configs(variant, args.conda_build_config)
+        current_pr_build_numbers = get_build_numbers(pr_build_config_data, pr_config, variant)
 
         print("Build Info for Variant:   {}".format(variant))
         print("Current PR Build Info:    {}".format(current_pr_build_numbers))

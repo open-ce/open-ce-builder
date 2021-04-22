@@ -102,7 +102,7 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
     '''
     Build a feedstock from a build_command object.
     '''
-    utils.check_if_conda_build_exists()
+    utils.check_if_package_exists('conda-build')
 
     # pylint: disable=import-outside-toplevel
     import conda_build.api
