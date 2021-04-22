@@ -40,7 +40,11 @@ def test_build_image_positive_case(mocker):
     '''
     Simple test for build_runtime_image
     '''
-    intended_image_name = build_image.REPO_NAME + ":" + build_image.IMAGE_NAME + TEST_IMAGE_NAME_SUFFIX
+    open_ce_version = "open-ce-1.1.0"
+
+    mocker.patch('open_ce.utils.get_open_ce_version', return_value=open_ce_version)
+
+    intended_image_name = build_image.REPO_NAME + ":" + open_ce_version + TEST_IMAGE_NAME_SUFFIX
     container_tool = utils.DEFAULT_CONTAINER_TOOL
 
     mocker.patch(
@@ -77,7 +81,9 @@ def test_local_conda_channel_with_absolute_path(mocker):
     '''
     Test for build_runtime_image with local conda channel with its absolute path
     '''
-    intended_image_name = build_image.REPO_NAME + ":" + build_image.IMAGE_NAME + TEST_IMAGE_NAME_SUFFIX
+
+    open_ce_version = utils.get_open_ce_version(TEST_CONDA_ENV_FILE)
+    intended_image_name = build_image.REPO_NAME + ":" + open_ce_version + TEST_IMAGE_NAME_SUFFIX
     container_tool = utils.DEFAULT_CONTAINER_TOOL
     mocker.patch(
         'os.system',
@@ -108,7 +114,8 @@ def test_channel_update_in_conda_env(mocker):
     Test to see if channel is being updated in the conda env file before passing to build_runtime_image
     '''
 
-    intended_image_name = build_image.REPO_NAME + ":" + build_image.IMAGE_NAME + TEST_IMAGE_NAME_SUFFIX 
+    open_ce_version = utils.get_open_ce_version(TEST_CONDA_ENV_FILE)
+    intended_image_name = build_image.REPO_NAME + ":" + open_ce_version + TEST_IMAGE_NAME_SUFFIX 
     container_tool = utils.DEFAULT_CONTAINER_TOOL
     mocker.patch(
         'os.system',
@@ -150,8 +157,8 @@ def test_modified_file_removed(mocker):
     '''
     Make sure the copied conda env file was deleted afterwards
     '''
-
-    intended_image_name = build_image.REPO_NAME + ":" + build_image.IMAGE_NAME + TEST_IMAGE_NAME_SUFFIX
+    open_ce_version = utils.get_open_ce_version(TEST_CONDA_ENV_FILE)
+    intended_image_name = build_image.REPO_NAME + ":" + open_ce_version + TEST_IMAGE_NAME_SUFFIX
     container_tool = utils.DEFAULT_CONTAINER_TOOL
     mocker.patch(
         'os.system',
@@ -188,14 +195,14 @@ def test_build_image_name(mocker):
     '''
     Tests that runtime image gets its name based on the env file passed.
     '''
-    intended_image_name = build_image.REPO_NAME + ":" + build_image.IMAGE_NAME + TEST_IMAGE_NAME_SUFFIX 
+    intended_image_name = build_image.REPO_NAME + ":" + "open-ce-v1.2.0" + TEST_IMAGE_NAME_SUFFIX 
     container_tool = utils.DEFAULT_CONTAINER_TOOL
 
     mocker.patch('os.system', return_value=0)
     os.mkdir(os.path.join(TEST_LOCAL_CONDA_CHANNEL_DIR, build_image.TEMP_FILES))
     image_name = build_image.build_image(TEST_LOCAL_CONDA_CHANNEL_DIR,
                                          os.path.basename(TEST_CONDA_ENV_FILE),
-                                         container_tool)
+                                         container_tool, "open-ce-v1.2.0")
     assert image_name == intended_image_name
     build_image.cleanup(TEST_LOCAL_CONDA_CHANNEL_DIR)
 
@@ -226,7 +233,4 @@ def test_get_runtime_image_file(mocker):
     mocker.patch('open_ce.utils.get_container_tool_ver', return_value=None)
     path = build_image._get_runtime_image_file("podman")
     head_tail = os.path.split(path)
-    assert os.path.split(head_tail[0])[1] == "docker"
-
-
-    
+    assert os.path.split(head_tail[0])[1] == "docker"  

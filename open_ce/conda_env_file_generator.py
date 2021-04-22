@@ -64,7 +64,7 @@ class CondaEnvFileGenerator():
             dependencies = self._dependency_set,
         )
         if not git_tag_for_env:
-            # git_tag_for_env will be None in the case open-ce's main branch is used. 
+            # git_tag_for_env will be None in the case open-ce's main branch is used.
             # And, main branch means the latest code, hence open-ce version string should be `latest`.
             git_tag_for_env = "latest"
         with open(conda_env_file, 'w') as outfile:

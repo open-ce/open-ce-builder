@@ -332,3 +332,25 @@ def get_container_tool_ver(tool):
             break
 
     return version
+
+def get_open_ce_version(conda_env_file):
+    '''
+    Parses conda environment files to retrieve Open-CE version
+    '''
+    conda_file = None
+    version = "open-ce"
+    try:
+        with open(conda_env_file, 'r') as conda_file:
+            lines = conda_file.readlines()
+            for line in lines:
+                matched = re.match(r'(#'+OPEN_CE_VERSION_STRING+':(.*))', line)
+                if matched:
+                    version = matched.group(2)
+                    break
+
+    except IOError:
+        print("WARNING: IO error occurred while reading version information from conda environment file.")
+    finally:
+        if conda_file:
+            conda_file.close()
+    return version

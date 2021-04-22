@@ -19,7 +19,6 @@
 
 import os
 import shutil
-import re
 from open_ce import utils
 from open_ce import __version__ as open_ce_version
 from open_ce.inputs import Argument, parse_arg_list
@@ -37,7 +36,6 @@ RUNTIME_IMAGE_NAME = "opence-runtime"
 RUNTIME_IMAGE_PATH = os.path.join(OPEN_CE_PATH, "images",
                                   RUNTIME_IMAGE_NAME)
 REPO_NAME = "open-ce"
-IMAGE_NAME = "open-ce-" + open_ce_version
 TEMP_FILES = "temp_dir"
 
 OPENCE_USER = "opence"
@@ -52,7 +50,7 @@ def build_image(local_conda_channel, conda_env_file, container_tool, image_versi
     variant = os.path.splitext(conda_env_file)[0].replace(utils.CONDA_ENV_FILENAME_PREFIX, "", 1)
     variant = variant.replace("-runtime", "")
     image_name = REPO_NAME + ":" + image_version + "-" + variant
-
+    print("Image name: ", image_name)
     # Docker version on ppc64le rhel7 doesn't allow Dockerfiles to be out of build context.
     # Hence, copying it in temp_dir inside the build context. This isn't needed with newer
     # docker versions or podman but to be consistent, doing this in all cases.
@@ -75,27 +73,6 @@ def build_image(local_conda_channel, conda_env_file, container_tool, image_versi
         raise OpenCEError(Error.BUILD_IMAGE, image_name)
 
     return image_name
-
-def get_image_version(conda_env_file):
-    conda_file = None
-    version = "open-ce"
-    try:
-        with open(conda_env_file, 'r') as conda_file:
-            lines = conda_file.readlines()
-            for line in lines:
-                matched = re.match(r'(#'+utils.OPEN_CE_VERSION_STRING+':(.*))', line)
-                if matched:
-                    print("matched.group(2): ",  matched.group(2))
-                    version = matched.group(2)
-                    break
-
-    except IOError:
-        print("WARNING: IO error occurred while reading version information from conda environment file.")
-    finally:
-        if conda_file:
-            conda_file.close()
-        return version
-
 
 def _get_runtime_image_file(container_tool):
     tool_ver = utils.get_container_tool_ver(container_tool)
@@ -143,7 +120,8 @@ def build_runtime_container_image(args):
         create_copy(conda_env_file, conda_env_runtime_file)
         utils.replace_conda_env_channels(conda_env_runtime_file, r'file:.*', "file:/{}".format(TARGET_DIR))
 
-        image_version = get_image_version(conda_env_file) 
+        image_version = utils.get_open_ce_version(conda_env_file)
+        print("image version: ", image_version)
         image_name = build_image(args.local_conda_channel, os.path.basename(conda_env_runtime_file),
                                  args.container_tool, image_version, args.container_build_args)
         print("Docker image with name {} is built successfully.".format(image_name))
