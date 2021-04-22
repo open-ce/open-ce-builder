@@ -73,24 +73,6 @@ def test_not_existing_env_file():
         opence._main(arg_strings)
     assert Error.INCORRECT_INPUT_PATHS.value[1] in str(exc.value)
 
-def test_out_of_context_local_channel():
-    '''
-    Test for local conda channel not being in the build context
-    '''
-
-    # Local conda channel dir passed isn't within the build context
-    TEST_CONDA_CHANNEL_DIR = "../testcondabuild-pytest"
-
-    if not os.path.exists(os.path.abspath(TEST_CONDA_CHANNEL_DIR)):
-        os.mkdir(TEST_CONDA_CHANNEL_DIR)
-
-    arg_strings = ["build", build_image.COMMAND, "--local_conda_channel", TEST_CONDA_CHANNEL_DIR, "--conda_env_file", TEST_CONDA_ENV_FILE]
-    with pytest.raises(OpenCEError) as exc:
-        opence._main(arg_strings)
-    assert Error.LOCAL_CHANNEL_NOT_IN_CONTEXT.value[1] in str(exc.value)
-
-    os.rmdir(TEST_CONDA_CHANNEL_DIR)
-
 def test_local_conda_channel_with_absolute_path(mocker):
     '''
     Test for build_runtime_image with local conda channel with its absolute path
@@ -137,14 +119,18 @@ def test_channel_update_in_conda_env(mocker):
         'os.remove',
         return_value=0
     )
-
+    mocker.patch(
+        'shutil.rmtree',
+        return_value=1
+    )
     channel_index_before, _ = get_channel_being_modified(TEST_CONDA_ENV_FILE)
 
     arg_strings = ["build", build_image.COMMAND, "--local_conda_channel", TEST_LOCAL_CONDA_CHANNEL_DIR, "--conda_env_file", TEST_CONDA_ENV_FILE]
     opence._main(arg_strings)
 
     # We copy conda environment file to the passed local conda channel before updating it
-    channel_index_after, channel_modified = get_channel_being_modified(os.path.join(TEST_LOCAL_CONDA_CHANNEL_DIR, "test-conda-env-runtime.yaml"))
+    channel_index_after, channel_modified = get_channel_being_modified(os.path.join(TEST_LOCAL_CONDA_CHANNEL_DIR, build_image.TEMP_FILES, "test-conda-env-runtime.yaml"))
+
 
     assert channel_modified == "file:/{}".format(build_image.TARGET_DIR)
     assert channel_index_before == channel_index_after
@@ -176,7 +162,8 @@ def test_modified_file_removed(mocker):
     arg_strings = ["build", build_image.COMMAND, "--local_conda_channel", TEST_LOCAL_CONDA_CHANNEL_DIR, "--conda_env_file", TEST_CONDA_ENV_FILE]
     opence._main(arg_strings)
 
-    assert not os.path.exists(os.path.join(TEST_LOCAL_CONDA_CHANNEL_DIR,"test-conda-env-runtime.yaml"))
+    assert not os.path.exists(os.path.join(TEST_LOCAL_CONDA_CHANNEL_DIR,
+                                           build_image.TEMP_FILES, "test-conda-env-runtime.yaml"))
 
 def test_build_image_with_container_tool(mocker):
     '''
@@ -205,5 +192,41 @@ def test_build_image_name(mocker):
     container_tool = utils.DEFAULT_CONTAINER_TOOL
 
     mocker.patch('os.system', return_value=0)
-    image_name = build_image.build_image(TEST_LOCAL_CONDA_CHANNEL_DIR, os.path.basename(TEST_CONDA_ENV_FILE), container_tool)
+    os.mkdir(os.path.join(TEST_LOCAL_CONDA_CHANNEL_DIR, build_image.TEMP_FILES))
+    image_name = build_image.build_image(TEST_LOCAL_CONDA_CHANNEL_DIR,
+                                         os.path.basename(TEST_CONDA_ENV_FILE),
+                                         container_tool)
     assert image_name == intended_image_name
+    build_image.cleanup(TEST_LOCAL_CONDA_CHANNEL_DIR)
+
+def test_get_runtime_image_file(mocker):
+    '''
+    Tests that Dockerfile being used is correct as per tool used
+    '''
+    mocker.patch('open_ce.utils.get_container_tool_ver', return_value='1709')
+    path = build_image._get_runtime_image_file("docker")
+    head_tail = os.path.split(path)
+    assert os.path.split(head_tail[0])[1] == "podman"
+
+    mocker.patch('open_ce.utils.get_container_tool_ver', return_value='1131')
+    path = build_image._get_runtime_image_file("docker")
+    head_tail = os.path.split(path)
+    assert os.path.split(head_tail[0])[1] == "docker"
+
+    mocker.patch('open_ce.utils.get_container_tool_ver', return_value='165')
+    path = build_image._get_runtime_image_file("podman")
+    head_tail = os.path.split(path)
+    assert os.path.split(head_tail[0])[1] == "docker"
+
+    mocker.patch('open_ce.utils.get_container_tool_ver', return_value='205')
+    path = build_image._get_runtime_image_file("podman")
+    head_tail = os.path.split(path)
+    assert os.path.split(head_tail[0])[1] == "podman"
+
+    mocker.patch('open_ce.utils.get_container_tool_ver', return_value=None)
+    path = build_image._get_runtime_image_file("podman")
+    head_tail = os.path.split(path)
+    assert os.path.split(head_tail[0])[1] == "docker"
+
+
+    

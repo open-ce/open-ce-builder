@@ -135,3 +135,12 @@ def test_get_branch_of_tag(mocker):
 
     assert utils.get_branch_of_tag("mytag") == "mytag"
 
+def test_get_container_tool_ver(mocker):
+    '''
+    Simple test to check get_container_tool_ver
+    '''
+    sample_output = "Client:\n Version: 1.2.3 \n Some Field: x.y.z\n"
+    mocker.patch('open_ce.utils.get_output', return_value=sample_output ) 
+
+    assert utils.get_container_tool_ver("container_tool") == "1.2.3"
+
