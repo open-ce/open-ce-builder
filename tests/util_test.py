@@ -145,7 +145,7 @@ def test_get_container_tool_ver(mocker):
 
     assert utils.get_container_tool_ver("container_tool") == "1.2.3"
 
-def test_get_open_ce_version(mocker):
+def test_get_open_ce_version():
     '''
     Simple test to read open-ce version from the conda environment file
     '''
