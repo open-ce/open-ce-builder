@@ -38,7 +38,8 @@ class CondaEnvFileGenerator():
                              channels=None,
                              output_folder=None,
                              env_file_prefix=utils.CONDA_ENV_FILENAME_PREFIX,
-                             path=utils.DEFAULT_OUTPUT_FOLDER ):
+                             path=utils.DEFAULT_OUTPUT_FOLDER,
+                             git_tag_for_env=utils.DEFAULT_GIT_TAG):
         """
         This function writes conda environment files using the dependency dictionary
         created from all the buildcommands.
@@ -62,8 +63,13 @@ class CondaEnvFileGenerator():
             channels = channels,
             dependencies = self._dependency_set,
         )
+        if not git_tag_for_env:
+            # git_tag_for_env will be None in the case open-ce's main branch is used.
+            # And, main branch means the latest code, hence open-ce version string should be `latest`.
+            git_tag_for_env = "latest"
         with open(conda_env_file, 'w') as outfile:
             outfile.write("#" + utils.OPEN_CE_VARIANT + ":" + variant_string + "\n")
+            outfile.write("#" + utils.OPEN_CE_VERSION_STRING + ":" + git_tag_for_env + "\n" )
             open_ce.yaml_utils.dump(data, outfile, default_flow_style=False)
             file_name = conda_env_file
 

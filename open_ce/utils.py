@@ -52,6 +52,7 @@ OPEN_CE_INFO_FILE = "open-ce-info.yaml"
 CONTAINER_TOOLS = ["podman", "docker"]
 DEFAULT_CONTAINER_TOOL = next(filter(lambda tool: os.system("which {} &> /dev/null".format(tool))
                                       == 0, CONTAINER_TOOLS), None)
+OPEN_CE_VERSION_STRING = "Open-CE Version"
 
 def make_variants(python_versions=DEFAULT_PYTHON_VERS, build_types=DEFAULT_BUILD_TYPES, mpi_types=DEFAULT_MPI_TYPES,
 cuda_versions=DEFAULT_CUDA_VERS):
@@ -330,4 +331,26 @@ def get_container_tool_ver(tool):
             version = version.strip()
             break
 
+    return version
+
+def get_open_ce_version(conda_env_file):
+    '''
+    Parses conda environment files to retrieve Open-CE version
+    '''
+    conda_file = None
+    version = "open-ce"
+    try:
+        with open(conda_env_file, 'r') as conda_file:
+            lines = conda_file.readlines()
+            for line in lines:
+                matched = re.match(r'(#'+OPEN_CE_VERSION_STRING+':(.*))', line)
+                if matched:
+                    version = matched.group(2)
+                    break
+
+    except IOError:
+        print("WARNING: IO error occurred while reading version information from conda environment file.")
+    finally:
+        if conda_file:
+            conda_file.close()
     return version

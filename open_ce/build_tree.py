@@ -402,7 +402,8 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         conda_env_files = dict()
         for variant, conda_env_file in self._conda_env_files.items():
             conda_env_files[variant] = conda_env_file.write_conda_env_file(variant, self._channels,
-                                                                   output_folder, env_file_prefix, path)
+                                                                   output_folder, env_file_prefix,
+                                                                   path, self._git_tag_for_env)
 
         return conda_env_files
 

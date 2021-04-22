@@ -36,21 +36,20 @@ RUNTIME_IMAGE_NAME = "opence-runtime"
 RUNTIME_IMAGE_PATH = os.path.join(OPEN_CE_PATH, "images",
                                   RUNTIME_IMAGE_NAME)
 REPO_NAME = "open-ce"
-IMAGE_NAME = "open-ce-" + open_ce_version
 TEMP_FILES = "temp_dir"
 
 OPENCE_USER = "opence"
 LOCAL_CONDA_CHANNEL_IN_IMG = "opence-local-conda-channel"
 TARGET_DIR = "/home/{}/{}".format(OPENCE_USER, LOCAL_CONDA_CHANNEL_IN_IMG)
 
-def build_image(local_conda_channel, conda_env_file, container_tool, container_build_args=""):
+def build_image(local_conda_channel, conda_env_file, container_tool, image_version, container_build_args=""):
     """
     Build a container image from the Dockerfile in RUNTIME_IMAGE_PATH.
     Returns a result code and the name of the new image.
     """
     variant = os.path.splitext(conda_env_file)[0].replace(utils.CONDA_ENV_FILENAME_PREFIX, "", 1)
     variant = variant.replace("-runtime", "")
-
+    image_name = REPO_NAME + ":" + image_version + "-" + variant
     # Docker version on ppc64le rhel7 doesn't allow Dockerfiles to be out of build context.
     # Hence, copying it in temp_dir inside the build context. This isn't needed with newer
     # docker versions or podman but to be consistent, doing this in all cases.
@@ -58,7 +57,6 @@ def build_image(local_conda_channel, conda_env_file, container_tool, container_b
     runtime_img_file = _get_runtime_image_file(container_tool)
     create_copy(runtime_img_file, dockerfile_path)
 
-    image_name = REPO_NAME + ":" + IMAGE_NAME + "-" + variant
     build_cmd = container_tool + " build "
     build_cmd += "-f " + dockerfile_path + " "
     build_cmd += "-t " + image_name + " "
@@ -121,8 +119,9 @@ def build_runtime_container_image(args):
         create_copy(conda_env_file, conda_env_runtime_file)
         utils.replace_conda_env_channels(conda_env_runtime_file, r'file:.*', "file:/{}".format(TARGET_DIR))
 
+        image_version = utils.get_open_ce_version(conda_env_file)
         image_name = build_image(args.local_conda_channel, os.path.basename(conda_env_runtime_file),
-                                 args.container_tool, args.container_build_args)
+                                 args.container_tool, image_version, args.container_build_args)
         print("Docker image with name {} is built successfully.".format(image_name))
 
     cleanup(local_conda_channel)
