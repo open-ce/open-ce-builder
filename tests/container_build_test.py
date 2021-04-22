@@ -104,12 +104,16 @@ def test_execute_in_container(mocker):
     container = "my_container"
     command = "my_script.py arg1 arg2"
     container_tool = "docker"
+    user_option = ""
+    if container_build._use_root_user(container_tool):
+        user_option = "--user root "
 
     mocker.patch(
         'os.system',
         return_value=0,
-        side_effect=(lambda x: helpers.validate_cli(x, expect=[container_tool + " exec " + container,
-                                                               "my_script.py arg1 arg2"])))
+        side_effect=(lambda x: helpers.validate_cli(x, expect=[container_tool + 
+                                                       " exec {}".format(user_option) + container,
+                                                       "my_script.py arg1 arg2"])))
 
     container_build._execute_in_container(container, command, container_tool)
 

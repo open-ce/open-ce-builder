@@ -53,6 +53,7 @@ CONTAINER_TOOLS = ["podman", "docker"]
 DEFAULT_CONTAINER_TOOL = next(filter(lambda tool: os.system("which {} &> /dev/null".format(tool))
                                       == 0, CONTAINER_TOOLS), None)
 NUM_THREAD_POOL = 16
+OPEN_CE_VERSION_STRING = "Open-CE Version"
 
 def make_variants(python_versions=DEFAULT_PYTHON_VERS, build_types=DEFAULT_BUILD_TYPES, mpi_types=DEFAULT_MPI_TYPES,
 cuda_versions=DEFAULT_CUDA_VERS):
@@ -316,3 +317,41 @@ def git_clone(git_url, git_tag, location, up_to_date=False):
         raise OpenCEError(Error.CLONE_REPO, git_url)
 
     return clone_successful
+
+def get_container_tool_ver(tool):
+    '''
+    Returns the version of the tool
+    '''
+    cmd = tool + " version"
+    output = get_output(cmd)
+    version = None
+    for line in output.split("\n"):
+        matched = re.match(r'(\s*Version:\s* (.*))', line)
+        if matched:
+            version = matched.group(2)
+            version = version.strip()
+            break
+
+    return version
+
+def get_open_ce_version(conda_env_file):
+    '''
+    Parses conda environment files to retrieve Open-CE version
+    '''
+    conda_file = None
+    version = "open-ce"
+    try:
+        with open(conda_env_file, 'r') as conda_file:
+            lines = conda_file.readlines()
+            for line in lines:
+                matched = re.match(r'(#'+OPEN_CE_VERSION_STRING+':(.*))', line)
+                if matched:
+                    version = matched.group(2)
+                    break
+
+    except IOError:
+        print("WARNING: IO error occurred while reading version information from conda environment file.")
+    finally:
+        if conda_file:
+            conda_file.close()
+    return version
