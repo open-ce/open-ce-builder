@@ -218,13 +218,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
             validate_config.validate_build_tree(self._tree, external_deps, variant_start_nodes)
             installable_packages = get_installable_packages(self._tree, external_deps, variant_start_nodes)
 
-            filtered_packages = [package for package in installable_packages
-                                     if utils.remove_version(package) in {x for node in variant_start_nodes
-                                                                                     if node.build_command
-                                                                            for x in node.build_command.packages} or
-                                        utils.remove_version(package) in utils.KNOWN_VARIANT_PACKAGES]
-
-            self._conda_env_files[variant_string] = CondaEnvFileGenerator(filtered_packages)
+            self._conda_env_files[variant_string] = CondaEnvFileGenerator(installable_packages)
             self._test_feedstocks[variant_string] = []
             for build_command in traverse_build_commands(self._tree, variant_start_nodes):
                 self._test_feedstocks[variant_string].append(build_command.repository)
@@ -561,6 +555,6 @@ def get_installable_packages(build_commands, external_deps, starting_nodes=None,
                                                     retval)
 
     for dep in external_deps:
-        if is_independent(DependencyNode({dep}), build_commands):
+        if not independent or is_independent(DependencyNode({dep}), build_commands):
             retval = check_and_add({dep}, retval)
     return sorted(retval, key=len)
