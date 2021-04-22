@@ -216,9 +216,8 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
             self._initial_nodes += variant_start_nodes
 
             validate_config.validate_build_tree(self._tree, external_deps, variant_start_nodes)
-            installable_packages = get_installable_packages(self._tree, external_deps, variant_start_nodes)
 
-            self._conda_env_files[variant_string] = CondaEnvFileGenerator(installable_packages)
+            self._conda_env_files[variant_string] = get_conda_file_packages(self._tree, external_deps, variant_start_nodes)
             self._test_feedstocks[variant_string] = []
             for build_command in traverse_build_commands(self._tree, variant_start_nodes):
                 self._test_feedstocks[variant_string].append(build_command.repository)
@@ -558,3 +557,9 @@ def get_installable_packages(build_commands, external_deps, starting_nodes=None,
         if not independent or is_independent(DependencyNode({dep}), build_commands):
             retval = check_and_add({dep}, retval)
     return sorted(retval, key=len)
+
+def get_conda_file_packages(build_commands, external_deps, starting_nodes=None):
+    '''
+    This function makes the conda env file generator for the installable packages.
+    '''
+    return CondaEnvFileGenerator(get_installable_packages(build_commands, external_deps, starting_nodes))
