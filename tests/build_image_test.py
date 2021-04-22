@@ -206,23 +206,27 @@ def test_get_runtime_image_file(mocker):
     mocker.patch('open_ce.utils.get_container_tool_ver', return_value='1709')
     path = build_image._get_runtime_image_file("docker")
     head_tail = os.path.split(path)
-    os.path.split(head_tail[0])[1] == "podman"
+    assert os.path.split(head_tail[0])[1] == "podman"
 
     mocker.patch('open_ce.utils.get_container_tool_ver', return_value='1131')
     path = build_image._get_runtime_image_file("docker")
     head_tail = os.path.split(path)
-    os.path.split(head_tail[0])[1] == "docker"
+    assert os.path.split(head_tail[0])[1] == "docker"
 
     mocker.patch('open_ce.utils.get_container_tool_ver', return_value='165')
     path = build_image._get_runtime_image_file("podman")
     head_tail = os.path.split(path)
-    os.path.split(head_tail[0])[1] == "docker"
+    assert os.path.split(head_tail[0])[1] == "docker"
 
     mocker.patch('open_ce.utils.get_container_tool_ver', return_value='205')
     path = build_image._get_runtime_image_file("podman")
     head_tail = os.path.split(path)
-    os.path.split(head_tail[0])[1] == "podman"
+    assert os.path.split(head_tail[0])[1] == "podman"
 
+    mocker.patch('open_ce.utils.get_container_tool_ver', return_value=None)
+    path = build_image._get_runtime_image_file("podman")
+    head_tail = os.path.split(path)
+    assert os.path.split(head_tail[0])[1] == "docker"
 
 
     
