@@ -1,4 +1,5 @@
 #open-ce-variant:py3.6-cuda-openmpi-10.2
+#Open-CE Version:open-ce-v1.0.0
 channels:
 - defaults
 dependencies:

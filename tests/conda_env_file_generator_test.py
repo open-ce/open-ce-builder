@@ -25,6 +25,8 @@ import open_ce.build_tree as build_tree
 import open_ce.conda_env_file_generator as conda_env_file_generator
 import open_ce.utils as utils
 
+external_deps = ["external_pac1    1.2", "external_pack2", "external_pack3=1.2.3"]
+
 def sample_build_commands() :
     retval = networkx.DiGraph()
     node1 = build_tree.DependencyNode(packages=["package1a", "package1b"], build_command=build_tree.BuildCommand("recipe1",
@@ -66,33 +68,30 @@ def sample_build_commands() :
     retval.add_node(node3)
     retval.add_node(node4)
 
-    return retval
+    for dep in external_deps:
+        retval.add_node(build_tree.DependencyNode({dep}))
 
-external_deps = ["external_pac1    1.2", "external_pack2", "external_pack3=1.2.3"]
+    return retval
 
 def test_conda_env_file_content():
     '''
     Tests that the conda env file content are being populated correctly
     '''
-    packages = build_tree.get_installable_packages(sample_build_commands(), external_deps, starting_nodes=[list(sample_build_commands().nodes)[0]])
-    mock_conda_env_file_generator = conda_env_file_generator.CondaEnvFileGenerator(packages)
+    mock_conda_env_file_generator = build_tree.get_conda_file_packages(sample_build_commands(), external_deps, starting_nodes=[list(sample_build_commands().nodes)[0]])
     expected_deps = set(["python >=3.6", "pack1 1.0.*", "pack2 >=2.0", "package1a", "package1b",
                          "pack3 9b", "external_pac1 1.2.*", "external_pack2", "external_pack3=1.2.3"])
     assert Counter(expected_deps) == Counter(mock_conda_env_file_generator._dependency_set)
 
-    packages = build_tree.get_installable_packages(sample_build_commands(), [], starting_nodes=[list(sample_build_commands().nodes)[1]])
-    mock_conda_env_file_generator = conda_env_file_generator.CondaEnvFileGenerator(packages)
+    mock_conda_env_file_generator = build_tree.get_conda_file_packages(sample_build_commands(), [], starting_nodes=[list(sample_build_commands().nodes)[1]])
     expected_deps = set(["python ==3.6.*", "pack1 >=1.0", "pack2 ==2.0.*", "package2a", "pack3 3.3.* build"])
     assert Counter(expected_deps) == Counter(mock_conda_env_file_generator._dependency_set)
 
-    packages = build_tree.get_installable_packages(sample_build_commands(), external_deps, starting_nodes=[list(sample_build_commands().nodes)[2]])
-    mock_conda_env_file_generator = conda_env_file_generator.CondaEnvFileGenerator(packages)
+    mock_conda_env_file_generator = build_tree.get_conda_file_packages(sample_build_commands(), external_deps, starting_nodes=[list(sample_build_commands().nodes)[2]])
     expected_deps = set(["python 3.7.*", "pack1==1.0.*", "pack2 <=2.0", "pack3 3.0.*", "package3a", "package3b",
                      "pack4=1.15.0=py38h6ffa863_0", "external_pac1 1.2.*", "external_pack2", "external_pack3=1.2.3"])
     assert Counter(expected_deps) == Counter(mock_conda_env_file_generator._dependency_set)
 
-    packages = build_tree.get_installable_packages(sample_build_commands(), [], starting_nodes=[list(sample_build_commands().nodes)[3]])
-    mock_conda_env_file_generator = conda_env_file_generator.CondaEnvFileGenerator(packages)
+    mock_conda_env_file_generator = build_tree.get_conda_file_packages(sample_build_commands(), [], starting_nodes=[list(sample_build_commands().nodes)[3]])
     expected_deps = set(["pack1==1.0.*", "pack2 <=2.0", "pack3-suffix 3.0.*", "package4a", "package4b"])
     assert Counter(expected_deps) == Counter(mock_conda_env_file_generator._dependency_set)
 

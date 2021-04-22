@@ -17,6 +17,8 @@
 """
 
 import os
+import multiprocessing as mp
+
 import networkx
 from open_ce import utils
 from open_ce import env_config
@@ -32,9 +34,14 @@ class DependencyNode():
     """
     def __init__(self,
                  packages=None,
-                 build_command=None):
+                 build_command=None,
+                 channels=None):
         self.packages = packages
         self.build_command = build_command
+        self.channels = channels
+        if not self.channels:
+            self.channels = []
+        self._hash_val = hash(str(self.packages) + str(self.build_command))
 
     def __repr__(self):
         return str(self)
@@ -43,7 +50,7 @@ class DependencyNode():
         return "({} : {})".format(self.packages, self.build_command)
 
     def __hash__(self):
-        return hash(self.__repr__())
+        return self._hash_val
 
     def __eq__(self, other):
         if not isinstance(other, DependencyNode):
@@ -73,6 +80,12 @@ def traverse_build_commands(build_tree, starting_nodes=None, return_node=False):
                 else:
                     yield current.build_command
 
+def is_independent(node, tree):
+    """
+    Returns true if the node does not depend on any internal build commands.
+    """
+    return not {x for x in networkx.descendants(tree, node) if x.build_command is not None}
+
 def get_independent_runtime_deps(tree, node):
     """
     This function gets all run dependencies of a node that don't depend on
@@ -85,7 +98,7 @@ def get_independent_runtime_deps(tree, node):
         for run_dep in run_deps:
             run_dep_node = next(x for x in tree.successors(node)
                                     if utils.remove_version(run_dep) in map(utils.remove_version, x.packages))
-            if not {x for x in networkx.descendants(tree, run_dep_node) if x.build_command is not None}:
+            if is_independent(run_dep_node, tree):
                 deps.add(run_dep)
     return deps
 
@@ -178,6 +191,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         # of variants.
         self._possible_variants = utils.make_variants(python_versions, build_types, mpi_types, cuda_versions)
         self._tree = networkx.DiGraph()
+        validate_args = []
         for variant in self._possible_variants:
             try:
                 variant_tree, external_deps = self._create_nodes(variant)
@@ -205,18 +219,17 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
 
             self._initial_nodes += variant_start_nodes
 
-            validate_config.validate_build_tree(self._tree, external_deps, variant_start_nodes)
-            installable_packages = get_installable_packages(self._tree, external_deps, variant_start_nodes)
+            validate_args.append((self._tree, external_deps, variant_start_nodes))
 
-            filtered_packages = [package for package in installable_packages
-                                     if utils.remove_version(package) in {x for node in variant_start_nodes
-                                                                            for x in node.build_command.packages} or
-                                        utils.remove_version(package) in utils.KNOWN_VARIANT_PACKAGES]
-
-            self._conda_env_files[variant_string] = CondaEnvFileGenerator(filtered_packages)
+            self._conda_env_files[variant_string] = get_conda_file_packages(self._tree, external_deps, variant_start_nodes)
             self._test_feedstocks[variant_string] = []
             for build_command in traverse_build_commands(self._tree, variant_start_nodes):
                 self._test_feedstocks[variant_string].append(build_command.repository)
+
+        # Execute _create_commands_helper in parallel
+        pool = mp.Pool(utils.NUM_THREAD_POOL)
+        pool.starmap(validate_config.validate_build_tree, validate_args)
+        pool.close()
 
     def _get_repo(self, env_config_data, package):
         # If the feedstock value starts with any of the SUPPORTED_GIT_PROTOCOLS, treat it as a url. Otherwise
@@ -252,6 +265,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         feedstocks_seen = set()
         external_deps = []
         retval = networkx.DiGraph()
+        create_commands_args = []
         # Create recipe dictionaries for each repository in the environment file
         for env_config_data in env_config_data_list:
             channels = self._channels + env_config_data.get(env_config.Key.channels.name, [])
@@ -262,23 +276,42 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
                 if _make_hash(feedstock) in feedstocks_seen:
                     continue
 
-                repo_dir = self._get_repo(env_config_data, feedstock)
-                runtime_package = feedstock.get(env_config.Key.runtime_package.name, True)
-                retval = networkx.compose(retval,
-                                          _create_commands(repo_dir,
-                                                            runtime_package,
-                                                            feedstock.get(env_config.Key.recipe_path.name),
-                                                            feedstock.get(env_config.Key.recipes.name),
-                                                            [os.path.abspath(self._conda_build_config)],
-                                                            variants,
-                                                            channels))
-
+                # Create arguments for call to _create_commands_helper
+                create_commands_args.append((variants, env_config_data, feedstock))
                 feedstocks_seen.add(_make_hash(feedstock))
 
             current_deps = env_config_data.get(env_config.Key.external_dependencies.name, [])
+            for dep in current_deps:
+                #Add external dependencies as top level nodes in the graph.
+                new_dep = DependencyNode({dep}, channels=channels)
+                retval.add_node(new_dep)
+
             if current_deps:
                 external_deps += current_deps
+
+        # Execute _create_commands_helper in parallel
+        pool = mp.Pool(utils.NUM_THREAD_POOL)
+        commands = pool.starmap(self._create_commands_helper, create_commands_args)
+        pool.close()
+
+        # Add the results of _create_commands_helper to the graph
+        for command in commands:
+            retval = networkx.compose(retval, command)
+
         return retval, external_deps
+
+    def _create_commands_helper(self, variants, env_config_data, feedstock):
+        channels = self._channels + env_config_data.get(env_config.Key.channels.name, [])
+        repo_dir = self._get_repo(env_config_data, feedstock)
+        runtime_package = feedstock.get(env_config.Key.runtime_package.name, True)
+        retval = _create_commands(repo_dir,
+                                  runtime_package,
+                                  feedstock.get(env_config.Key.recipe_path.name),
+                                  feedstock.get(env_config.Key.recipes.name),
+                                  [os.path.abspath(self._conda_build_config)],
+                                  variants,
+                                  channels)
+        return retval
 
     def _create_remote_deps(self, dep_graph):
         #pylint: disable=import-outside-toplevel
@@ -293,7 +326,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
                     if package_name in seen:
                         continue
                     seen.add(package_name)
-                    package_info = conda_utils.get_latest_package_info(self._channels, package)
+                    package_info = conda_utils.get_latest_package_info(self._channels + node.channels, package)
                     dep_graph.add_node(DependencyNode({package}))
                     for dep in package_info['dependencies']:
                         dep_name = utils.remove_version(dep)
@@ -386,7 +419,8 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         conda_env_files = dict()
         for variant, conda_env_file in self._conda_env_files.items():
             conda_env_files[variant] = conda_env_file.write_conda_env_file(variant, self._channels,
-                                                                   output_folder, env_file_prefix, path)
+                                                                   output_folder, env_file_prefix,
+                                                                   path, self._git_tag_for_env)
 
         return conda_env_files
 
@@ -543,5 +577,13 @@ def get_installable_packages(build_commands, external_deps, starting_nodes=None,
                                                         for i, package in enumerate(build_command.packages)],
                                                     retval)
 
-    retval = check_and_add(external_deps, retval)
+    for dep in external_deps:
+        if not independent or is_independent(DependencyNode({dep}), build_commands):
+            retval = check_and_add({dep}, retval)
     return sorted(retval, key=len)
+
+def get_conda_file_packages(build_commands, external_deps, starting_nodes=None):
+    '''
+    This function makes the conda env file generator for the installable packages.
+    '''
+    return CondaEnvFileGenerator(get_installable_packages(build_commands, external_deps, starting_nodes))

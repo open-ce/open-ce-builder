@@ -17,6 +17,7 @@
 import pathlib
 import errno
 import pytest
+import os
 
 test_dir = pathlib.Path(__file__).parent.absolute()
 
@@ -134,4 +135,26 @@ def test_get_branch_of_tag(mocker):
     assert utils.get_branch_of_tag("mytag") == "remotes/origin/r2.4.1"
 
     assert utils.get_branch_of_tag("mytag") == "mytag"
+
+def test_get_container_tool_ver(mocker):
+    '''
+    Simple test to check get_container_tool_ver
+    '''
+    sample_output = "Client:\n Version: 1.2.3 \n Some Field: x.y.z\n"
+    mocker.patch('open_ce.utils.get_output', return_value=sample_output ) 
+
+    assert utils.get_container_tool_ver("container_tool") == "1.2.3"
+
+def test_get_open_ce_version():
+    '''
+    Simple test to read open-ce version from the conda environment file
+    '''
+    
+    expected_version = "open-ce-v1.0.0"
+    
+    test_conda_env_file = os.path.join(test_dir,"test-conda-env2.yaml")
+    assert utils.get_open_ce_version(test_conda_env_file) == expected_version
+
+    test_conda_env_file = os.path.join(test_dir,"test-conda-env.yaml")
+    assert utils.get_open_ce_version(test_conda_env_file) == "open-ce"
 
