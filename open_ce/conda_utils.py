@@ -21,14 +21,13 @@ from logging import ERROR, getLogger
 from datetime import datetime
 import functools
 
-import yaml
-
 # Disabling pylint warning "cyclic-import" locally here doesn't work. So, added it in .pylintrc
 # according to https://github.com/PyCQA/pylint/issues/59
-from open_ce.utils import validate_dict_schema, check_if_conda_build_exists, generalize_version # pylint: disable=cyclic-import
+from open_ce.utils import validate_dict_schema, check_if_package_exists, generalize_version # pylint: disable=cyclic-import
 from open_ce.errors import OpenCEError, Error
+import open_ce.yaml_utils
 
-check_if_conda_build_exists()
+check_if_package_exists('conda-build')
 
 # pylint: disable=wrong-import-position,wrong-import-order
 import conda_build.api
@@ -101,7 +100,7 @@ def conda_package_info(channels, package):
     for entry in std_out.split("\n\n"):
         _, file_name, rest = entry.partition("file name")
         if file_name:
-            entry = yaml.safe_load(file_name + rest)
+            entry = open_ce.yaml_utils.load(file_name + rest)
             # Convert time string into a timestamp (if there is a timestamp)
             if "timestamp" in entry:
                 entry["timestamp"] = datetime.timestamp(datetime.strptime(entry["timestamp"], '%Y-%m-%d %H:%M:%S %Z'))

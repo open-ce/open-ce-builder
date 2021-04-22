@@ -46,7 +46,7 @@ class CondaEnvFileGenerator():
         It returns the path to the file that was written.
         """
         #pylint: disable=import-outside-toplevel
-        import yaml
+        import open_ce.yaml_utils
 
         if not os.path.exists(path):
             os.mkdir(path)
@@ -64,7 +64,7 @@ class CondaEnvFileGenerator():
         )
         with open(conda_env_file, 'w') as outfile:
             outfile.write("#" + utils.OPEN_CE_VARIANT + ":" + variant_string + "\n")
-            yaml.dump(data, outfile, default_flow_style=False)
+            open_ce.yaml_utils.dump(data, outfile, default_flow_style=False)
             file_name = conda_env_file
 
         return file_name

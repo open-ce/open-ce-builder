@@ -528,6 +528,8 @@ def test_get_installable_package_for_non_runtime_package():
     build_commands.add_edge(node1, node2)
 
     external_deps = ["external_pac1    1.2", "external_pack2", "external_pack3=1.2.3"]
+    for dep in external_deps:
+        build_commands.add_node(build_tree.DependencyNode({dep}))
     packages = build_tree.get_installable_packages(build_commands, external_deps)
     assert not "package1a" in packages
 
@@ -557,6 +559,8 @@ def test_get_installable_package_with_no_duplicates():
     build_commands.add_node(node3)
 
     external_deps = ["external_pac1    1.2"]
+    for dep in external_deps:
+        build_commands.add_node(build_tree.DependencyNode({dep}))
     packages = build_tree.get_installable_packages(build_commands, external_deps)
     assert not "package1a" in packages
     assert not "pack1a" in packages
