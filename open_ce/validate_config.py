@@ -62,23 +62,19 @@ def validate_build_tree(tree, external_deps, start_nodes=None):
     '''
     Check a build tree for dependency compatability.
     '''
-    try:
-        packages = [package for recipe in build_tree.traverse_build_commands(tree, start_nodes)
-                                for package in recipe.packages]
-        channels = {channel for recipe in build_tree.traverse_build_commands(tree, start_nodes)
-                                for channel in recipe.channels}
-        env_channels = {channel for node in tree.nodes() for channel in node.channels}
-        deps = build_tree.get_installable_packages(tree, external_deps, start_nodes, True)
+    packages = [package for recipe in build_tree.traverse_build_commands(tree, start_nodes)
+                            for package in recipe.packages]
+    channels = {channel for recipe in build_tree.traverse_build_commands(tree, start_nodes) for channel in recipe.channels}
+    env_channels = {channel for node in tree.nodes() for channel in node.channels}
+    deps = build_tree.get_installable_packages(tree, external_deps, start_nodes, True)
 
-        pkg_args = " ".join(["\"{}\"".format(utils.generalize_version(dep)) for dep in deps
+    pkg_args = " ".join(["\"{}\"".format(utils.generalize_version(dep)) for dep in deps
                                                                     if not utils.remove_version(dep) in packages])
-        channel_args = " ".join({"-c \"{}\"".format(channel) for channel in channels.union(env_channels)})
+    channel_args = " ".join({"-c \"{}\"".format(channel) for channel in channels.union(env_channels)})
 
-        cli = "conda create --dry-run -n test_conda_dependencies {} {}".format(channel_args, pkg_args)
-        ret_code, std_out, std_err = utils.run_command_capture(cli)
-        if not ret_code:
-            raise OpenCEError(Error.VALIDATE_BUILD_TREE, cli, std_out, std_err)
-    except SystemExit as err:
-        raise OpenCEError(Error.ERROR, str(err)) from err
+    cli = "conda create --dry-run -n test_conda_dependencies {} {}".format(channel_args, pkg_args)
+    ret_code, std_out, std_err = utils.run_command_capture(cli)
+    if not ret_code:
+        raise OpenCEError(Error.VALIDATE_BUILD_TREE, cli, std_out, std_err)
 
 ENTRY_FUNCTION = validate_config

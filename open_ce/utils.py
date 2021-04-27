@@ -24,6 +24,7 @@ from itertools import product
 import re
 import urllib.request
 import tempfile
+import multiprocessing as mp
 import pkg_resources
 from open_ce.errors import OpenCEError, Error
 from open_ce import inputs
@@ -355,3 +356,19 @@ def get_open_ce_version(conda_env_file):
         if conda_file:
             conda_file.close()
     return version
+
+def _run_helper(func, *args, **kwargs):
+    try:
+        return func(*args, **kwargs)
+    except SystemExit as err:
+        raise OpenCEError(Error.ERROR, str(err)) from err
+
+def run_in_parallel(function, arguments):
+    '''
+    Run function in parallel across all arguments.
+    '''
+    new_args = [tuple([function]) + x for x in arguments]
+    pool = mp.Pool(NUM_THREAD_POOL)
+    retval = pool.starmap(_run_helper, new_args)
+    pool.close()
+    return retval
