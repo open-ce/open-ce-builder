@@ -226,7 +226,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
             for build_command in traverse_build_commands(self._tree, variant_start_nodes):
                 self._test_feedstocks[variant_string].append(build_command.repository)
 
-        # Execute _create_commands_helper in parallel
+        # Execute validate_build_tree in parallel
         pool = mp.Pool(utils.NUM_THREAD_POOL)
         pool.starmap(validate_config.validate_build_tree, validate_args)
         pool.close()
@@ -301,16 +301,20 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         return retval, external_deps
 
     def _create_commands_helper(self, variants, env_config_data, feedstock):
-        channels = self._channels + env_config_data.get(env_config.Key.channels.name, [])
-        repo_dir = self._get_repo(env_config_data, feedstock)
-        runtime_package = feedstock.get(env_config.Key.runtime_package.name, True)
-        retval = _create_commands(repo_dir,
-                                  runtime_package,
-                                  feedstock.get(env_config.Key.recipe_path.name),
-                                  feedstock.get(env_config.Key.recipes.name),
-                                  [os.path.abspath(self._conda_build_config)],
-                                  variants,
-                                  channels)
+        try:
+            channels = self._channels + env_config_data.get(env_config.Key.channels.name, [])
+            repo_dir = self._get_repo(env_config_data, feedstock)
+            runtime_package = feedstock.get(env_config.Key.runtime_package.name, True)
+            retval = _create_commands(repo_dir,
+                                      runtime_package,
+                                      feedstock.get(env_config.Key.recipe_path.name),
+                                      feedstock.get(env_config.Key.recipes.name),
+                                      [os.path.abspath(self._conda_build_config)],
+                                      variants,
+                                      channels)
+        except SystemExit as err:
+            raise OpenCEError(Error.ERROR, str(err)) from err
+
         return retval
 
     def _create_remote_deps(self, dep_graph):
