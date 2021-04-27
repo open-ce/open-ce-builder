@@ -30,7 +30,8 @@ DESCRIPTION = 'Perform validation on a conda_build_config.yaml file.'
 
 ARGUMENTS = [Argument.CONDA_BUILD_CONFIG, Argument.ENV_FILE,
              Argument.REPOSITORY_FOLDER, Argument.PYTHON_VERSIONS,
-             Argument.BUILD_TYPES, Argument.MPI_TYPES, Argument.CUDA_VERSIONS]
+             Argument.BUILD_TYPES, Argument.MPI_TYPES, Argument.CUDA_VERSIONS,
+             Argument.GIT_LOCATION]
 
 def validate_config(args):
     '''Entry Function'''
