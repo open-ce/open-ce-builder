@@ -17,7 +17,6 @@
 """
 
 import os
-import multiprocessing as mp
 
 import networkx
 from open_ce import utils
@@ -226,10 +225,8 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
             for build_command in traverse_build_commands(self._tree, variant_start_nodes):
                 self._test_feedstocks[variant_string].append(build_command.repository)
 
-        # Execute _create_commands_helper in parallel
-        pool = mp.Pool(utils.NUM_THREAD_POOL)
-        pool.starmap(validate_config.validate_build_tree, validate_args)
-        pool.close()
+        # Execute validate_build_tree in parallel
+        utils.run_in_parallel(validate_config.validate_build_tree, validate_args)
 
     def _get_repo(self, env_config_data, package):
         # If the feedstock value starts with any of the SUPPORTED_GIT_PROTOCOLS, treat it as a url. Otherwise
@@ -290,9 +287,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
                 external_deps += current_deps
 
         # Execute _create_commands_helper in parallel
-        pool = mp.Pool(utils.NUM_THREAD_POOL)
-        commands = pool.starmap(self._create_commands_helper, create_commands_args)
-        pool.close()
+        commands = utils.run_in_parallel(self._create_commands_helper, create_commands_args)
 
         # Add the results of _create_commands_helper to the graph
         for command in commands:

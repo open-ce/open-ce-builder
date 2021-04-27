@@ -440,6 +440,17 @@ def test_build_env_if_no_conda_build(mocker):
     with pytest.raises(OpenCEError):
         opence._main(arg_strings)
 
+def test_system_exit(mocker):
+    '''
+    Test that SystemExit exceptions are handled properly from within pool.
+    '''
+    mocker.patch("open_ce.build_tree.BuildTree._get_repo", side_effect=SystemExit(1))
+
+    arg_strings = ["build", build_env.COMMAND, "tests/test-env1.yaml"]
+    with pytest.raises(OpenCEError) as exc:
+        opence._main(arg_strings)
+    assert "Unexpected Error: 1" in str(exc.value)
+
 def test_run_tests(mocker):
     '''
     Test that the _run_tests function works properly.
