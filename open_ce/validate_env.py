@@ -28,7 +28,8 @@ COMMAND = 'env'
 DESCRIPTION = 'Lint Environment Files'
 
 ARGUMENTS = [Argument.ENV_FILE, Argument.PYTHON_VERSIONS,
-             Argument.BUILD_TYPES, Argument.MPI_TYPES, Argument.CUDA_VERSIONS]
+             Argument.BUILD_TYPES, Argument.MPI_TYPES, Argument.CUDA_VERSIONS,
+             Argument.GIT_LOCATION]
 
 def validate_env(args):
     '''Entry Function'''
