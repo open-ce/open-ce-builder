@@ -26,7 +26,7 @@ import urllib.request
 import tempfile
 import multiprocessing as mp
 import pkg_resources
-from open_ce.errors import OpenCEError, Error
+from open_ce.errors import OpenCEError, Error, show_warning
 from open_ce import inputs
 
 
@@ -351,7 +351,7 @@ def get_open_ce_version(conda_env_file):
                     break
 
     except IOError:
-        print("WARNING: IO error occurred while reading version information from conda environment file.")
+        show_warning(Error.CONDA_IO_ERROR, conda_env_file)
     finally:
         if conda_file:
             conda_file.close()

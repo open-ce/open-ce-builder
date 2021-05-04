@@ -20,7 +20,8 @@ import os
 from enum import Enum, unique, auto
 
 from open_ce import utils
-from open_ce.errors import OpenCEError, Error
+from open_ce.errors import OpenCEError, Error, show_warning
+from open_ce import __version__ as open_ce_version
 
 @unique
 class Key(Enum):
@@ -71,9 +72,12 @@ def _validate_config_file(env_file, variants):
         version_check_obj = conda_utils.render_yaml(env_file, permit_undefined_jinja=True)
         if Key.builder_version.name in version_check_obj.keys():
             if not conda_utils.version_matches_spec(version_check_obj.get(Key.builder_version.name)):
-                raise OpenCEError(Error.ERROR, "Version mismatch.")
+                raise OpenCEError(Error.SCHEMA_VERSION_MISMATCH,
+                                  env_file,
+                                  version_check_obj.get(Key.builder_version.name),
+                                  open_ce_version)
         else:
-            print("WARNING: '{}' does not provide '{}'. Possible schema mismatch.".format(env_file, Key.builder_version.name))
+            show_warning(Error.SCHEMA_VERSION_NOT_FOUND, env_file, Key.builder_version.name)
 
         meta_obj = conda_utils.render_yaml(env_file, variants=variants, schema=_ENV_CONFIG_SCHEMA)
         if not (Key.packages.name in meta_obj.keys() or Key.imported_envs.name in meta_obj.keys()):
