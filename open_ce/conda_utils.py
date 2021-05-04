@@ -142,7 +142,6 @@ def version_matches_spec(spec_string, version=open_ce_version):
     version_matches_spec(">=1.2,<1.3", "1.2.1") -> True
     version_matches_spec(">=1.2,<1.3", "1.3.0") -> False
     '''
-    print(version)
     match_spec = MatchSpec("test[version='{}']".format(spec_string))
     query_pkg = {"name": "test", "version": version, "build": "", "build_number": 0}
     return match_spec.match(query_pkg)

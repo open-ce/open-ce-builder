@@ -76,13 +76,17 @@ def _validate_config_file(env_file, variants):
                                   env_file,
                                   version_check_obj.get(Key.builder_version.name),
                                   open_ce_version)
-        else:
-            show_warning(Error.SCHEMA_VERSION_NOT_FOUND, env_file, Key.builder_version.name)
 
-        meta_obj = conda_utils.render_yaml(env_file, variants=variants, schema=_ENV_CONFIG_SCHEMA)
-        if not (Key.packages.name in meta_obj.keys() or Key.imported_envs.name in meta_obj.keys()):
-            raise OpenCEError(Error.CONFIG_CONTENT)
-        meta_obj[Key.opence_env_file_path.name] = env_file
+        meta_obj = None
+        try:
+            meta_obj = conda_utils.render_yaml(env_file, variants=variants, schema=_ENV_CONFIG_SCHEMA)
+            if not (Key.packages.name in meta_obj.keys() or Key.imported_envs.name in meta_obj.keys()):
+                raise OpenCEError(Error.CONFIG_CONTENT)
+            meta_obj[Key.opence_env_file_path.name] = env_file
+        except OpenCEError as exc:
+            if Key.builder_version.name not in version_check_obj.keys():
+                show_warning(Error.SCHEMA_VERSION_NOT_FOUND, env_file, Key.builder_version.name)
+            raise exc
         return meta_obj
     except (Exception, SystemExit) as exc: #pylint: disable=broad-except
         raise OpenCEError(Error.ERROR, "Error in {}:\n  {}".format(env_file, str(exc))) from exc
