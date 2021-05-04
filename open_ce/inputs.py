@@ -311,10 +311,10 @@ def parse_args(parser, arg_strings=None):
     if "conda_build_configs" in vars(args).keys():
         if args.conda_build_configs is None:
             if "env_config_file" in vars(args).keys() and args.env_config_file:
-                args.conda_build_configs = [os.path.join(os.path.dirname(args.env_config_file[0]),
-                                                       utils.CONDA_BUILD_CONFIG_FILE)]
+                args.conda_build_configs = os.path.join(os.path.dirname(args.env_config_file[0]),
+                                                       utils.CONDA_BUILD_CONFIG_FILE)
             else:
-                args.conda_build_configs = [utils.DEFAULT_CONDA_BUILD_CONFIG]
+                args.conda_build_configs = utils.DEFAULT_CONDA_BUILD_CONFIG
 
         configs = []
         for config in parse_arg_list(args.conda_build_configs):
