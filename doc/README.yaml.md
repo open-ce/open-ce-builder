@@ -10,6 +10,7 @@
       - [patches](#patches)
       - [channels(feedstock)](#channelsfeedstock)
       - [recipes](#recipes)
+    - [builder_version](#builder_version)
     - [imported_envs](#imported_envs)
     - [channels](#channels)
     - [git_tag_for_env](#git_tag_for_env)
@@ -54,6 +55,7 @@ packages:              # The environment package name
     recipes:           # Sets name and path of recipe location(s)
     patches:           # Specifies list of patches to be applied to this feedstock
     runtime_package:   # Specifies if the package is needed at runtime for the main frameworks to install
+builder_version:       # Specifies the version of builder tools this file is compatible with.
 imported_envs:         # Used to import content of one env file into another
 channels:              # Defines a channel location for obtaining dependencies
 git_tag_for_env:       # Specify a git tag to use across all packages in environment
@@ -201,6 +203,16 @@ If you look in the
 you will see that each of these `path` specifiers has a directory name that is
 present in the feedstock repo, and within each path is a `meta.yaml` file which
 represents the recipe for each separate package.
+
+### builder_version
+
+This keyword specifies the versions of `open-ce-builder` tool this environment file is
+compatible with. This can be used to ensure that there is no schema mismatch
+or incompatibilities. The value can be any valid conda MatchSpec version string.
+
+```yaml
+builder_version: ">=1.0,<3.0"
+```
 
 ### imported_envs
 

@@ -36,14 +36,20 @@ def test_validate_env():
     env_file = os.path.join(test_dir, 'test-env2.yaml')
     opence._main(["validate", validate_env.COMMAND, env_file])
 
-def test_validate_env_negative():
+def test_validate_env_negative(mocker, capsys):
     '''
     Negative test for validate_env.
     '''
+    from sys import stderr
+    # Apparently the `file` default was being set before capsys mocked sys.stderr. This mocks the default for the function.
+    mocker.patch('open_ce.errors.show_warning.__kwdefaults__', {'file': stderr})
     env_file = os.path.join(test_dir, 'test-env-invalid1.yaml')
     with pytest.raises(OpenCEError) as exc:
         opence._main(["validate", validate_env.COMMAND, env_file])
     assert "Unexpected key chnnels was found in " in str(exc.value)
+    captured = capsys.readouterr()
+    assert "OPEN-CE-WARNING" in captured.err
+    assert "test-env-invalid1.yaml' does not provide 'builder_version'. Possible schema mismatch." in captured.err
 
 def test_validate_env_wrong_external_deps(mocker,):
     '''
@@ -68,3 +74,13 @@ def test_validate_env_dict_for_external_deps(mocker,):
     with pytest.raises(OpenCEError) as exc:
         opence._main(["validate", validate_env.COMMAND, unused_env_for_arg])
     assert "{'feedstock': 'ext_dep'} is not of expected type <class 'str'>" in str(exc.value)
+
+def test_validate_env_schema_mismatch(mocker):
+    '''
+    Positive test for validate_env.
+    '''
+    mocker.patch('open_ce.conda_utils.version_matches_spec.__defaults__', ("0.1.0",))
+    env_file = os.path.join(test_dir, 'test-env3.yaml')
+    with pytest.raises(OpenCEError) as exc:
+        opence._main(["validate", validate_env.COMMAND, env_file])
+    assert "test-env3.yaml' expects to be built with Open-CE Builder [>=1]. But this version is " in str(exc.value)

@@ -22,7 +22,7 @@ import shutil
 from open_ce import utils
 from open_ce import __version__ as open_ce_version
 from open_ce.inputs import Argument, parse_arg_list
-from open_ce.errors import OpenCEError, Error
+from open_ce.errors import OpenCEError, Error, show_warning
 
 COMMAND = 'image'
 DESCRIPTION = 'Run Open-CE tools within a container'
@@ -77,7 +77,7 @@ def _get_runtime_image_file(container_tool):
     tool_ver = utils.get_container_tool_ver(container_tool)
     image_file = os.path.join(RUNTIME_IMAGE_PATH, "docker/Dockerfile")
     if not tool_ver:
-        print("WARNING: Could not retrieve version of {} container tool".format(container_tool))
+        show_warning(Error.CONTAINER_VERSION, container_tool)
         # If we couldn't get the version of the tool, should use the older docker
         # supported Dockerfile
         return image_file

@@ -21,6 +21,7 @@ import os
 import argparse
 from enum import Enum, unique
 from open_ce import utils
+from open_ce.errors import Error, show_warning
 
 class OpenCEFormatter(argparse.ArgumentDefaultsHelpFormatter):
     """
@@ -320,7 +321,7 @@ def parse_args(parser, arg_strings=None):
         elif os.path.exists(args.conda_build_config):
             args.conda_build_config = os.path.abspath(args.conda_build_config)
         else:
-            print("WARNING: No valid conda_build_config.yaml file was found. Some recipes may fail to build.")
+            show_warning(Error.CONDA_BUILD_CONFIG_NOT_FOUND, utils.CONDA_BUILD_CONFIG_FILE)
 
     return args
 

@@ -26,6 +26,7 @@ import functools
 from open_ce.utils import validate_dict_schema, check_if_package_exists, generalize_version # pylint: disable=cyclic-import
 from open_ce.errors import OpenCEError, Error
 import open_ce.yaml_utils
+from open_ce import __version__ as open_ce_version
 
 check_if_package_exists('conda-build')
 
@@ -34,6 +35,7 @@ import conda_build.api
 from conda_build.config import get_or_merge_config
 import conda_build.metadata
 import conda.cli.python_api
+from conda.models.match_spec import MatchSpec
 # pylint: enable=wrong-import-position,wrong-import-order
 
 def render_yaml(path, variants=None, variant_config_files=None, schema=None, permit_undefined_jinja=False):
@@ -132,3 +134,14 @@ def get_latest_package_info(channels, package):
         if package_info["timestamp"] > retval["timestamp"]:
             retval = package_info
     return retval
+
+def version_matches_spec(spec_string, version=open_ce_version):
+    '''
+    Uses conda version specification syntax to check if version matches spec_string.
+    e.g.
+    version_matches_spec(">=1.2,<1.3", "1.2.1") -> True
+    version_matches_spec(">=1.2,<1.3", "1.3.0") -> False
+    '''
+    match_spec = MatchSpec("test[version='{}']".format(spec_string))
+    query_pkg = {"name": "test", "version": version, "build": "", "build_number": 0}
+    return match_spec.match(query_pkg)

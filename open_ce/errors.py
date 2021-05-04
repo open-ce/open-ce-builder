@@ -16,11 +16,12 @@
 # *****************************************************************
 """
 
+import sys
 from enum import Enum, unique
 
 @unique
 class Error(Enum):
-    '''Enum for Arguments'''
+    '''Enum for Error Messages'''
     ERROR = (0, "Unexpected Error: {}")
     CREATE_CONTAINER = (1, "Error creating container: \"{}\"")
     COPY_DIR_TO_CONTAINER = (2, "Error copying \"{}\" directory into container: \"{}\"")
@@ -57,6 +58,13 @@ class Error(Enum):
     NO_CONTAINER_TOOL_FOUND = (27, "No container tool found on the system.")
     CONDA_PACKAGE_INFO = (28, "Conda Package Info Failed.\nCommand:\n{}\nOutput:\n{}")
     REMOTE_PACKAGE_DEPENDENCIES = (29, "Failure getting remote dependencies for the following packages:\n{}\nError:\n{}")
+    WARNING = (30, "Unexpected Warning: {}")
+    SCHEMA_VERSION_NOT_FOUND = (31, "'{}' does not provide '{}'. Possible schema mismatch.")
+    CONTAINER_VERSION = (32, "Could not retrieve version of {} container tool.")
+    CONDA_BUILD_CONFIG_NOT_FOUND = (33, "No valid '{}' file was found. Some recipes may fail to build.")
+    CONDA_IO_ERROR = (34, "IO error occurred while reading version information from conda environment file '{}'.")
+    SCHEMA_VERSION_MISMATCH = (35, "Open-CE Env file '{}' expects to be built with Open-CE Builder [{}]. " +
+                                    "But this version is '{}'.")
 
 class OpenCEError(Exception):
     """
@@ -70,3 +78,10 @@ class OpenCEError(Exception):
             msg = "[OPEN-CE-ERROR-{}] {}".format(error.value[0], error.value[1].format(*additional_args))
         super().__init__(msg, **kwargs)
         self.msg = msg
+
+def show_warning(warning, *additional_args, file=sys.stderr, **kwargs):
+    """
+    Prints an Open-CE Warning.
+    """
+    msg = "[OPEN-CE-WARNING-{}] {}".format(warning.value[0], warning.value[1].format(*additional_args))
+    print(msg, file=file, **kwargs)
