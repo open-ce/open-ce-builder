@@ -66,7 +66,7 @@ The `open-ce test env` command can be used to run tests for every package listed
 
 ```shell
 ==============================================================================
-usage: open-ce test env [-h] [--conda_build_config CONDA_BUILD_CONFIG]
+usage: open-ce test env [-h] [--conda_build_configs CONDA_BUILD_CONFIG]
                         [--output_folder OUTPUT_FOLDER]
                         [--channels CHANNELS_LIST] [--packages PACKAGES]
                         [--repository_folder REPOSITORY_FOLDER]
@@ -93,9 +93,10 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  --conda_build_config CONDA_BUILD_CONFIG
-                        Location of conda_build_config.yaml file. Can be a
-                        valid URL. (default: None)
+  --conda_build_configs CONDA_BUILD_CONFIGS
+                        Comma delimited list of locations of
+                        conda_build_config.yaml files. Can be a valid URL.
+                        (default: None)
   --output_folder OUTPUT_FOLDER
                         Path where built conda packages will be saved.
                         (default: condabuild)

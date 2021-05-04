@@ -167,7 +167,6 @@ def build_in_container(image_name, args, arg_strings):
 
     output_folder = os.path.abspath(args.output_folder)
     env_files = [os.path.abspath(e) if not utils.is_url(e) else e for e in args.env_config_file]
-    conda_build_config = os.path.abspath(args.conda_build_config)
     home_path = _home_path(args.container_tool)
 
     #use set comprehension to remove duplicates
@@ -187,9 +186,11 @@ def build_in_container(image_name, args, arg_strings):
     _copy_to_container(OPEN_CE_PATH, home_path, container_name, args.container_tool)
 
     # Add the conda_build_config
-    _copy_to_container(conda_build_config, home_path, container_name, args.container_tool)
-    config_in_container = os.path.join(home_path, os.path.basename(conda_build_config))
-    arg_strings = arg_strings + ["--conda_build_config", config_in_container]
+    config_in_container = []
+    for conda_build_config in args.conda_build_configs:
+        _copy_to_container(conda_build_config, home_path, container_name, args.container_tool)
+        config_in_container.append(os.path.join(home_path, os.path.basename(conda_build_config)))
+    arg_strings = arg_strings + ["--conda_build_configs", ",".join(config_in_container)]
 
     # Add local_files directory (if it exists)
     if os.path.isdir(LOCAL_FILES_PATH):

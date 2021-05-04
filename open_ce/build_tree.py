@@ -171,7 +171,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
                  git_location=utils.DEFAULT_GIT_LOCATION,
                  git_tag_for_env=utils.DEFAULT_GIT_TAG,
                  git_up_to_date=False,
-                 conda_build_config=utils.DEFAULT_CONDA_BUILD_CONFIG,
+                 conda_build_config=None,
                  packages=None):
 
         self._env_config_files = env_config_files
@@ -180,7 +180,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         self._git_location = git_location
         self._git_tag_for_env = git_tag_for_env
         self._git_up_to_date = git_up_to_date
-        self._conda_build_config = conda_build_config
+        self._conda_build_config = conda_build_config if conda_build_config else []
         self._external_dependencies = dict()
         self._conda_env_files = dict()
         self._test_feedstocks = dict()
@@ -303,7 +303,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
                                   runtime_package,
                                   feedstock.get(env_config.Key.recipe_path.name),
                                   feedstock.get(env_config.Key.recipes.name),
-                                  [os.path.abspath(self._conda_build_config)],
+                                  [os.path.abspath(config) for config in self._conda_build_config],
                                   variants,
                                   channels)
         return retval

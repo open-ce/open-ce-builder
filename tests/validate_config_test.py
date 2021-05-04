@@ -129,7 +129,7 @@ def test_validate_config(mocker):
     )
 
     env_file = os.path.join(test_dir, 'test-env2.yaml')
-    opence._main(["validate", validate_config.COMMAND, "--conda_build_config", "./conda_build_config.yaml", env_file, "--python_versions", "3.6", "--build_types", "cuda"])
+    opence._main(["validate", validate_config.COMMAND, "--conda_build_configs", "./tests/conda_build_config.yaml", env_file, "--python_versions", "3.6", "--build_types", "cuda"])
 
 def test_validate_negative(mocker):
     '''
@@ -185,9 +185,9 @@ def test_validate_negative(mocker):
 
     env_file = os.path.join(test_dir, 'test-env2.yaml')
     with pytest.raises(OpenCEError) as err:
-        opence._main(["validate", validate_config.COMMAND, "--conda_build_config", "./conda_build_config.yaml", env_file, "--python_versions", "3.6", "--build_types", "cuda"])
+        opence._main(["validate", validate_config.COMMAND, "--conda_build_configs", "./tests/conda_build_config.yaml", env_file, "--python_versions", "3.6", "--build_types", "cuda"])
     assert "Error validating \"" in str(err.value)
-    assert "conda_build_config.yaml\" for " in str(err.value)
+    assert "conda_build_config.yaml\']\" for " in str(err.value)
     assert "Dependencies are not compatible.\nCommand:\nconda create" in str(err.value)
 
 def test_validate_bad_env(mocker):
@@ -225,7 +225,7 @@ def test_validate_bad_env(mocker):
     )
     env_file = os.path.join(test_dir, 'test-env-invalid1.yaml')
     with pytest.raises(OpenCEError) as err:
-        opence._main(["validate", validate_config.COMMAND, "--conda_build_config", "./conda_build_config.yaml", env_file, "--python_versions", "3.6", "--build_types", "cuda"])
+        opence._main(["validate", validate_config.COMMAND, "--conda_build_configs", "./tests/conda_build_config.yaml", env_file, "--python_versions", "3.6", "--build_types", "cuda"])
     assert "Error validating \"" in str(err.value)
-    assert "conda_build_config.yaml\" for " in str(err.value)
+    assert "conda_build_config.yaml\']\" for " in str(err.value)
     assert "Unexpected key chnnels was found in " in str(err.value)

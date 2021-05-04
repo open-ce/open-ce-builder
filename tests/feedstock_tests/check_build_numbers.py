@@ -41,11 +41,11 @@ def main(arg_strings=None):
     variant_build_results = dict()
     for variant in variants:
         utils.run_and_log("git checkout {}".format(default_branch))
-        main_build_config_data, main_config = get_configs(variant, args.conda_build_config)
+        main_build_config_data, main_config = get_configs(variant, args.conda_build_configs)
         main_build_numbers = get_build_numbers(main_build_config_data, main_config, variant)
 
         utils.run_and_log("git checkout {}".format(pr_branch))
-        pr_build_config_data, pr_config = get_configs(variant, args.conda_build_config)
+        pr_build_config_data, pr_config = get_configs(variant, args.conda_build_configs)
         current_pr_build_numbers = get_build_numbers(pr_build_config_data, pr_config, variant)
 
         print("Build Info for Variant:   {}".format(variant))

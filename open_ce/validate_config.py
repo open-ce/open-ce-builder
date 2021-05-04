@@ -36,7 +36,7 @@ ARGUMENTS = [Argument.CONDA_BUILD_CONFIG, Argument.ENV_FILE,
 def validate_config(args):
     '''Entry Function'''
     variants = utils.make_variants(args.python_versions, args.build_types, args.mpi_types, args.cuda_versions)
-    validate_env_config(args.conda_build_config, args.env_config_file, variants, args.repository_folder)
+    validate_env_config(args.conda_build_configs, args.env_config_file, variants, args.repository_folder)
 
 def validate_env_config(conda_build_config, env_config_files, variants, repository_folder):
     '''
