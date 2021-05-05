@@ -80,11 +80,7 @@ def _run_tests(build_tree, test_labels, conda_env_files):
 def build_env(args):
     '''Entry Function'''
 
-    # pylint: disable=too-many-branches
-    for conda_build_config in args.conda_build_configs:
-        if not utils.is_url(conda_build_config) and not os.path.exists(conda_build_config):
-            raise OpenCEError(Error.CONDA_BUILD_CONFIG_FILE_NOT_FOUND, conda_build_config)
-    # pylint: enable=too-many-branches
+    utils.check_conda_build_configs_exist(args.conda_build_configs)
 
     if args.container_build:
         if len(args.cuda_versions.split(',')) > 1:

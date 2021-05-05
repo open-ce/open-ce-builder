@@ -28,6 +28,7 @@ class Key(Enum):
     '''Enum for Env Config Keys'''
     builder_version = auto()
     imported_envs = auto()
+    conda_build_configs = auto()
     channels = auto()
     packages = auto()
     git_tag_for_env = auto()
@@ -56,6 +57,7 @@ _ENV_CONFIG_SCHEMA = {
     Key.channels.name: utils.make_schema_type([str]),
     Key.git_tag_for_env.name: utils.make_schema_type(str),
     Key.external_dependencies.name: utils.make_schema_type([str]),
+    Key.conda_build_configs.name: utils.make_schema_type([str]),
     Key.packages.name: utils.make_schema_type([_PACKAGE_SCHEMA])
 }
 
@@ -110,9 +112,8 @@ def load_env_config_files(config_files, variants):
         if not imported_envs:
             imported_envs = []
         for imported_env in imported_envs:
-            imported_env = os.path.expanduser(imported_env)
-            if not utils.is_url(imported_env) and not os.path.isabs(imported_env):
-                imported_env = os.path.join(os.path.dirname(env_config_files[0]), imported_env)
+            if not utils.is_url(imported_env):
+                imported_env = utils.expanded_path(imported_env, relative_to=env_config_files[0])
             if not imported_env in env_config_files and not imported_env in loaded_files:
                 new_config_files += [imported_env]
 

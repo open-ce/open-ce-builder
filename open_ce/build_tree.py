@@ -267,6 +267,10 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         for env_config_data in env_config_data_list:
             channels = self._channels + env_config_data.get(env_config.Key.channels.name, [])
             feedstocks = env_config_data.get(env_config.Key.packages.name, [])
+            conda_build_configs = [utils.expanded_path(config,
+                                                       relative_to=env_config_data[env_config.Key.opence_env_file_path.name])
+                                       for config in env_config_data.get(env_config.Key.conda_build_configs.name, [])]
+            utils.check_conda_build_configs_exist(conda_build_configs)
             if not feedstocks:
                 feedstocks = []
             for feedstock in feedstocks:
@@ -274,7 +278,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
                     continue
 
                 # Create arguments for call to _create_commands_helper
-                create_commands_args.append((variants, env_config_data, feedstock))
+                create_commands_args.append((variants, env_config_data, conda_build_configs, feedstock))
                 feedstocks_seen.add(_make_hash(feedstock))
 
             current_deps = env_config_data.get(env_config.Key.external_dependencies.name, [])
@@ -295,15 +299,16 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
 
         return retval, external_deps
 
-    def _create_commands_helper(self, variants, env_config_data, feedstock):
+    def _create_commands_helper(self, variants, env_config_data, env_conda_build_configs, feedstock):
         channels = self._channels + env_config_data.get(env_config.Key.channels.name, [])
         repo_dir = self._get_repo(env_config_data, feedstock)
         runtime_package = feedstock.get(env_config.Key.runtime_package.name, True)
+        conda_build_configs = self._conda_build_config + env_conda_build_configs
         retval = _create_commands(repo_dir,
                                   runtime_package,
                                   feedstock.get(env_config.Key.recipe_path.name),
                                   feedstock.get(env_config.Key.recipes.name),
-                                  [os.path.abspath(config) for config in self._conda_build_config],
+                                  [os.path.abspath(config) for config in conda_build_configs],
                                   variants,
                                   channels)
         return retval

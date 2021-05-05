@@ -316,12 +316,7 @@ def parse_args(parser, arg_strings=None):
             else:
                 args.conda_build_configs = utils.DEFAULT_CONDA_BUILD_CONFIG
 
-        configs = []
-        for config in parse_arg_list(args.conda_build_configs):
-            if utils.is_url(config):
-                configs.append(utils.download_file(config, filename=utils.CONDA_BUILD_CONFIG_FILE))
-            elif os.path.exists(config):
-                configs.append(os.path.abspath(config))
+        configs = utils.get_conda_build_configs(parse_arg_list(args.conda_build_configs))
         args.conda_build_configs = configs
 
         if not configs:
