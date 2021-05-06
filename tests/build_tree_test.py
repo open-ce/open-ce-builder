@@ -154,7 +154,7 @@ def test_feedstock_args():
 
         build_tree.BuildCommand("recipe2", "repo2", {"pkg1", "pkg2"},
                                 python="3.2", mpi_type="system",
-                                build_type="cuda", cudatoolkit="10.0")
+                                build_type="cuda", cudatoolkit="10.0", conda_build_configs=["conda_build_config5.yaml"])
     ]
 
     for build_command in build_commands:
@@ -173,6 +173,8 @@ def test_feedstock_args():
             assert "--mpi_types {}".format(build_command.mpi_type) in build_string
         if build_command.cudatoolkit:
             assert "--cuda_versions {}".format(build_command.cudatoolkit) in build_string
+        if build_command.conda_build_configs:
+            assert "--conda_build_configs \"{}\"".format(",".join(build_command.conda_build_configs)) in build_string
 
 def test_clone_repo(mocker):
     '''

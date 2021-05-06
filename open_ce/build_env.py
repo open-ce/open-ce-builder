@@ -127,8 +127,7 @@ def build_env(args):
                 try:
                     print("Building " + build_command.recipe)
                     build_feedstock.build_feedstock_from_command(build_command,
-                                                            output_folder=os.path.abspath(args.output_folder),
-                                                            conda_build_config=args.conda_build_configs)
+                                                            output_folder=os.path.abspath(args.output_folder))
                 except OpenCEError as exc:
                     raise OpenCEError(Error.BUILD_RECIPE, build_command.repository, exc.msg) from exc
             else:
