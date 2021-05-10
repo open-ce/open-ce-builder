@@ -33,7 +33,7 @@ from open_ce import __version__ as open_ce_version
 #pylint: disable=too-many-locals
 def make_parser():
     ''' Parser for input arguments '''
-    parser = inputs.make_parser([], description = 'Open-CE Builder {}'.format(open_ce_version))
+    parser = inputs.make_parser([inputs.Argument.VERSION], description = 'Open-CE Builder {}'.format(open_ce_version))
 
     subparsers = parser.add_subparsers(title='Open-CE Commands',
                                        description='Choose from the following commands to perform.')
