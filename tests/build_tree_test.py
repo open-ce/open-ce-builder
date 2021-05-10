@@ -544,15 +544,18 @@ def test_get_installable_package_with_no_duplicates():
                                                                                                     "repo1",
                                                                                                     ["package1a"],
                                                                                                     runtime_package=False,
+                                                                                                    output_files=["package1a-1.0-py37_4.tar.bz2"],
                                                                                                     run_dependencies=["python 3.7", "pack1a==1.0"]))
     node2 = build_tree.DependencyNode(packages=["package2a"], build_command=build_tree.BuildCommand("recipe2",
                                                                                                     "repo2",
                                                                                                     ["package2a"],
+                                                                                                    output_files=["package2a-2.0-py37.tar.bz2"],
                                                                                                     run_dependencies=["python 3.7", "pack1 ==1.0", "pack1", "pack2 <=2.0",
                                                                                                     "pack2 2.0", "pack3   3.0.*", "pack2"]))
     node3 = build_tree.DependencyNode(packages=["package3a", "package3b"], build_command=build_tree.BuildCommand("recipe3",
                                                                                                                 "repo3",
                                                                                                                 ["package3a", "package3b"],
+                                                                                                                output_files=["package3a-1.5-cpu.tar.bz2", "package3b-1.5-cpu.tar.bz2"],
                                                                                                                 run_dependencies=["pack1 >=1.0", "pack1", "pack4 <=2.0",
                                                                                                                 "pack2 2.0", "pack3   3.0.*", "pack4"]))
 
@@ -564,13 +567,13 @@ def test_get_installable_package_with_no_duplicates():
     for dep in external_deps:
         build_commands.add_node(build_tree.DependencyNode({dep}))
     packages = build_tree.get_installable_packages(build_commands, external_deps)
-    assert not "package1a" in packages
-    assert not "pack1a" in packages
+    assert not "package1a" in str(packages)
+    assert not "pack1a" in str(packages)
 
     print("Packages: ", packages)
 
-    expected_packages = ["package2a", "python 3.7.*", "pack1 ==1.0.*", "pack2 <=2.0", "pack3 3.0.*",
-                         "package3a", "package3b", "pack4 <=2.0", "external_pac1 1.2.*"]
+    expected_packages = ["package2a 2.0.* py37", "python 3.7.*", "pack1 ==1.0.*", "pack2 <=2.0", "pack3 3.0.*",
+                         "package3a 1.5.* cpu", "package3b 1.5.* cpu", "pack4 <=2.0", "external_pac1 1.2.*"]
     assert Counter(packages) == Counter(expected_packages)
 
 def test_get_build_copmmand_dependencies():
