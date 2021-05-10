@@ -58,7 +58,7 @@ like cpusets.
 As part of this process of container build, it will copy a local_files directory that is in the
 current working directory into the container, if the directory exists.
 
-The paths to the `env_config_file`s and `--conda_build_config` must point to
+The paths to the `env_config_file`s and `--conda_build_configs` must point to
 files within the `open-ce` directory and be relative to the directory
 containing the root level `open-ce` directory.
 
@@ -76,7 +76,7 @@ will require that the MPI environment is correctly set up.
 
 ```shell
 ==============================================================================
-usage: open-ce build env [-h] [--conda_build_config CONDA_BUILD_CONFIG]
+usage: open-ce build env [-h] [--conda_build_configs CONDA_BUILD_CONFIG]
                          [--output_folder OUTPUT_FOLDER]
                          [--channels CHANNELS_LIST] [--packages PACKAGES]
                          [--repository_folder REPOSITORY_FOLDER]
@@ -111,9 +111,10 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  --conda_build_config CONDA_BUILD_CONFIG
-                        Location of conda_build_config.yaml file. Can be a
-                        valid URL. (default: None)
+  --conda_build_configs CONDA_BUILD_CONFIGS
+                        Comma delimited list of locations of
+                        conda_build_config.yaml files. Can be a valid URL.
+                        (default: None)
   --output_folder OUTPUT_FOLDER
                         Path where built conda packages will be saved.
                         (default: condabuild)
@@ -224,7 +225,7 @@ Command usage for the `open-ce build feedstock` command:
 
 ```shell
 ==============================================================================
-usage: open-ce build feedstock [-h] [--conda_build_config CONDA_BUILD_CONFIG]
+usage: open-ce build feedstock [-h] [--conda_build_configs CONDA_BUILD_CONFIG]
                                [--output_folder OUTPUT_FOLDER]
                                [--channels CHANNELS_LIST]
                                [--python_versions PYTHON_VERSIONS]
@@ -238,9 +239,10 @@ usage: open-ce build feedstock [-h] [--conda_build_config CONDA_BUILD_CONFIG]
 
 optional arguments:
   -h, --help            show this help message and exit
-  --conda_build_config CONDA_BUILD_CONFIG
-                        Location of conda_build_config.yaml file. Can be a
-                        valid URL. (default: None)
+  --conda_build_configs CONDA_BUILD_CONFIGS
+                        Comma delimited list of locations of
+                        conda_build_config.yaml files. Can be a valid URL.
+                        (default: None)
   --output_folder OUTPUT_FOLDER
                         Path where built conda packages will be saved.
                         (default: condabuild)
