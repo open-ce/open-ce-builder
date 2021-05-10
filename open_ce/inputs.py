@@ -22,6 +22,7 @@ import argparse
 from enum import Enum, unique
 from open_ce import utils
 from open_ce.errors import Error, show_warning
+from open_ce import __version__ as open_ce_version
 
 class OpenCEFormatter(argparse.ArgumentDefaultsHelpFormatter):
     """
@@ -243,6 +244,12 @@ path of \"recipe\"."""))
                                      default=None,
                                      help="Comma delimited list of template files to initialize with Open-CE "
                                           " information."))
+
+    VERSION = (lambda parser: parser.add_argument(
+                                     '-v',
+                                     '--version',
+                                     action='version',
+                                     version="Open-CE Builder {}".format(open_ce_version)))
 
 
 def make_parser(arguments, *args, formatter_class=OpenCEFormatter, **kwargs):
