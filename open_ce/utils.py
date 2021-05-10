@@ -372,3 +372,36 @@ def run_in_parallel(function, arguments):
     retval = pool.starmap(_run_helper, new_args)
     pool.close()
     return retval
+
+def get_conda_build_configs(configs):
+    '''
+    Get a list of all of the conda_build_config file paths.
+    If a path is a URL it will be downloaded.
+    If a path doesn't exist, it won't be added.
+    '''
+    result = []
+    for config in configs:
+        if is_url(config):
+            result.append(download_file(config, filename=CONDA_BUILD_CONFIG_FILE))
+        elif os.path.exists(config):
+            result.append(os.path.abspath(config))
+
+    return result
+
+def check_conda_build_configs_exist(conda_build_configs):
+    '''
+    Verify that all non-url conda_build_config files exist locally.
+    '''
+    for conda_build_config in conda_build_configs:
+        if not is_url(conda_build_config) and not os.path.exists(conda_build_config):
+            raise OpenCEError(Error.CONDA_BUILD_CONFIG_FILE_NOT_FOUND, conda_build_config)
+
+def expanded_path(path, relative_to=None):
+    '''
+    Expand a path relative to another file.
+    '''
+    result = os.path.expanduser(path)
+    if not os.path.isabs(result) and relative_to:
+        result = os.path.join(os.path.dirname(relative_to), result)
+
+    return result

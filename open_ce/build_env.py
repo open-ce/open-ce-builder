@@ -80,10 +80,7 @@ def _run_tests(build_tree, test_labels, conda_env_files):
 def build_env(args):
     '''Entry Function'''
 
-    # pylint: disable=too-many-branches
-    if not utils.is_url(args.conda_build_config) and not os.path.exists(args.conda_build_config):
-        raise OpenCEError(Error.CONDA_BUILD_CONFIG_FILE_NOT_FOUND, args.conda_build_config)
-    # pylint: enable=too-many-branches
+    utils.check_conda_build_configs_exist(args.conda_build_configs)
 
     if args.container_build:
         if len(args.cuda_versions.split(',')) > 1:
@@ -113,7 +110,7 @@ def build_env(args):
                                git_location=args.git_location,
                                git_tag_for_env=args.git_tag_for_env,
                                git_up_to_date=args.git_up_to_date,
-                               conda_build_config=args.conda_build_config,
+                               conda_build_config=args.conda_build_configs,
                                packages=inputs.parse_arg_list(args.packages))
 
     # Generate conda environment files
@@ -130,8 +127,7 @@ def build_env(args):
                 try:
                     print("Building " + build_command.recipe)
                     build_feedstock.build_feedstock_from_command(build_command,
-                                                            output_folder=os.path.abspath(args.output_folder),
-                                                            conda_build_config=os.path.abspath(args.conda_build_config))
+                                                            output_folder=os.path.abspath(args.output_folder))
                 except OpenCEError as exc:
                     raise OpenCEError(Error.BUILD_RECIPE, build_command.repository, exc.msg) from exc
             else:

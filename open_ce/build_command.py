@@ -41,7 +41,8 @@ class BuildCommand():
                  host_dependencies=None,
                  build_dependencies=None,
                  test_dependencies=None,
-                 channels=None):
+                 channels=None,
+                 conda_build_configs=None):
         self.recipe = recipe
         self.repository = repository
         self.packages = packages
@@ -60,6 +61,7 @@ class BuildCommand():
         self.build_dependencies = build_dependencies
         self.test_dependencies = test_dependencies
         self.channels = channels
+        self.conda_build_configs = conda_build_configs
 
     def feedstock_args(self):
         """
@@ -80,7 +82,8 @@ class BuildCommand():
             build_args += ["--mpi_types", self.mpi_type]
         if self.cudatoolkit:
             build_args += ["--cuda_versions", self.cudatoolkit]
-
+        if self.conda_build_configs:
+            build_args += ["--conda_build_configs", "\"" + ",".join(self.conda_build_configs) + "\""]
 
         if self.recipe:
             build_args += ["--recipes", self.recipe]

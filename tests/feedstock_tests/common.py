@@ -26,7 +26,6 @@ from conda_build.config import get_or_merge_config
 
 sys.path.append(os.path.join(pathlib.Path(__file__).parent.absolute(), '..'))
 import open_ce.build_feedstock as build_feedstock  # pylint: disable=wrong-import-position
-import open_ce.utils as utils # pylint: disable=wrong-import-position
 import open_ce.inputs as inputs # pylint: disable=wrong-import-position
 
 def make_parser():
@@ -51,10 +50,10 @@ def get_build_numbers(build_config_data, config, variant):
                                                            "number" : meta.meta['build']['number']}
     return build_numbers
 
-def get_configs(variant, conda_build_config=utils.DEFAULT_CONDA_BUILD_CONFIG):
+def get_configs(variant, conda_build_config=None):
     build_config_data, _ = build_feedstock.load_package_config(variants=variant)
     config = get_or_merge_config(None, variant=variant)
-    config.variant_config_files = [conda_build_config]
+    config.variant_config_files = conda_build_config if conda_build_config else []
     config.verbose = False
     recipe_conda_build_config = build_feedstock.get_conda_build_config()
     if recipe_conda_build_config:

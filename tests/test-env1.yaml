@@ -31,3 +31,6 @@ git_tag_for_env: release-v1.0
 external_dependencies:
     - external_dep1
     - external_dep2   5.2
+
+conda_build_configs:
+    - conda_build_config2.yaml
