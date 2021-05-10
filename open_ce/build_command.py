@@ -83,7 +83,7 @@ class BuildCommand():
         if self.cudatoolkit:
             build_args += ["--cuda_versions", self.cudatoolkit]
         if self.conda_build_configs:
-            build_args += ["--conda_build_configs", "\"" + ",".join(self.conda_build_configs) + "\""]
+            build_args += ["--conda_build_configs", "\'" + ",".join(self.conda_build_configs) + "\'"]
 
         if self.recipe:
             build_args += ["--recipes", self.recipe]
