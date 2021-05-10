@@ -64,7 +64,7 @@ def sample_build_commands() :
                                                                                                     build_type="cuda",
                                                                                                     mpi_type="system",
                                                                                                     cudatoolkit="10.2",
-                                                                                                    output_files=["package4a-1.0-py37_cuda10.2.tar.bz2", "package4b-1.0-py37_cuda10.2.tar.bz2"],
+                                                                                                    output_files=["package4a-1.0-py37_cuda.tar.bz2", "package4b-1.0-py37_cuda.tar.bz2"],
                                                                                                     run_dependencies=["pack1==1.0", "pack2 <=2.0", "pack3-suffix 3.0"]))
 
     retval.add_node(node1)
@@ -96,7 +96,7 @@ def test_conda_env_file_content():
     assert Counter(expected_deps) == Counter(mock_conda_env_file_generator._dependency_set)
 
     mock_conda_env_file_generator = build_tree.get_conda_file_packages(sample_build_commands(), [], starting_nodes=[list(sample_build_commands().nodes)[3]])
-    expected_deps = set(["pack1==1.0.*", "pack2 <=2.0", "pack3-suffix 3.0.*", "package4a 1.0.* py37_cuda10.2", "package4b 1.0.* py37_cuda10.2"])
+    expected_deps = set(["pack1==1.0.*", "pack2 <=2.0", "pack3-suffix 3.0.*", "package4a 1.0.* py37_cuda", "package4b 1.0.* py37_cuda"])
     assert Counter(expected_deps) == Counter(mock_conda_env_file_generator._dependency_set)
 
 def test_create_channels():
