@@ -40,6 +40,7 @@ class DependencyNode():
         self.channels = channels
         if not self.channels:
             self.channels = []
+        self.hash_val = hash(self.build_command)
 
     def __repr__(self):
         return str(self)
@@ -48,7 +49,7 @@ class DependencyNode():
         return "({} : {})".format(self.packages, self.build_command)
 
     def __hash__(self):
-        return hash(self.build_command)
+        return self.hash_val
 
     def __eq__(self, other):
         if not isinstance(other, DependencyNode):
