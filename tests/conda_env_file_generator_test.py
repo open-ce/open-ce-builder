@@ -36,6 +36,7 @@ def sample_build_commands() :
                                                                                                     build_type="cuda",
                                                                                                     mpi_type="openmpi",
                                                                                                     cudatoolkit="10.2",
+                                                                                                    output_files=["package1a-1.0-py36_cuda10.2.tar.bz2", "package1b-1.0-py36_cuda10.2.tar.bz2"],
                                                                                                     run_dependencies=["python     >=3.6", "pack1    1.0", "pack2   >=2.0", "pack3 9b"]))
     node2 = build_tree.DependencyNode(packages=["package2a"], build_command=build_tree.BuildCommand("recipe2",
                                                                                                     "repo2",
@@ -44,6 +45,7 @@ def sample_build_commands() :
                                                                                                     build_type="cpu",
                                                                                                     mpi_type="system",
                                                                                                     cudatoolkit="10.2",
+                                                                                                    output_files=["package2a-1.0-py36_cuda10.2.tar.bz2"],
                                                                                                     run_dependencies=["python ==3.6", "pack1 >=1.0", "pack2   ==2.0", "pack3 3.3 build"]))
     node3 = build_tree.DependencyNode(packages=["package3a", "package3b"], build_command=build_tree.BuildCommand("recipe3",
                                                                                                     "repo3",
@@ -52,6 +54,7 @@ def sample_build_commands() :
                                                                                                     build_type="cpu",
                                                                                                     mpi_type="openmpi",
                                                                                                     cudatoolkit="10.2",
+                                                                                                    output_files=["package3a-1.0-py37_cuda10.2.tar.bz2", "package3b-1.0-py37_cuda10.2.tar.bz2"],
                                                                                                     run_dependencies=["python 3.7", "pack1==1.0", "pack2 <=2.0", "pack3   3.0.*",
                                                                                                                     "pack4=1.15.0=py38h6ffa863_0"]))
     node4 = build_tree.DependencyNode(packages=["package4a", "package4b"], build_command=build_tree.BuildCommand("recipe4",
@@ -61,6 +64,7 @@ def sample_build_commands() :
                                                                                                     build_type="cuda",
                                                                                                     mpi_type="system",
                                                                                                     cudatoolkit="10.2",
+                                                                                                    output_files=["package4a-1.0-py37_cuda.tar.bz2", "package4b-1.0-py37_cuda.tar.bz2"],
                                                                                                     run_dependencies=["pack1==1.0", "pack2 <=2.0", "pack3-suffix 3.0"]))
 
     retval.add_node(node1)
@@ -78,21 +82,21 @@ def test_conda_env_file_content():
     Tests that the conda env file content are being populated correctly
     '''
     mock_conda_env_file_generator = build_tree.get_conda_file_packages(sample_build_commands(), external_deps, starting_nodes=[list(sample_build_commands().nodes)[0]])
-    expected_deps = set(["python >=3.6", "pack1 1.0.*", "pack2 >=2.0", "package1a", "package1b",
+    expected_deps = set(["python >=3.6", "pack1 1.0.*", "pack2 >=2.0", "package1a 1.0.* py36_cuda10.2", "package1b 1.0.* py36_cuda10.2",
                          "pack3 9b", "external_pac1 1.2.*", "external_pack2", "external_pack3=1.2.3"])
     assert Counter(expected_deps) == Counter(mock_conda_env_file_generator._dependency_set)
 
     mock_conda_env_file_generator = build_tree.get_conda_file_packages(sample_build_commands(), [], starting_nodes=[list(sample_build_commands().nodes)[1]])
-    expected_deps = set(["python ==3.6.*", "pack1 >=1.0", "pack2 ==2.0.*", "package2a", "pack3 3.3.* build"])
+    expected_deps = set(["python ==3.6.*", "pack1 >=1.0", "pack2 ==2.0.*", "package2a 1.0.* py36_cuda10.2", "pack3 3.3.* build"])
     assert Counter(expected_deps) == Counter(mock_conda_env_file_generator._dependency_set)
 
     mock_conda_env_file_generator = build_tree.get_conda_file_packages(sample_build_commands(), external_deps, starting_nodes=[list(sample_build_commands().nodes)[2]])
-    expected_deps = set(["python 3.7.*", "pack1==1.0.*", "pack2 <=2.0", "pack3 3.0.*", "package3a", "package3b",
+    expected_deps = set(["python 3.7.*", "pack1==1.0.*", "pack2 <=2.0", "pack3 3.0.*", "package3a 1.0.* py37_cuda10.2", "package3b 1.0.* py37_cuda10.2",
                      "pack4=1.15.0=py38h6ffa863_0", "external_pac1 1.2.*", "external_pack2", "external_pack3=1.2.3"])
     assert Counter(expected_deps) == Counter(mock_conda_env_file_generator._dependency_set)
 
     mock_conda_env_file_generator = build_tree.get_conda_file_packages(sample_build_commands(), [], starting_nodes=[list(sample_build_commands().nodes)[3]])
-    expected_deps = set(["pack1==1.0.*", "pack2 <=2.0", "pack3-suffix 3.0.*", "package4a", "package4b"])
+    expected_deps = set(["pack1==1.0.*", "pack2 <=2.0", "pack3-suffix 3.0.*", "package4a 1.0.* py37_cuda", "package4b 1.0.* py37_cuda"])
     assert Counter(expected_deps) == Counter(mock_conda_env_file_generator._dependency_set)
 
 def test_create_channels():

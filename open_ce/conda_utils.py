@@ -145,3 +145,11 @@ def version_matches_spec(spec_string, version=open_ce_version):
     match_spec = MatchSpec("test[version='{}']".format(spec_string))
     query_pkg = {"name": "test", "version": version, "build": "", "build_number": 0}
     return match_spec.match(query_pkg)
+
+def output_file_to_string(output_file):
+    '''
+    Given a package file name,
+    returns a string that can be used within a conda environment file to reference the package specifically.
+    '''
+    match_spec = MatchSpec.from_dist_str(os.path.basename(output_file))
+    return "{} {} {}".format(match_spec.get("name", ""), match_spec.get("version", ""), match_spec.get("build", "")).strip()

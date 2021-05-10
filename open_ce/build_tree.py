@@ -522,6 +522,9 @@ def get_installable_packages(build_commands, external_deps, starting_nodes=None,
     This function retrieves the list of unique dependencies that are needed at runtime, from the
     build commands and external dependencies that are passed to it.
     '''
+    #pylint: disable=import-outside-toplevel
+    from open_ce import conda_utils
+
     retval =  set()
 
     def check_matching(deps_set, dep_to_be_added):
@@ -574,9 +577,9 @@ def get_installable_packages(build_commands, external_deps, starting_nodes=None,
                 run_deps = build_command.run_dependencies
             retval = check_and_add(run_deps, retval)
             if not independent:
-                retval = check_and_add([package + (" " + build_command.version[i] if build_command.version else "")
-                                                        for i, package in enumerate(build_command.packages)],
-                                                    retval)
+                retval = check_and_add([conda_utils.output_file_to_string(output_file)
+                                            for output_file in build_command.output_files],
+                                       retval)
 
     for dep in external_deps:
         if not independent or is_independent(DependencyNode({dep}), build_commands):
