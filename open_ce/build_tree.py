@@ -40,7 +40,6 @@ class DependencyNode():
         self.channels = channels
         if not self.channels:
             self.channels = []
-        self._hash_val = hash(str(self.packages) + str(self.build_command))
 
     def __repr__(self):
         return str(self)
@@ -49,13 +48,13 @@ class DependencyNode():
         return "({} : {})".format(self.packages, self.build_command)
 
     def __hash__(self):
-        return self._hash_val
+        return hash(self.build_command)
 
     def __eq__(self, other):
         if not isinstance(other, DependencyNode):
             return False
         if self.build_command is not None and other.build_command is not None:
-            return self.packages == other.packages and self.build_command == other.build_command
+            return self.build_command == other.build_command
         return self.packages == other.packages
 
 def traverse_build_commands(build_tree, starting_nodes=None, return_node=False):
@@ -196,7 +195,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
                 variant_tree, external_deps = self._create_nodes(variant)
                 variant_tree = _create_edges(variant_tree)
                 variant_tree = self._create_remote_deps(variant_tree)
-                self._tree = networkx.compose(self._tree, variant_tree)
+                self._tree = networkx.compose(variant_tree, self._tree)
             except OpenCEError as exc:
                 raise OpenCEError(Error.CREATE_BUILD_TREE, exc.msg) from exc
             variant_string = utils.variant_string(variant["python"], variant["build_type"],

@@ -111,13 +111,10 @@ class BuildCommand():
         return result
 
     def __repr__(self):
-        return str(self.__key())
+        return ",".join(self.output_files)
 
     def __str__(self):
         return self.name()
-
-    def __key(self):
-        return (self.name(), ",".join(self.output_files))
 
     def __hash__(self):
         return hash(self.__repr__())
@@ -125,7 +122,7 @@ class BuildCommand():
     def __eq__(self, other):
         if not isinstance(other, BuildCommand):
             return False
-        return self.__key() == other.__key()  # pylint: disable=protected-access
+        return self.__repr__() == other.__repr__()  # pylint: disable=protected-access
 
     def get_all_dependencies(self):
         '''
