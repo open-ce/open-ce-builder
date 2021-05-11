@@ -49,9 +49,9 @@ class BuildCommand():
         self.version = version
         self.recipe_path = recipe_path
         self.runtime_package = runtime_package
-        self.output_files = output_files
-        if not self.output_files:
-            self.output_files = []
+        self.output_files = set()
+        if output_files:
+            self.output_files = set(output_files)
         self.python = python
         self.build_type = build_type
         self.mpi_type = mpi_type
@@ -122,7 +122,7 @@ class BuildCommand():
     def __eq__(self, other):
         if not isinstance(other, BuildCommand):
             return False
-        return self.__repr__() == other.__repr__()  # pylint: disable=protected-access
+        return self.output_files == other.output_files
 
     def get_all_dependencies(self):
         '''
