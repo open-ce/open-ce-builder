@@ -264,14 +264,20 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         external_deps = []
         retval = graph.OpenCEGraph()
         create_commands_args = []
+
+        # Find all conda_build_configs listed in environment files
+        conda_build_configs = []
+        for env_config_data in env_config_data_list:
+            conda_build_configs += [utils.expanded_path(config,
+                                        relative_to=env_config_data[env_config.Key.opence_env_file_path.name])
+                                            for config in env_config_data.get(env_config.Key.conda_build_configs.name,
+                                                                              [])]
+        utils.check_conda_build_configs_exist(conda_build_configs)
+
         # Create recipe dictionaries for each repository in the environment file
         for env_config_data in env_config_data_list:
             channels = self._channels + env_config_data.get(env_config.Key.channels.name, [])
             feedstocks = env_config_data.get(env_config.Key.packages.name, [])
-            conda_build_configs = [utils.expanded_path(config,
-                                                       relative_to=env_config_data[env_config.Key.opence_env_file_path.name])
-                                       for config in env_config_data.get(env_config.Key.conda_build_configs.name, [])]
-            utils.check_conda_build_configs_exist(conda_build_configs)
             if not feedstocks:
                 feedstocks = []
             for feedstock in feedstocks:
