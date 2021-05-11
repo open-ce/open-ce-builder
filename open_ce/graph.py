@@ -51,12 +51,12 @@ class OpenCEGraph(nx.DiGraph):
         Add an edge between u and v.
         """
         existing_u = next((x for x in self.nodes() if x == u_of_edge), None)
-        if existing_u is  None:
+        if existing_u is None:
             super().add_node(u_of_edge)
             existing_u = u_of_edge
 
         existing_v = next((x for x in self.nodes() if x == v_of_edge), None)
-        if existing_v is  None:
+        if existing_v is None:
             super().add_node(v_of_edge)
             existing_v = v_of_edge
 
