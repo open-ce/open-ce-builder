@@ -438,14 +438,9 @@ def sample_build_commands() :
     retval.add_node(node2)
     retval.add_node(node3)
     retval.add_node(node4)
-    print(retval.nodes())
-    print(retval.edges())
     retval.add_edge(node1, node4)
     retval.add_edge(node1, node3)
     retval.add_edge(node3, node2)
-    print(retval.nodes())
-    print("\n".join([str(x) for x in retval.edges()]))
-    print(", ".join([str(x) for x in retval.predecessors(node4)]))
 
     return retval
 
@@ -518,7 +513,6 @@ def test_build_tree_cycle_fail():
         mock_build_tree._detect_cycle()
 
     assert "Build dependencies should form a Directed Acyclic Graph." in str(exc.value)
-    print(str(exc.value))
     assert any(["recipe1 -> recipe2 -> recipe1" in str(exc.value),
                 "recipe2 -> recipe1 -> recipe2" in str(exc.value),
                 "recipe1 -> recipe3 -> recipe2 -> recipe1" in str(exc.value),
