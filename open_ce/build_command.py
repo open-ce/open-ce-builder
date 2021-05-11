@@ -49,9 +49,9 @@ class BuildCommand():
         self.version = version
         self.recipe_path = recipe_path
         self.runtime_package = runtime_package
-        self.output_files = output_files
-        if not self.output_files:
-            self.output_files = []
+        self.output_files = set()
+        if output_files:
+            self.output_files = set(output_files)
         self.python = python
         self.build_type = build_type
         self.mpi_type = mpi_type
@@ -83,7 +83,7 @@ class BuildCommand():
         if self.cudatoolkit:
             build_args += ["--cuda_versions", self.cudatoolkit]
         if self.conda_build_configs:
-            build_args += ["--conda_build_configs", "\"" + ",".join(self.conda_build_configs) + "\""]
+            build_args += ["--conda_build_configs", "\'" + ",".join(self.conda_build_configs) + "\'"]
 
         if self.recipe:
             build_args += ["--recipes", self.recipe]
@@ -111,13 +111,10 @@ class BuildCommand():
         return result
 
     def __repr__(self):
-        return str(self.__key())
+        return ",".join(self.output_files)
 
     def __str__(self):
         return self.name()
-
-    def __key(self):
-        return (self.name(), ",".join(self.output_files))
 
     def __hash__(self):
         return hash(self.__repr__())
@@ -125,7 +122,7 @@ class BuildCommand():
     def __eq__(self, other):
         if not isinstance(other, BuildCommand):
             return False
-        return self.__key() == other.__key()  # pylint: disable=protected-access
+        return self.output_files == other.output_files
 
     def get_all_dependencies(self):
         '''
