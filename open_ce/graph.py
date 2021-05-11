@@ -38,5 +38,5 @@ class OpenCEGraph(nx.DiGraph):
                 u, v = e
                 dd = {}
             else:
-                raise NetworkXError(f"Edge tuple {e} must be a 2-tuple or 3-tuple.")
+                raise nx.NetworkXError(f"Edge tuple {e} must be a 2-tuple or 3-tuple.")
             self.add_edge(u, v, **attr)
