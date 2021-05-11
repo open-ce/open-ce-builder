@@ -175,7 +175,7 @@ def test_feedstock_args():
         if build_command.cudatoolkit:
             assert "--cuda_versions {}".format(build_command.cudatoolkit) in build_string
         if build_command.conda_build_configs:
-            assert "--conda_build_configs \"{}\"".format(",".join(build_command.conda_build_configs)) in build_string
+            assert "--conda_build_configs \'{}\'".format(",".join(build_command.conda_build_configs)) in build_string
 
 def test_clone_repo(mocker):
     '''
