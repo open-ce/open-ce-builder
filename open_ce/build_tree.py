@@ -197,7 +197,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
                 variant_tree, external_deps = self._create_nodes(variant)
                 variant_tree = _create_edges(variant_tree)
                 variant_tree = self._create_remote_deps(variant_tree)
-                self._tree = networkx.compose(variant_tree, self._tree)
+                self._tree = networkx.compose(self._tree, variant_tree)
             except OpenCEError as exc:
                 raise OpenCEError(Error.CREATE_BUILD_TREE, exc.msg) from exc
             variant_string = utils.variant_string(variant["python"], variant["build_type"],
