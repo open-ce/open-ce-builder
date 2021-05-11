@@ -19,6 +19,7 @@
 import os
 
 import networkx
+from open_ce import graph
 from open_ce import utils
 from open_ce import env_config
 from open_ce import validate_config
@@ -189,7 +190,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         # Create a dependency tree that includes recipes for every combination
         # of variants.
         self._possible_variants = utils.make_variants(python_versions, build_types, mpi_types, cuda_versions)
-        self._tree = networkx.DiGraph()
+        self._tree = graph.OpenCEGraph()
         validate_args = []
         for variant in self._possible_variants:
             try:
@@ -261,7 +262,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         env_config_data_list = env_config.load_env_config_files(self._env_config_files, variants)
         feedstocks_seen = set()
         external_deps = []
-        retval = networkx.DiGraph()
+        retval = graph.OpenCEGraph()
         create_commands_args = []
         # Create recipe dictionaries for each repository in the environment file
         for env_config_data in env_config_data_list:
@@ -473,7 +474,7 @@ def _create_commands(repository, runtime_package, recipe_path,
     Returns:
         A tree of nodes containing BuildCommands for each recipe within a repository.
     """
-    retval = networkx.DiGraph()
+    retval = graph.OpenCEGraph()
     saved_working_directory = os.getcwd()
     os.chdir(repository)
 
