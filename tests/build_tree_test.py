@@ -18,7 +18,6 @@ import os
 from collections import Counter
 import pathlib
 import pytest
-import networkx
 
 test_dir = pathlib.Path(__file__).parent.absolute()
 
