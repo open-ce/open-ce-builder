@@ -27,8 +27,8 @@ class OpenCEGraph(nx.DiGraph):
         """
         Add a single node `node_for_adding` and update node attributes.
         """
-        if node_for_adding in self.nodes():
-            existing_node = next(x for x in self.nodes() if x == node_for_adding)
+        existing_node = next((x for x in self.nodes() if x == node_for_adding), None)
+        if existing_node:
             super().add_node(existing_node, **attr)
         else:
             super().add_node(node_for_adding, **attr)
@@ -50,9 +50,16 @@ class OpenCEGraph(nx.DiGraph):
         """
         Add an edge between u and v.
         """
-        self.add_nodes_from([u_of_edge, v_of_edge])
-        existing_u = next(x for x in self.nodes() if x == u_of_edge)
-        existing_v = next(x for x in self.nodes() if x == v_of_edge)
+        existing_u = next((x for x in self.nodes() if x == u_of_edge), None)
+        if existing_u is  None:
+            super().add_node(u_of_edge)
+            existing_u = u_of_edge
+
+        existing_v = next((x for x in self.nodes() if x == v_of_edge), None)
+        if existing_v is  None:
+            super().add_node(v_of_edge)
+            existing_v = v_of_edge
+
         super().add_edge(existing_u, existing_v, **attr)
 
     def add_edges_from(self, ebunch_to_add, **attr):
