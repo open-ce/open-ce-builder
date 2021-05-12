@@ -251,6 +251,18 @@ path of \"recipe\"."""))
                                      action='version',
                                      version="Open-CE Builder {}".format(open_ce_version)))
 
+    WIDTH = (lambda parser: parser.add_argument(
+                                     '--width',
+                                     type=int,
+                                     default=50,
+                                     help="Width of output graph."))
+
+    HEIGHT = (lambda parser: parser.add_argument(
+                                     '--height',
+                                     type=int,
+                                     default=50,
+                                     help="Height of output graph."))
+
 
 def make_parser(arguments, *args, formatter_class=OpenCEFormatter, **kwargs):
     '''

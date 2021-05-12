@@ -28,6 +28,7 @@ from open_ce import validate_config
 from open_ce import validate_env
 from open_ce import build_image
 from open_ce import get_licenses
+from open_ce import get_graph
 from open_ce import __version__ as open_ce_version
 
 #pylint: disable=too-many-locals
@@ -114,6 +115,12 @@ def make_parser():
                                                get_licenses.ARGUMENTS,
                                                help=get_licenses.DESCRIPTION)
     get_licenses_parser.set_defaults(func=get_licenses.ENTRY_FUNCTION)
+
+    get_graph_parser = inputs.add_subparser(get_sub_parsers,
+                                            get_graph.COMMAND,
+                                            get_graph.ARGUMENTS,
+                                            help=get_graph.DESCRIPTION)
+    get_graph_parser.set_defaults(func=get_graph.ENTRY_FUNCTION)
 
     return parser
 
