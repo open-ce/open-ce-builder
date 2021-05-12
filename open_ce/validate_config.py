@@ -73,6 +73,7 @@ def validate_build_tree(tree, external_deps, start_nodes=None):
     channel_args = " ".join({"-c \"{}\"".format(channel) for channel in channels.union(env_channels)})
 
     cli = "conda create --dry-run -n test_conda_dependencies {} {}".format(channel_args, pkg_args)
+    print(cli)
     ret_code, std_out, std_err = utils.run_command_capture(cli)
     if not ret_code:
         raise OpenCEError(Error.VALIDATE_BUILD_TREE, cli, std_out, std_err)

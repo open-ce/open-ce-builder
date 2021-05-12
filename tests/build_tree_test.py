@@ -132,7 +132,7 @@ def test_create_commands(mocker):
                                                                            "/test/starting_dir"])) # And then changed back to the starting directory.
     )
 
-    build_commands = [x.build_command for x in build_tree._create_commands("/test/my_repo", "True", "my_recipe_path", None, "main", {'python' : '3.6', 'build_type' : 'cuda', 'mpi_type' : 'openmpi', 'cudatoolkit' : '10.2'}, []).nodes()]
+    build_commands = [x.build_command for x in build_tree._create_commands("/test/my_repo", "True", "my_recipe_path", None, "main", {'python' : '3.6', 'build_type' : 'cuda', 'mpi_type' : 'openmpi', 'cudatoolkit' : '10.2'}, [], True).nodes()]
     assert build_commands[0].packages == ['horovod']
     assert build_commands[0].recipe_path == "my_recipe_path"
     for dep in {'build_req1', 'build_req2            1.2'}:

@@ -310,6 +310,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         channels = self._channels + env_config_data.get(env_config.Key.channels.name, [])
         repo_dir = self._get_repo(env_config_data, feedstock)
         runtime_package = feedstock.get(env_config.Key.runtime_package.name, True)
+        validate_deps = feedstock.get(env_config.Key.validate.name, True)
         conda_build_configs = self._conda_build_config + env_conda_build_configs
         retval = _create_commands(repo_dir,
                                   runtime_package,
@@ -317,7 +318,8 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
                                   feedstock.get(env_config.Key.recipes.name),
                                   [os.path.abspath(config) for config in conda_build_configs],
                                   variants,
-                                  channels)
+                                  channels,
+                                  validate_deps)
         return retval
 
     def _create_remote_deps(self, dep_graph):
@@ -475,7 +477,8 @@ def _create_edges(tree):
 
 #pylint: disable=too-many-locals,too-many-arguments
 def _create_commands(repository, runtime_package, recipe_path,
-                    recipes, variant_config_files, variants, channels):
+                    recipes, variant_config_files, variants, channels,
+                    validate_deps):
     """
     Returns:
         A tree of nodes containing BuildCommands for each recipe within a repository.
@@ -517,7 +520,8 @@ def _create_commands(repository, runtime_package, recipe_path,
                                     build_dependencies=build_deps,
                                     test_dependencies=test_deps,
                                     channels=channels,
-                                    conda_build_configs=variant_config_files)
+                                    conda_build_configs=variant_config_files,
+                                    validate=validate_deps)
         package_node = DependencyNode(set(packages), build_command)
         retval.add_node(package_node)
 
@@ -578,7 +582,9 @@ def get_installable_packages(build_commands, external_deps, starting_nodes=None,
     for node in traverse_build_commands(build_commands, starting_nodes, True):
         build_command = node.build_command
         if build_command.runtime_package:
-            if independent:
+            if independent and not build_command.validate:
+                run_deps = {}
+            elif independent:
                 run_deps = get_independent_runtime_deps(build_commands, node)
             else:
                 run_deps = build_command.run_dependencies

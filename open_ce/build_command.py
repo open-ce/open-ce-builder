@@ -42,7 +42,8 @@ class BuildCommand():
                  build_dependencies=None,
                  test_dependencies=None,
                  channels=None,
-                 conda_build_configs=None):
+                 conda_build_configs=None,
+                 validate=True):
         self.recipe = recipe
         self.repository = repository
         self.packages = packages
@@ -62,6 +63,7 @@ class BuildCommand():
         self.test_dependencies = test_dependencies
         self.channels = channels
         self.conda_build_configs = conda_build_configs
+        self.validate = validate
 
     def feedstock_args(self):
         """

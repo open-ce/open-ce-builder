@@ -40,6 +40,7 @@ class Key(Enum):
     opence_env_file_path = auto()
     runtime_package = auto()
     recipe_path = auto()
+    validate = auto()
 
 _PACKAGE_SCHEMA ={
     Key.feedstock.name: utils.make_schema_type(str, True),
@@ -48,7 +49,8 @@ _PACKAGE_SCHEMA ={
     Key.channels.name: utils.make_schema_type([str]),
     Key.patches.name: utils.make_schema_type([str]),
     Key.runtime_package.name: utils.make_schema_type(bool),
-    Key.recipe_path.name: utils.make_schema_type(str)
+    Key.recipe_path.name: utils.make_schema_type(str),
+    Key.validate.name: utils.make_schema_type(bool)
 }
 
 _ENV_CONFIG_SCHEMA = {
