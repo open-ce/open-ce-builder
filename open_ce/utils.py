@@ -53,7 +53,7 @@ OPEN_CE_INFO_FILE = "open-ce-info.yaml"
 CONTAINER_TOOLS = ["podman", "docker"]
 DEFAULT_CONTAINER_TOOL = next(filter(lambda tool: os.system("which {} &> /dev/null".format(tool))
                                       == 0, CONTAINER_TOOLS), None)
-DEFAULT_PKG_FORMAT = "2"  # uses conda_v2 output format
+DEFAULT_PKG_FORMAT = "2"  # use conda_v2 output format
 NUM_THREAD_POOL = 16
 OPEN_CE_VERSION_STRING = "Open-CE Version"
 
