@@ -200,8 +200,8 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
                 self._tree = networkx.compose(self._tree, variant_tree)
             except OpenCEError as exc:
                 raise OpenCEError(Error.CREATE_BUILD_TREE, exc.msg) from exc
-            variant_string = utils.variant_string(variant["python"], variant["build_type"],
-                                                  variant["mpi_type"], variant["cudatoolkit"])
+            variant_string = utils.variant_string(variant.get("python"), variant.get("build_type"),
+                                                  variant.get("mpi_type"), variant.get("cudatoolkit"))
             self._external_dependencies[variant_string] = external_deps
 
             self._detect_cycle()
@@ -412,8 +412,8 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
 
     def get_external_dependencies(self, variant):
         '''Return the list of external dependencies for the given variant.'''
-        variant_string = utils.variant_string(variant["python"], variant["build_type"],
-                                              variant["mpi_type"], variant["cudatoolkit"])
+        variant_string = utils.variant_string(variant.get("python"), variant.get("build_type"),
+                                              variant.get("mpi_type"), variant.get("cudatoolkit"))
         return self._external_dependencies.get(variant_string, [])
 
     def write_conda_env_files(self,
@@ -505,13 +505,13 @@ def _create_commands(repository, runtime_package, recipe_path,
                                     repository=repository,
                                     packages=packages,
                                     version=version,
-                                    recipe_path=recipe_path,
+                                    recipe_path=recipe.get('path'),
                                     runtime_package=runtime_package,
                                     output_files=output_files,
-                                    python=variants['python'],
-                                    build_type=variants['build_type'],
-                                    mpi_type=variants['mpi_type'],
-                                    cudatoolkit=variants['cudatoolkit'],
+                                    python=variants.get('python'),
+                                    build_type=variants.get('build_type'),
+                                    mpi_type=variants.get('mpi_type'),
+                                    cudatoolkit=variants.get('cudatoolkit'),
                                     run_dependencies=run_deps,
                                     host_dependencies=host_deps,
                                     build_dependencies=build_deps,
