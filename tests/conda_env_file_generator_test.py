@@ -130,11 +130,12 @@ def test_get_variant_string_no_string(mocker):
 
 def test_variant_specific_env_files():
     tmp_test = tempfile.TemporaryDirectory()
-    arg_strings = ["build", build_env.COMMAND, "--skip_build",
-                   "--python_versions", "3.7", "--build_types", "cuda,cpu", "--repository_folder", os.path.join(tmp_test.name, "repos"),
+    base_arg_strings = ["build", build_env.COMMAND, "--skip_build",
+                   "--python_versions", "3.7", "--repository_folder", os.path.join(tmp_test.name, "repos"),
                    "--output_folder", os.path.join(tmp_test.name, "output"),
-                   "opence-env.yaml"]
-    opence._main(arg_strings)
+                   "https://raw.githubusercontent.com/open-ce/open-ce/open-ce-v1.2.1/envs/opence-env.yaml"]
+
+    opence._main(base_arg_strings + ["--build_types", "cuda,cpu"])
     file = open(glob.glob(os.path.join(tmp_test.name, "output", "*cpu*.yaml"))[0],mode='r')
     cpu_env = file.read()
     file.close()
@@ -143,4 +144,15 @@ def test_variant_specific_env_files():
     cuda_env = file.read()
     file.close()
     assert "cuda" in cuda_env
+
+    opence._main(base_arg_strings + ["--build_types", "cpu,cuda"])
+    file = open(glob.glob(os.path.join(tmp_test.name, "output", "*cpu*.yaml"))[0],mode='r')
+    cpu_env = file.read()
+    file.close()
+    assert "cuda" not in cpu_env
+    file = open(glob.glob(os.path.join(tmp_test.name, "output", "*cuda*.yaml"))[0],mode='r')
+    cuda_env = file.read()
+    file.close()
+    assert "cuda" in cuda_env
+
     tmp_test.cleanup()
