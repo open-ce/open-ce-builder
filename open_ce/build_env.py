@@ -96,7 +96,7 @@ def build_env(args):
     from open_ce.build_tree import BuildTree  # pylint: disable=import-outside-toplevel
 
     # If repository_folder doesn't exist, create it
-    if args.repository_folder and not os.path.exists(args.repository_folder):
+    if args.repository_folder:
         os.makedirs(args.repository_folder, exist_ok=True)
 
     # Create the build tree
