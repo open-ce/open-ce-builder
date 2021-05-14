@@ -304,7 +304,6 @@ def validate_and_remove_conda_env_files(py_versions=utils.DEFAULT_PYTHON_VERS,
                                      utils.variant_string(variant['python'], variant['build_type'], variant['mpi_type'], variant['cudatoolkit'])))
         assert os.path.exists(cuda_env_file)
         # Remove the file once it's existence is verified
-        print(cuda_env_file)
         os.remove(cuda_env_file)
 
 def test_env_validate(mocker):
