@@ -59,11 +59,16 @@ OPEN_CE_VERSION_STRING = "Open-CE Version"
 def make_variants(python_versions=DEFAULT_PYTHON_VERS, build_types=DEFAULT_BUILD_TYPES, mpi_types=DEFAULT_MPI_TYPES,
 cuda_versions=DEFAULT_CUDA_VERS):
     '''Create a cross product of possible variant combinations.'''
-    variants = { 'python' : inputs.parse_arg_list(python_versions),
-                 'build_type' : inputs.parse_arg_list(build_types),
-                 'mpi_type' :  inputs.parse_arg_list(mpi_types),
-                 'cudatoolkit' : inputs.parse_arg_list(cuda_versions)}
-    return [dict(zip(variants,y)) for y in product(*variants.values())]
+    results = []
+    for build_type in inputs.parse_arg_list(build_types):
+        variants = { 'python' : inputs.parse_arg_list(python_versions),
+                     'build_type' : [build_type],
+                     'mpi_type' :  inputs.parse_arg_list(mpi_types)}
+        if build_type == "cuda":
+            variants["cudatoolkit"] = inputs.parse_arg_list(cuda_versions)
+        results += [dict(zip(variants,y)) for y in product(*variants.values())]
+
+    return results
 
 def remove_version(package):
     '''Remove conda version from dependency.'''
@@ -156,8 +161,9 @@ def variant_string_to_dict(var_string):
     variants = var_string.split("-")
     variant_dict = { 'python' : variants[0][2:],
                      'build_type' : variants[1],
-                     'mpi_type' : variants[2],
-                     'cudatoolkit' : variants[3] }
+                     'mpi_type' : variants[2] }
+    if variant_dict["build_type"] == "cuda":
+        variant_dict["cudatoolkit"] = variants[3]
 
     return variant_dict
 
