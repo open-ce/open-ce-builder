@@ -16,11 +16,21 @@
 
 import os
 import pathlib
+import glob
+import tempfile
 from collections import Counter
 import networkx
 
+from importlib.util import spec_from_loader, module_from_spec
+from importlib.machinery import SourceFileLoader
+
 test_dir = pathlib.Path(__file__).parent.absolute()
 
+spec = spec_from_loader("opence", SourceFileLoader("opence", os.path.join(test_dir, '..', 'open_ce', 'open-ce-builder')))
+opence = module_from_spec(spec)
+spec.loader.exec_module(opence)
+
+import open_ce.build_env as build_env
 import open_ce.build_tree as build_tree
 import open_ce.conda_env_file_generator as conda_env_file_generator
 import open_ce.utils as utils
@@ -117,3 +127,20 @@ def test_get_variant_string_no_string(mocker):
     mocker.patch('builtins.open', mocker.mock_open(read_data=test_env_file))
 
     assert conda_env_file_generator.get_variant_string("some_file.yaml") is None
+
+def test_variant_specific_env_files():
+    tmp_test = tempfile.TemporaryDirectory()
+    arg_strings = ["build", build_env.COMMAND, "--skip_build",
+                   "--python_versions", "3.7", "--build_types", "cuda,cpu", "--repository_folder", os.path.join(tmp_test.name, "repos"),
+                   "--output_folder", os.path.join(tmp_test.name, "output"),
+                   "opence-env.yaml"]
+    opence._main(arg_strings)
+    file = open(glob.glob(os.path.join(tmp_test.name, "output", "*cpu*.yaml"))[0],mode='r')
+    cpu_env = file.read()
+    file.close()
+    assert "cuda" not in cpu_env
+    file = open(glob.glob(os.path.join(tmp_test.name, "output", "*cuda*.yaml"))[0],mode='r')
+    cuda_env = file.read()
+    file.close()
+    assert "cuda" in cuda_env
+    tmp_test.cleanup()
