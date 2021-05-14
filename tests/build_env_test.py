@@ -304,6 +304,7 @@ def validate_and_remove_conda_env_files(py_versions=utils.DEFAULT_PYTHON_VERS,
                                      utils.variant_string(variant['python'], variant['build_type'], variant['mpi_type'], variant['cudatoolkit'])))
         assert os.path.exists(cuda_env_file)
         # Remove the file once it's existence is verified
+        print(cuda_env_file)
         os.remove(cuda_env_file)
 
 def test_env_validate(mocker):
@@ -522,3 +523,17 @@ def test_build_env_url(mocker):
     with pytest.raises(OpenCEError) as exc:
         opence._main(["build", build_env.COMMAND, env_file])
     assert "Unexpected key chnnels was found in " in str(exc.value)
+
+def test_build_env_conda_pkg_format(mocker):
+    '''
+    Test that passing --conda_pkg_format argument works correctly.
+    '''
+	
+    mocker.patch(
+        'open_ce.build_tree.BuildTree',
+    )
+
+    pkg_format = "2"
+    arg_strings = ["build", build_env.COMMAND,
+                  "--conda_pkg_format", pkg_format, "tests/test-env1.yaml"]
+    opence._main(arg_strings)

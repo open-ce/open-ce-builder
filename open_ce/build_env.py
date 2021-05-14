@@ -50,7 +50,8 @@ ARGUMENTS = [Argument.CONDA_BUILD_CONFIG,
              Argument.GIT_UP_TO_DATE,
              Argument.TEST_LABELS,
              Argument.CONTAINER_BUILD_ARGS,
-             Argument.CONTAINER_TOOL]
+             Argument.CONTAINER_TOOL,
+             Argument.CONDA_PKG_FORMAT]
 
 def _run_tests(build_tree, test_labels, conda_env_files):
     """
@@ -127,7 +128,8 @@ def build_env(args):
                 try:
                     print("Building " + build_command.recipe)
                     build_feedstock.build_feedstock_from_command(build_command,
-                                                            output_folder=os.path.abspath(args.output_folder))
+                                                            output_folder=os.path.abspath(args.output_folder),
+                                                            pkg_format=args.conda_pkg_format)
                 except OpenCEError as exc:
                     raise OpenCEError(Error.BUILD_RECIPE, build_command.repository, exc.msg) from exc
             else:

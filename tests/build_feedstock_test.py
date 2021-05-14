@@ -252,3 +252,14 @@ def test_build_feedstock_if_no_conda_build(mocker):
     with pytest.raises(OpenCEError):
         assert opence._main(["build", build_feedstock.COMMAND]) == 1
 
+def test_build_feedstock_conda_pkg_format(mocker):
+    '''
+    Test that the --conda_pkg_format argument is correctly handled.
+    '''
+
+    mocker.patch(
+        'conda_build.api.build',
+    )	
+
+    pkg_format = "2"
+    opence._main(["build", build_feedstock.COMMAND, "--conda_pkg_format", pkg_format])
