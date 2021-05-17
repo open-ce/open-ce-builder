@@ -33,10 +33,12 @@ def main(arg_strings=None):
     args = inputs.parse_args(parser, arg_strings)
     variants = utils.make_variants(args.python_versions, args.build_types, args.mpi_types, args.cuda_versions)
 
+    pr_branch = utils.get_output("git log -1 --format='%H'")
     check_result = True
     for variant in variants:
-        main_build_config_data, main_config = get_configs(variant, args.conda_build_configs)
-        if not check_recipes(main_build_config_data, main_config, variant):
+        pr_build_config_data, pr_config = get_configs(variant, args.conda_build_configs)
+        print("check recipe %s %s" %(pr_build_config_data, pr_config))
+        if not check_recipes(pr_build_config_data, pr_config, variant):
             check_result = False
             print("Recipe validation failed for variant '{}'.".format(variant))
 
