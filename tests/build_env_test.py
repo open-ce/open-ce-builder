@@ -231,8 +231,8 @@ def test_build_env(mocker, capsys):
     )
 
     env_file = os.path.join(test_dir, 'test-env2.yaml')
-    opence._main(["build", build_env.COMMAND, env_file, "--cuda_versions", cuda_version])
-    validate_and_remove_conda_env_files(cuda_versions=cuda_version)
+    opence._main(["build", build_env.COMMAND, env_file, "--cuda_versions", cuda_version, "--build_types", "cuda"])
+    validate_and_remove_conda_env_files(build_types="cuda", cuda_versions=cuda_version)
 
     #---The seventh test specifies specific packages that should be built (plus their dependencies)
     package_deps = {"package11": ["package15"],
@@ -301,7 +301,7 @@ def validate_and_remove_conda_env_files(py_versions=utils.DEFAULT_PYTHON_VERS,
     for variant in variants:
         cuda_env_file = os.path.join(os.getcwd(), utils.DEFAULT_OUTPUT_FOLDER,
                                      "{}{}.yaml".format(utils.CONDA_ENV_FILENAME_PREFIX,
-                                     utils.variant_string(variant['python'], variant['build_type'], variant['mpi_type'], variant['cudatoolkit'])))
+                                     utils.variant_string(variant.get('python'), variant.get('build_type'), variant.get('mpi_type'), variant.get('cudatoolkit'))))
         assert os.path.exists(cuda_env_file)
         # Remove the file once it's existence is verified
         os.remove(cuda_env_file)
