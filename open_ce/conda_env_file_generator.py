@@ -49,8 +49,7 @@ class CondaEnvFileGenerator():
         #pylint: disable=import-outside-toplevel
         import open_ce.yaml_utils
 
-        if not os.path.exists(path):
-            os.mkdir(path)
+        os.makedirs(path, exist_ok=True)
 
         conda_env_name = env_file_prefix + variant_string
         conda_env_file = conda_env_name + ".yaml"
