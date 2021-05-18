@@ -19,8 +19,6 @@ import pathlib
 import pytest
 import sys
 import shutil
-from importlib.util import spec_from_loader, module_from_spec
-from importlib.machinery import SourceFileLoader
 
 test_dir = pathlib.Path(__file__).parent.absolute()
 sys.path.append(os.path.join(test_dir, "feedstock_tests"))
