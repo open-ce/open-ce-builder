@@ -47,6 +47,8 @@ def create_git_repository():
     os.chdir(repo_name)
     os.mkdir("recipe")
     shutil.copy(os.path.join(test_dir, "test-meta1.yaml"), meta_path)
+    utils.run_and_log("git config user.email \"me@test_address.fake\"")
+    utils.run_and_log("git config user.name \"Fake Name\"")
     utils.run_and_log("git add {}".format(meta_path))
     utils.run_and_log("git commit -a -m \"Initial Commit\"")
     utils.run_and_log("git push origin HEAD")
