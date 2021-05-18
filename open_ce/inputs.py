@@ -263,6 +263,25 @@ path of \"recipe\"."""))
                                      default=50,
                                      help="Height of output graph."))
 
+VARIANT_ARGS = [Argument.PYTHON_VERSIONS,
+                Argument.BUILD_TYPES,
+                Argument.MPI_TYPES,
+                Argument.CUDA_VERSIONS]
+
+GIT_ARGS = [Argument.REPOSITORY_FOLDER,
+            Argument.GIT_LOCATION,
+            Argument.GIT_TAG_FOR_ENV,
+            Argument.GIT_UP_TO_DATE]
+
+PRIMARY_BUILD_ARGS = [Argument.CONDA_BUILD_CONFIG,
+                      Argument.OUTPUT_FOLDER,
+                      Argument.CHANNELS] + \
+                     VARIANT_ARGS
+
+ENV_BUILD_ARGS = PRIMARY_BUILD_ARGS + \
+                 GIT_ARGS + \
+                 [Argument.ENV_FILE,
+                  Argument.PACKAGES]
 
 def make_parser(arguments, *args, formatter_class=OpenCEFormatter, **kwargs):
     '''

@@ -19,60 +19,46 @@
 
 import os
 
-from open_ce import utils
-from open_ce import inputs
+import networkx as nx
+
 from open_ce.inputs import Argument
 from open_ce import graph
+from open_ce import build_env
 
 COMMAND = "graph"
 
 DESCRIPTION = 'Plot a dependency graph.'
 
-ARGUMENTS = [Argument.CONDA_BUILD_CONFIG,
-             Argument.OUTPUT_FOLDER,
-             Argument.CHANNELS,
-             Argument.ENV_FILE,
-             Argument.PACKAGES,
-             Argument.REPOSITORY_FOLDER,
-             Argument.PYTHON_VERSIONS,
-             Argument.BUILD_TYPES,
-             Argument.MPI_TYPES,
-             Argument.CUDA_VERSIONS,
-             Argument.GIT_LOCATION,
-             Argument.GIT_TAG_FOR_ENV,
-             Argument.GIT_UP_TO_DATE,
-             Argument.WIDTH,
+ARGUMENTS = build_env.ARGUMENTS + \
+            [Argument.WIDTH,
              Argument.HEIGHT]
 
 def export_graph(args):
     '''Entry Function'''
+    build_tree = build_env.construct_build_tree(args)
 
-    utils.check_conda_build_configs_exist(args.conda_build_configs)
+    #sub_tree_nodes = {node for initial_node in build_tree._initial_nodes for node in nx.descendants(build_tree._tree, initial_node)}
+    #sub_tree_nodes = {node for initial_node in build_tree._initial_nodes for node in build_tree._tree.predecessors(initial_node)}
+    #sub_tree_nodes = {node for initial_node in build_tree._initial_nodes for node in build_tree._tree.successors(initial_node)}
+    #sub_tree_nodes = {node for node in sub_tree_nodes for package in node.packages if 'python' not in package}
+    #sub_tree_nodes.update(build_tree._initial_nodes)
 
-    # Checking conda-build existence if --container_build is not specified
-    utils.check_if_package_exists('conda-build')
+    # get all paths from estimator to base to see if there's more than just the direct.
+    sub_tree_nodes = set()
+    for source_node in {node for node in build_tree._initial_nodes for package in node.packages if "py-lightgbm-base" in package}:
+        print("Source output: ", source_node.build_command.output_files)
+        for dest_node in {node for node in build_tree._initial_nodes for package in node.packages if "openmpi" in package}:
+            print("Destination output: ", dest_node.build_command.output_files)
+            paths = nx.all_simple_paths(build_tree._tree, source_node, dest_node)
+            for path in paths:
+                print(path)
+            sub_tree_nodes.update({node for path in paths for node in path})
+        print()
+        print("-----------")
+        print()
 
-    # Here, importing BuildTree is intentionally done after checking
-    # existence of conda-build as BuildTree uses conda_build APIs.
-    from open_ce.build_tree import BuildTree  # pylint: disable=import-outside-toplevel
 
-    # If repository_folder doesn't exist, create it
-    if args.repository_folder and not os.path.exists(args.repository_folder):
-        os.mkdir(args.repository_folder)
-
-    # Create the build tree
-    build_tree = BuildTree(env_config_files=args.env_config_file,
-                               python_versions=inputs.parse_arg_list(args.python_versions),
-                               build_types=inputs.parse_arg_list(args.build_types),
-                               mpi_types=inputs.parse_arg_list(args.mpi_types),
-                               cuda_versions=inputs.parse_arg_list(args.cuda_versions),
-                               repository_folder=args.repository_folder,
-                               channels=args.channels_list,
-                               git_location=args.git_location,
-                               git_tag_for_env=args.git_tag_for_env,
-                               git_up_to_date=args.git_up_to_date,
-                               conda_build_config=args.conda_build_configs,
-                               packages=inputs.parse_arg_list(args.packages))
+    sub_tree = build_tree._tree.subgraph(sub_tree_nodes)
 
     graph.export_image(build_tree._tree, os.path.join(args.output_folder, "graph.png"), args.width, args.height) # pylint: disable=protected-access
 

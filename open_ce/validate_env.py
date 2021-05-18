@@ -21,15 +21,16 @@
 from open_ce import env_config
 from open_ce import utils
 from open_ce.inputs import Argument
+from open_ce import inputs
 from open_ce.errors import OpenCEError, Error
 
 COMMAND = 'env'
 
 DESCRIPTION = 'Lint Environment Files'
 
-ARGUMENTS = [Argument.ENV_FILE, Argument.PYTHON_VERSIONS,
-             Argument.BUILD_TYPES, Argument.MPI_TYPES, Argument.CUDA_VERSIONS,
-             Argument.GIT_LOCATION]
+ARGUMENTS = [Argument.ENV_FILE,
+             Argument.GIT_LOCATION] + \
+            inputs.VARIANT_ARGS
 
 def validate_env(args):
     '''Entry Function'''
