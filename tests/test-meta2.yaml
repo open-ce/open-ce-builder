@@ -1,0 +1,10 @@
+package:
+    name: test_package1
+    version: 1.2.3 #[ python == '2.3' ]
+    version: 2.3.4 #[ python == '2.4' ]
+
+build:
+    number: 3 #[ python == '2.3' and build_type == 'cpu']
+    number: 4 #[ python == '2.3' and build_type == 'cuda']
+    number: 1 #[ python == '2.4' and build_type == 'cpu']
+    number: 3 #[ python == '2.4' and build_type == 'cuda']
