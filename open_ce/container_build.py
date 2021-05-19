@@ -89,8 +89,7 @@ def _add_volume(local_path, container_path):
     If local_path is None, an anonymous volume will be used.
     """
     if local_path:
-        if not os.path.isdir(local_path):
-            os.mkdir(local_path)
+        os.makedirs(local_path, exist_ok=True)
         volume_arg = "-v " + local_path + ":" + container_path + ":Z "
     else:
         volume_arg = "-v " + container_path + " "

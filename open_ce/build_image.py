@@ -104,8 +104,7 @@ def build_runtime_container_image(args):
     if not os.path.exists(local_conda_channel):
         raise OpenCEError(Error.INCORRECT_INPUT_PATHS)
 
-    if not os.path.exists(os.path.join(local_conda_channel, TEMP_FILES)):
-        os.mkdir(os.path.join(local_conda_channel, TEMP_FILES))
+    os.makedirs(os.path.join(local_conda_channel, TEMP_FILES), exist_ok=True)
 
     for conda_env_file in parse_arg_list(args.conda_env_files):
         conda_env_file = os.path.abspath(conda_env_file)

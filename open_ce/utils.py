@@ -115,8 +115,8 @@ def validate_dict_schema(dictionary, schema):
 
 def run_command_capture(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=None):
     """Run a shell command and capture the ret_code, stdout and stderr."""
-    if cwd and not os.path.exists(cwd):
-        os.mkdir(cwd)
+    if cwd:
+        os.makedirs(cwd, exist_ok=True)
     process = subprocess.Popen(
         cmd,
         stdout=stdout,
