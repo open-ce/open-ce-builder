@@ -109,8 +109,8 @@ def _create_version_branch(arg_strings=None):# pylint: disable=too-many-branches
         git_utils.checkout(repo_path, args.commit)
     current_commit = git_utils.get_current_branch(repo_path)
     config_file = None
-    if args.conda_build_config:
-        config_file = [args.conda_build_config]
+    if args.conda_build_configs:
+        config_file = args.conda_build_configs
     try:
         git_utils.checkout(repo_path, "HEAD~")
         previous_version = _get_repo_version(repo_path, config_file)

@@ -219,11 +219,11 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
 
             self._initial_nodes += variant_start_nodes
 
-            validate_args.append((self._tree, external_deps, variant_start_nodes))
+            validate_args.append((variant_tree, external_deps, variant_start_nodes))
 
-            self._conda_env_files[variant_string] = get_conda_file_packages(self._tree, external_deps, variant_start_nodes)
+            self._conda_env_files[variant_string] = get_conda_file_packages(variant_tree, external_deps, variant_start_nodes)
             self._test_feedstocks[variant_string] = []
-            for build_command in traverse_build_commands(self._tree, variant_start_nodes):
+            for build_command in traverse_build_commands(variant_tree, variant_start_nodes):
                 self._test_feedstocks[variant_string].append(build_command.repository)
 
         # Execute validate_build_tree in parallel
