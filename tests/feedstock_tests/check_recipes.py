@@ -33,7 +33,6 @@ def main(arg_strings=None):
     args = inputs.parse_args(parser, arg_strings)
     variants = utils.make_variants(args.python_versions, args.build_types, args.mpi_types, args.cuda_versions)
 
-    pr_branch = utils.get_output("git log -1 --format='%H'")
     check_result = True
     for variant in variants:
         pr_build_config_data, pr_config = get_configs(variant, args.conda_build_configs)
