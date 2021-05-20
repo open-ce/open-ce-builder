@@ -48,10 +48,10 @@ def validate_env_config(conda_build_config, env_config_files, variants, reposito
             print('Validating {} for {} : {}'.format(conda_build_config, env_file, variant))
             try:
                 _ = build_tree.BuildTree([env_file],
-                                          variant['python'],
-                                          variant['build_type'],
-                                          variant['mpi_type'],
-                                          variant['cudatoolkit'],
+                                          variant.get('python'),
+                                          variant.get('build_type'),
+                                          variant.get('mpi_type'),
+                                          variant.get('cudatoolkit'),
                                           repository_folder=repository_folder,
                                           conda_build_config=conda_build_config)
             except OpenCEError as err:
