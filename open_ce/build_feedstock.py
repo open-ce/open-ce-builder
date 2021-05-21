@@ -137,7 +137,9 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
             config.prefix_length = 225
             config.output_folder = output_folder
             config.variant_config_files = [config for config in command.conda_build_configs if os.path.exists(config)]
-            config.conda_pkg_format = pkg_format
+            
+            if pkg_format == "conda":
+                config.conda_pkg_format = "2"     # set to .conda format
 
             recipe_conda_build_config = get_conda_build_config()
             if recipe_conda_build_config:

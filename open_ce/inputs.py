@@ -255,7 +255,7 @@ path of \"recipe\"."""))
                                         '--conda_pkg_format',
                                         type=str,
                                         default=utils.DEFAULT_PKG_FORMAT,
-                                        help='Conda package format to be used. Default is conda_v2.'))
+                                        help='Conda package format to be used, such as "tarball" or "conda".'))
 
 def make_parser(arguments, *args, formatter_class=OpenCEFormatter, **kwargs):
     '''

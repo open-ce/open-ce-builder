@@ -532,7 +532,7 @@ def test_build_env_conda_pkg_format(mocker):
         'open_ce.build_tree.BuildTree',
     )
 
-    pkg_format = "2"
+    pkg_format = "conda"
     arg_strings = ["build", build_env.COMMAND,
                   "--conda_pkg_format", pkg_format, "tests/test-env1.yaml"]
     opence._main(arg_strings)

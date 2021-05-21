@@ -261,5 +261,5 @@ def test_build_feedstock_conda_pkg_format(mocker):
         'conda_build.api.build',
     )	
 
-    pkg_format = "2"
+    pkg_format = "conda"
     opence._main(["build", build_feedstock.COMMAND, "--conda_pkg_format", pkg_format])
