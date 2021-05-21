@@ -133,7 +133,7 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
                 continue
 
             config = get_or_merge_config(None, variant=variant)
-            config.skip_existing = True
+            config.skip_existing = False
             config.prefix_length = 225
             config.output_folder = output_folder
             config.variant_config_files = [config for config in command.conda_build_configs if os.path.exists(config)]
