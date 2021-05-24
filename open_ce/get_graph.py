@@ -22,6 +22,7 @@ import os
 from open_ce.inputs import Argument
 from open_ce import graph
 from open_ce import build_env
+from open_ce import utils
 
 COMMAND = "graph"
 
@@ -34,7 +35,9 @@ ARGUMENTS = build_env.ARGUMENTS + \
 def export_graph(args):
     '''Entry Function'''
     build_tree = build_env.construct_build_tree(args)
-
-    graph.export_image(build_tree._tree, os.path.join(args.output_folder, "graph.png"), args.width, args.height) # pylint: disable=protected-access
+    os.makedirs(args.output_folder, exist_ok=True)
+    graph_output = os.path.join(args.output_folder, utils.DEFAULT_GRAPH_FILE)
+    graph.export_image(build_tree._tree, graph_output, args.width, args.height) # pylint: disable=protected-access
+    print("Build graph successfully output to: {}".format(graph_output))
 
 ENTRY_FUNCTION = export_graph
