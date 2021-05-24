@@ -24,7 +24,7 @@ from open_ce import build_feedstock
 from open_ce import container_build
 from open_ce import utils
 from open_ce import inputs
-from open_ce.inputs import Argument
+from open_ce.inputs import Argument, ENV_BUILD_ARGS
 from open_ce import test_feedstock
 from open_ce.errors import OpenCEError, Error
 
@@ -32,22 +32,10 @@ COMMAND = "env"
 
 DESCRIPTION = 'Build conda environment as part of Open-CE'
 
-ARGUMENTS = [Argument.CONDA_BUILD_CONFIG,
-             Argument.OUTPUT_FOLDER,
-             Argument.CHANNELS,
-             Argument.ENV_FILE,
-             Argument.PACKAGES,
-             Argument.REPOSITORY_FOLDER,
-             Argument.PYTHON_VERSIONS,
-             Argument.BUILD_TYPES,
-             Argument.MPI_TYPES,
-             Argument.CUDA_VERSIONS,
-             Argument.SKIP_BUILD_PACKAGES,
+ARGUMENTS = ENV_BUILD_ARGS + \
+            [Argument.SKIP_BUILD_PACKAGES,
              Argument.RUN_TESTS,
              Argument.CONTAINER_BUILD,
-             Argument.GIT_LOCATION,
-             Argument.GIT_TAG_FOR_ENV,
-             Argument.GIT_UP_TO_DATE,
              Argument.TEST_LABELS,
              Argument.CONTAINER_BUILD_ARGS,
              Argument.CONTAINER_TOOL]
@@ -79,7 +67,6 @@ def _run_tests(build_tree, test_labels, conda_env_files):
 
 def build_env(args):
     '''Entry Function'''
-
     utils.check_conda_build_configs_exist(args.conda_build_configs)
 
     if args.container_build:
@@ -88,31 +75,11 @@ def build_env(args):
         container_build.build_with_container_tool(args, sys.argv)
         return
 
-    # Checking conda-build existence if --container_build is not specified
-    utils.check_if_package_exists('conda-build')
-
-    # Here, importing BuildTree is intentionally done after checking
+    # Importing BuildTree is intentionally done here because it checks for the
     # existence of conda-build as BuildTree uses conda_build APIs.
-    from open_ce.build_tree import BuildTree  # pylint: disable=import-outside-toplevel
+    from open_ce.build_tree import construct_build_tree  # pylint: disable=import-outside-toplevel
 
-    # If repository_folder doesn't exist, create it
-    if args.repository_folder:
-        os.makedirs(args.repository_folder, exist_ok=True)
-
-    # Create the build tree
-    build_tree = BuildTree(env_config_files=args.env_config_file,
-                               python_versions=inputs.parse_arg_list(args.python_versions),
-                               build_types=inputs.parse_arg_list(args.build_types),
-                               mpi_types=inputs.parse_arg_list(args.mpi_types),
-                               cuda_versions=inputs.parse_arg_list(args.cuda_versions),
-                               repository_folder=args.repository_folder,
-                               channels=args.channels_list,
-                               git_location=args.git_location,
-                               git_tag_for_env=args.git_tag_for_env,
-                               git_up_to_date=args.git_up_to_date,
-                               conda_build_config=args.conda_build_configs,
-                               packages=inputs.parse_arg_list(args.packages))
-
+    build_tree = construct_build_tree(args)
     # Generate conda environment files
     conda_env_files = build_tree.write_conda_env_files(output_folder=os.path.abspath(args.output_folder),
                                                        path=os.path.abspath(args.output_folder))

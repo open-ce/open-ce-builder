@@ -17,6 +17,7 @@
 """
 
 import networkx as nx
+import matplotlib.pyplot as plt
 
 class OpenCEGraph(nx.DiGraph):
     """
@@ -78,3 +79,13 @@ class OpenCEGraph(nx.DiGraph):
             newdict = attr.copy()
             newdict.update(dd)
             self.add_edge(u, v, **newdict)
+
+def export_image(graph, output_file, x=50, y=50):
+    '''
+    Export a plot of a graph using matplotlib.
+    '''
+    f = plt.figure()
+    f.set_figwidth(x)
+    f.set_figheight(y)
+    nx.draw_circular(graph, with_labels = True)
+    plt.savefig(output_file)

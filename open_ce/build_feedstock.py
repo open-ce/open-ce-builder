@@ -29,11 +29,10 @@ COMMAND = 'feedstock'
 
 DESCRIPTION = 'Build conda packages as part of Open-CE'
 
-ARGUMENTS = [Argument.CONDA_BUILD_CONFIG, Argument.OUTPUT_FOLDER,
-             Argument.CHANNELS, Argument.PYTHON_VERSIONS,
-             Argument.BUILD_TYPES, Argument.MPI_TYPES,
-             Argument.CUDA_VERSIONS, Argument.RECIPE_CONFIG_FILE,
-             Argument.RECIPES, Argument.WORKING_DIRECTORY,
+ARGUMENTS = inputs.PRIMARY_BUILD_ARGS + \
+            [Argument.RECIPE_CONFIG_FILE,
+             Argument.RECIPES,
+             Argument.WORKING_DIRECTORY,
              Argument.LOCAL_SRC_DIR]
 
 def get_conda_build_config():
