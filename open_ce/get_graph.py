@@ -21,7 +21,6 @@ import os
 
 from open_ce.inputs import Argument, ENV_BUILD_ARGS
 from open_ce import graph
-from open_ce.build_tree import construct_build_tree
 from open_ce import utils
 
 COMMAND = "graph"
@@ -34,6 +33,10 @@ ARGUMENTS = ENV_BUILD_ARGS + \
 
 def export_graph(args):
     '''Entry Function'''
+    # Importing BuildTree is intentionally done here because it checks for the
+    # existence of conda-build as BuildTree uses conda_build APIs.
+    from open_ce.build_tree import construct_build_tree  # pylint: disable=import-outside-toplevel
+
     build_tree = construct_build_tree(args)
     os.makedirs(args.output_folder, exist_ok=True)
     graph_output = os.path.join(args.output_folder, utils.DEFAULT_GRAPH_FILE)

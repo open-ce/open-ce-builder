@@ -75,7 +75,7 @@ def build_env(args):
         container_build.build_with_container_tool(args, sys.argv)
         return
 
-    # Here, importing BuildTree is intentionally done after checking
+    # Importing BuildTree is intentionally done here because it checks for the
     # existence of conda-build as BuildTree uses conda_build APIs.
     from open_ce.build_tree import construct_build_tree  # pylint: disable=import-outside-toplevel
 
