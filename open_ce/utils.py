@@ -17,7 +17,6 @@
 """
 
 import os
-import sys
 import subprocess
 import errno
 from itertools import product
@@ -76,13 +75,11 @@ def remove_version(package):
     return package.split()[0].split("=")[0]
 
 def check_if_package_exists(package):
-    '''Checks if conda-build is installed and exits if it is not'''
+    '''Checks if a package is installed'''
     try:
         pkg_resources.get_distribution(package)
-    except pkg_resources.DistributionNotFound:
-        print("Cannot find `{}`, please see https://github.com/open-ce/open-ce-builder#requirements"
-              " for a list of requirements.".format(package))
-        sys.exit(1)
+    except pkg_resources.DistributionNotFound as exc:
+        raise OpenCEError(Error.PACKAGE_NOT_FOUND, package) from exc
 
 def make_schema_type(data_type,required=False):
     '''Make a schema type tuple.'''

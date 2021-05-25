@@ -65,6 +65,8 @@ class Error(Enum):
     CONDA_IO_ERROR = (34, "IO error occurred while reading version information from conda environment file '{}'.")
     SCHEMA_VERSION_MISMATCH = (35, "Open-CE Env file '{}' expects to be built with Open-CE Builder [{}]. " +
                                     "But this version is '{}'.")
+    PACKAGE_NOT_FOUND = (36, "Cannot find `{}`, please see https://github.com/open-ce/open-ce-builder#requirements" +
+                             " for a list of requirements.")
 
 class OpenCEError(Exception):
     """

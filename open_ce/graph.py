@@ -17,7 +17,7 @@
 """
 
 import networkx as nx
-import matplotlib.pyplot as plt
+from open_ce.utils import check_if_package_exists
 
 class OpenCEGraph(nx.DiGraph):
     """
@@ -84,6 +84,8 @@ def export_image(graph, output_file, x=50, y=50):
     '''
     Export a plot of a graph using matplotlib.
     '''
+    check_if_package_exists('matplotlib')
+    import matplotlib.pyplot as plt # pylint: disable=import-outside-toplevel
     f = plt.figure()
     f.set_figwidth(x)
     f.set_figheight(y)
