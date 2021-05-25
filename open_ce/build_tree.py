@@ -19,14 +19,20 @@
 import os
 
 import networkx
-from open_ce import graph
+
 from open_ce import utils
+utils.check_if_package_exists('conda-build')
+
+# pylint: disable=wrong-import-position,wrong-import-order
+from open_ce import graph
 from open_ce import env_config
 from open_ce import validate_config
 from open_ce import build_feedstock
 from open_ce.errors import OpenCEError, Error
 from open_ce.conda_env_file_generator import CondaEnvFileGenerator
 from open_ce.build_command import BuildCommand
+from open_ce import inputs
+# pylint: enable=wrong-import-position,wrong-import-order
 
 class DependencyNode():
     """
@@ -598,3 +604,27 @@ def get_conda_file_packages(build_commands, external_deps, starting_nodes=None):
     This function makes the conda env file generator for the installable packages.
     '''
     return CondaEnvFileGenerator(get_installable_packages(build_commands, external_deps, starting_nodes))
+
+def construct_build_tree(args):
+    '''
+    Common function to make a build_tree from args.
+    '''
+    utils.check_conda_build_configs_exist(args.conda_build_configs)
+
+    # If repository_folder doesn't exist, create it
+    if args.repository_folder:
+        os.makedirs(args.repository_folder, exist_ok=True)
+
+    # Create the build tree
+    return BuildTree(env_config_files=args.env_config_file,
+                     python_versions=inputs.parse_arg_list(args.python_versions),
+                     build_types=inputs.parse_arg_list(args.build_types),
+                     mpi_types=inputs.parse_arg_list(args.mpi_types),
+                     cuda_versions=inputs.parse_arg_list(args.cuda_versions),
+                     repository_folder=args.repository_folder,
+                     channels=args.channels_list,
+                     git_location=args.git_location,
+                     git_tag_for_env=args.git_tag_for_env,
+                     git_up_to_date=args.git_up_to_date,
+                     conda_build_config=args.conda_build_configs,
+                     packages=inputs.parse_arg_list(args.packages))

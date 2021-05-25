@@ -25,6 +25,7 @@ requirements:
     - jinja2
     - python
     - git
+    - matplotlib
 
 test:
   commands:
