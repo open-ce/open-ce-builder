@@ -287,7 +287,6 @@ ENV_BUILD_ARGS = PRIMARY_BUILD_ARGS + \
                  GIT_ARGS + \
                  [Argument.ENV_FILE,
                   Argument.PACKAGES]
->>>>>>> main
 
 def make_parser(arguments, *args, formatter_class=OpenCEFormatter, **kwargs):
     '''
