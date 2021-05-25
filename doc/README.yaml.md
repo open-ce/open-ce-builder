@@ -10,8 +10,10 @@
       - [patches](#patches)
       - [channels(feedstock)](#channelsfeedstock)
       - [recipes](#recipes)
+    - [builder_version](#builder_version)
     - [imported_envs](#imported_envs)
     - [channels](#channels)
+    - [conda_build_configs](#conda_build_configs)
     - [git_tag_for_env](#git_tag_for_env)
     - [external_dependencies](#external_dependencies)
 
@@ -54,8 +56,10 @@ packages:              # The environment package name
     recipes:           # Sets name and path of recipe location(s)
     patches:           # Specifies list of patches to be applied to this feedstock
     runtime_package:   # Specifies if the package is needed at runtime for the main frameworks to install
+builder_version:       # Specifies the version of builder tools this file is compatible with.
 imported_envs:         # Used to import content of one env file into another
 channels:              # Defines a channel location for obtaining dependencies
+conda_build_configs:   # Specifies paths of conda_build_config files needed to build the environment
 git_tag_for_env:       # Specify a git tag to use across all packages in environment
 external_dependencies: # Specify a list of external dependencies  for compatibility validation
 ```
@@ -202,6 +206,16 @@ you will see that each of these `path` specifiers has a directory name that is
 present in the feedstock repo, and within each path is a `meta.yaml` file which
 represents the recipe for each separate package.
 
+### builder_version
+
+This keyword specifies the versions of `open-ce-builder` tool this environment file is
+compatible with. This can be used to ensure that there is no schema mismatch
+or incompatibilities. The value can be any valid conda MatchSpec version string.
+
+```yaml
+builder_version: ">=1.0,<3.0"
+```
+
 ### imported_envs
 
 Another stanza type that you might see in some environment files is
@@ -243,6 +257,20 @@ sample URL with the one you want to use):
 ```yaml
 channels:
   - https://public.dhe.ibm.com/ibmdl/export/pub/software/server/ibm-ai/conda/
+```
+
+### conda_build_configs
+
+The `conda_build_configs` specifier lists all of the conda_build_config files that will
+be used to build the environment. These files will be passed to `conda-build` after the
+values provided by the `--conda_build_configs` argument, as well as after the default
+locations for conda_build_config files. This will give conda_build_config files
+specified within an Open-CE file higher priority than those passed in through arguments
+and through default locations.
+
+```yaml
+conda_build_configs:
+  - my_conda_build_config.yaml
 ```
 
 ### git_tag_for_env

@@ -19,56 +19,56 @@
 """
 
 from open_ce import utils
-from open_ce.inputs import Argument
+from open_ce.inputs import ENV_BUILD_ARGS
 from open_ce.errors import OpenCEError, Error
-
-from open_ce import build_tree # pylint: disable=wrong-import-position
 
 COMMAND = 'config'
 
 DESCRIPTION = 'Perform validation on a conda_build_config.yaml file.'
 
-ARGUMENTS = [Argument.CONDA_BUILD_CONFIG, Argument.ENV_FILE,
-             Argument.REPOSITORY_FOLDER, Argument.PYTHON_VERSIONS,
-             Argument.BUILD_TYPES, Argument.MPI_TYPES, Argument.CUDA_VERSIONS]
+ARGUMENTS = ENV_BUILD_ARGS
 
 def validate_config(args):
-    '''Entry Function'''
-    variants = utils.make_variants(args.python_versions, args.build_types, args.mpi_types, args.cuda_versions)
-    validate_env_config(args.conda_build_config, args.env_config_file, variants, args.repository_folder)
-
-def validate_env_config(conda_build_config, env_config_files, variants, repository_folder):
-    '''
+    '''Entry Function
     Validates a lits of Open-CE env files against a conda build config
     for a given set of variants.
     '''
+    # Importing BuildTree is intentionally done here because it checks for the
+    # existence of conda-build as BuildTree uses conda_build APIs.
+    from open_ce.build_tree import construct_build_tree  # pylint: disable=import-outside-toplevel
+
+    variants = utils.make_variants(args.python_versions, args.build_types, args.mpi_types, args.cuda_versions)
+
     for variant in variants:
-        for env_file in env_config_files:
-            print('Validating {} for {} : {}'.format(conda_build_config, env_file, variant))
+        for env_file in args.env_config_file:
+            print('Validating {} for {} : {}'.format(args.conda_build_configs, env_file, variant))
             try:
-                _ = build_tree.BuildTree([env_file],
-                                          variant['python'],
-                                          variant['build_type'],
-                                          variant['mpi_type'],
-                                          variant['cudatoolkit'],
-                                          repository_folder=repository_folder,
-                                          conda_build_config=conda_build_config)
+                args.python_versions = variant.get('python')
+                args.build_types = variant.get('build_type')
+                args.mpi_types = variant.get('mpi_type')
+                args.cuda_versions = variant.get('cudatoolkit')
+                _ = construct_build_tree(args)
             except OpenCEError as err:
-                raise OpenCEError(Error.VALIDATE_CONFIG, conda_build_config, env_file, variant, err.msg) from err
-            print('Successfully validated {} for {} : {}'.format(conda_build_config, env_file, variant))
+                raise OpenCEError(Error.VALIDATE_CONFIG, args.conda_build_configs, env_file, variant, err.msg) from err
+            print('Successfully validated {} for {} : {}'.format(args.conda_build_configs, env_file, variant))
 
 def validate_build_tree(tree, external_deps, start_nodes=None):
     '''
     Check a build tree for dependency compatability.
     '''
+    # Importing BuildTree is intentionally done here because it checks for the
+    # existence of conda-build as BuildTree uses conda_build APIs.
+    from open_ce import build_tree  # pylint: disable=import-outside-toplevel
+
     packages = [package for recipe in build_tree.traverse_build_commands(tree, start_nodes)
                             for package in recipe.packages]
     channels = {channel for recipe in build_tree.traverse_build_commands(tree, start_nodes) for channel in recipe.channels}
+    env_channels = {channel for node in tree.nodes() for channel in node.channels}
     deps = build_tree.get_installable_packages(tree, external_deps, start_nodes, True)
 
     pkg_args = " ".join(["\"{}\"".format(utils.generalize_version(dep)) for dep in deps
                                                                     if not utils.remove_version(dep) in packages])
-    channel_args = " ".join({"-c \"{}\"".format(channel) for channel in channels})
+    channel_args = " ".join({"-c \"{}\"".format(channel) for channel in channels.union(env_channels)})
 
     cli = "conda create --dry-run -n test_conda_dependencies {} {}".format(channel_args, pkg_args)
     ret_code, std_out, std_err = utils.run_command_capture(cli)

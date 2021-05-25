@@ -35,7 +35,7 @@ def main(arg_strings=None):
 
     check_result = True
     for variant in variants:
-        main_build_config_data, main_config = get_configs(variant, args.conda_build_config)
+        main_build_config_data, main_config = get_configs(variant, args.conda_build_configs)
         if not check_recipes(main_build_config_data, main_config, variant):
             check_result = False
             print("Recipe validation failed for variant '{}'.".format(variant))

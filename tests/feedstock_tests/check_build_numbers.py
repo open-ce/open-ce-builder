@@ -41,11 +41,11 @@ def main(arg_strings=None):
     variant_build_results = dict()
     for variant in variants:
         utils.run_and_log("git checkout {}".format(default_branch))
-        main_build_config_data, main_config = get_configs(variant, args.conda_build_config)
+        main_build_config_data, main_config = get_configs(variant, args.conda_build_configs)
         main_build_numbers = get_build_numbers(main_build_config_data, main_config, variant)
 
         utils.run_and_log("git checkout {}".format(pr_branch))
-        pr_build_config_data, pr_config = get_configs(variant, args.conda_build_config)
+        pr_build_config_data, pr_config = get_configs(variant, args.conda_build_configs)
         current_pr_build_numbers = get_build_numbers(pr_build_config_data, pr_config, variant)
 
         print("Build Info for Variant:   {}".format(variant))
@@ -65,7 +65,7 @@ def main(arg_strings=None):
         checks = [current_pr_build_numbers[package]["version"] != main_build_numbers[package]["version"] or
                 int(current_pr_build_numbers[package]["number"]) > int(main_build_numbers[package]["number"])
                     for package in main_build_numbers]
-        variant_build_results[utils.variant_string(variant["python"], variant["build_type"], variant["mpi_type"], variant["cudatoolkit"])] = any(checks)
+        variant_build_results[utils.variant_string(variant.get("python"), variant.get("build_type"), variant.get("mpi_type"), variant.get("cudatoolkit"))] = any(checks)
     assert any(variant_build_results.values()), "At least one package needs to increase the build number or change the version in at least one variant."
 
 if __name__ == '__main__':

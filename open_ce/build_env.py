@@ -19,13 +19,12 @@
 
 import os
 import sys
-import glob
 
 from open_ce import build_feedstock
 from open_ce import container_build
 from open_ce import utils
 from open_ce import inputs
-from open_ce.inputs import Argument
+from open_ce.inputs import Argument, ENV_BUILD_ARGS
 from open_ce import test_feedstock
 from open_ce.errors import OpenCEError, Error
 
@@ -33,22 +32,10 @@ COMMAND = "env"
 
 DESCRIPTION = 'Build conda environment as part of Open-CE'
 
-ARGUMENTS = [Argument.CONDA_BUILD_CONFIG,
-             Argument.OUTPUT_FOLDER,
-             Argument.CHANNELS,
-             Argument.ENV_FILE,
-             Argument.PACKAGES,
-             Argument.REPOSITORY_FOLDER,
-             Argument.PYTHON_VERSIONS,
-             Argument.BUILD_TYPES,
-             Argument.MPI_TYPES,
-             Argument.CUDA_VERSIONS,
-             Argument.SKIP_BUILD_PACKAGES,
+ARGUMENTS = ENV_BUILD_ARGS + \
+            [Argument.SKIP_BUILD_PACKAGES,
              Argument.RUN_TESTS,
              Argument.CONTAINER_BUILD,
-             Argument.GIT_LOCATION,
-             Argument.GIT_TAG_FOR_ENV,
-             Argument.GIT_UP_TO_DATE,
              Argument.TEST_LABELS,
              Argument.CONTAINER_BUILD_ARGS,
              Argument.CONTAINER_TOOL]
@@ -80,50 +67,19 @@ def _run_tests(build_tree, test_labels, conda_env_files):
 
 def build_env(args):
     '''Entry Function'''
-
-    # pylint: disable=too-many-branches
-    if not utils.is_url(args.conda_build_config) and not os.path.exists(args.conda_build_config):
-        raise OpenCEError(Error.CONDA_BUILD_CONFIG_FILE_NOT_FOUND, args.conda_build_config)
-    # pylint: enable=too-many-branches
+    utils.check_conda_build_configs_exist(args.conda_build_configs)
 
     if args.container_build:
         if len(args.cuda_versions.split(',')) > 1:
             raise OpenCEError(Error.TOO_MANY_CUDA)
-        try:
-            container_build.build_with_container_tool(args, sys.argv)
-        finally:
-            for conda_env_file in glob.glob(os.path.join(args.output_folder, "*.yaml")):
-                utils.replace_conda_env_channels(conda_env_file,
-                                                 os.path.abspath(os.path.join(container_build.HOME_PATH,
-                                                                              utils.DEFAULT_OUTPUT_FOLDER)),
-                                                 os.path.abspath(args.output_folder))
+        container_build.build_with_container_tool(args, sys.argv)
         return
 
-    # Checking conda-build existence if --container_build is not specified
-    utils.check_if_conda_build_exists()
-
-    # Here, importing BuildTree is intentionally done after checking
+    # Importing BuildTree is intentionally done here because it checks for the
     # existence of conda-build as BuildTree uses conda_build APIs.
-    from open_ce.build_tree import BuildTree  # pylint: disable=import-outside-toplevel
+    from open_ce.build_tree import construct_build_tree  # pylint: disable=import-outside-toplevel
 
-    # If repository_folder doesn't exist, create it
-    if args.repository_folder and not os.path.exists(args.repository_folder):
-        os.mkdir(args.repository_folder)
-
-    # Create the build tree
-    build_tree = BuildTree(env_config_files=args.env_config_file,
-                               python_versions=inputs.parse_arg_list(args.python_versions),
-                               build_types=inputs.parse_arg_list(args.build_types),
-                               mpi_types=inputs.parse_arg_list(args.mpi_types),
-                               cuda_versions=inputs.parse_arg_list(args.cuda_versions),
-                               repository_folder=args.repository_folder,
-                               channels=args.channels_list,
-                               git_location=args.git_location,
-                               git_tag_for_env=args.git_tag_for_env,
-                               git_up_to_date=args.git_up_to_date,
-                               conda_build_config=args.conda_build_config,
-                               packages=inputs.parse_arg_list(args.packages))
-
+    build_tree = construct_build_tree(args)
     # Generate conda environment files
     conda_env_files = build_tree.write_conda_env_files(output_folder=os.path.abspath(args.output_folder),
                                                        path=os.path.abspath(args.output_folder))
@@ -138,8 +94,7 @@ def build_env(args):
                 try:
                     print("Building " + build_command.recipe)
                     build_feedstock.build_feedstock_from_command(build_command,
-                                                            output_folder=os.path.abspath(args.output_folder),
-                                                            conda_build_config=os.path.abspath(args.conda_build_config))
+                                                            output_folder=os.path.abspath(args.output_folder))
                 except OpenCEError as exc:
                     raise OpenCEError(Error.BUILD_RECIPE, build_command.repository, exc.msg) from exc
             else:

@@ -21,6 +21,8 @@ import os
 import argparse
 from enum import Enum, unique
 from open_ce import utils
+from open_ce.errors import Error, show_warning
+from open_ce import __version__ as open_ce_version
 
 class OpenCEFormatter(argparse.ArgumentDefaultsHelpFormatter):
     """
@@ -37,10 +39,11 @@ class OpenCEFormatter(argparse.ArgumentDefaultsHelpFormatter):
 class Argument(Enum):
     '''Enum for Arguments'''
     CONDA_BUILD_CONFIG = (lambda parser: parser.add_argument(
-                                        '--conda_build_config',
+                                        '--conda_build_configs',
                                         type=str,
                                         default=None,
-                                        help="Location of conda_build_config.yaml file. Can "
+                                        help="Comma delimited list of locations of "
+                                             "conda_build_config.yaml files. Can "
                                              "be a valid URL."))
 
     OUTPUT_FOLDER = (lambda parser: parser.add_argument(
@@ -242,6 +245,43 @@ path of \"recipe\"."""))
                                      help="Comma delimited list of template files to initialize with Open-CE "
                                           " information."))
 
+    VERSION = (lambda parser: parser.add_argument(
+                                     '-v',
+                                     '--version',
+                                     action='version',
+                                     version="Open-CE Builder {}".format(open_ce_version)))
+
+    WIDTH = (lambda parser: parser.add_argument(
+                                     '--width',
+                                     type=int,
+                                     default=50,
+                                     help="Width of output graph."))
+
+    HEIGHT = (lambda parser: parser.add_argument(
+                                     '--height',
+                                     type=int,
+                                     default=50,
+                                     help="Height of output graph."))
+
+VARIANT_ARGS = [Argument.PYTHON_VERSIONS,
+                Argument.BUILD_TYPES,
+                Argument.MPI_TYPES,
+                Argument.CUDA_VERSIONS]
+
+GIT_ARGS = [Argument.REPOSITORY_FOLDER,
+            Argument.GIT_LOCATION,
+            Argument.GIT_TAG_FOR_ENV,
+            Argument.GIT_UP_TO_DATE]
+
+PRIMARY_BUILD_ARGS = [Argument.CONDA_BUILD_CONFIG,
+                      Argument.OUTPUT_FOLDER,
+                      Argument.CHANNELS] + \
+                     VARIANT_ARGS
+
+ENV_BUILD_ARGS = PRIMARY_BUILD_ARGS + \
+                 GIT_ARGS + \
+                 [Argument.ENV_FILE,
+                  Argument.PACKAGES]
 
 def make_parser(arguments, *args, formatter_class=OpenCEFormatter, **kwargs):
     '''
@@ -298,7 +338,7 @@ def _create_env_config_paths(args):
 def parse_args(parser, arg_strings=None):
     '''
     Parses input arguments and handles more complex defaults.
-    - conda_build_config: If not passed in the default is with the env file,
+    - conda_build_configs: If not passed in the default is with the env file,
                           if is passed in, otherwise it is  expected to be in
                           the local path.
     '''
@@ -306,21 +346,19 @@ def parse_args(parser, arg_strings=None):
 
     _create_env_config_paths(args)
 
-    if "conda_build_config" in vars(args).keys():
-        if args.conda_build_config is None:
+    if "conda_build_configs" in vars(args).keys():
+        if args.conda_build_configs is None:
             if "env_config_file" in vars(args).keys() and args.env_config_file:
-                args.conda_build_config = os.path.join(os.path.dirname(args.env_config_file[0]),
+                args.conda_build_configs = os.path.join(os.path.dirname(args.env_config_file[0]),
                                                        utils.CONDA_BUILD_CONFIG_FILE)
             else:
-                args.conda_build_config = utils.DEFAULT_CONDA_BUILD_CONFIG
+                args.conda_build_configs = utils.DEFAULT_CONDA_BUILD_CONFIG
 
-        if utils.is_url(args.conda_build_config):
-            args.conda_build_config = utils.download_file(args.conda_build_config,
-                                                          filename=utils.CONDA_BUILD_CONFIG_FILE)
-        elif os.path.exists(args.conda_build_config):
-            args.conda_build_config = os.path.abspath(args.conda_build_config)
-        else:
-            print("WARNING: No valid conda_build_config.yaml file was found. Some recipes may fail to build.")
+        configs = utils.get_conda_build_configs(parse_arg_list(args.conda_build_configs))
+        args.conda_build_configs = configs
+
+        if not configs:
+            show_warning(Error.CONDA_BUILD_CONFIG_NOT_FOUND, utils.CONDA_BUILD_CONFIG_FILE)
 
     return args
 

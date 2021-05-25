@@ -29,11 +29,10 @@ COMMAND = 'feedstock'
 
 DESCRIPTION = 'Build conda packages as part of Open-CE'
 
-ARGUMENTS = [Argument.CONDA_BUILD_CONFIG, Argument.OUTPUT_FOLDER,
-             Argument.CHANNELS, Argument.PYTHON_VERSIONS,
-             Argument.BUILD_TYPES, Argument.MPI_TYPES,
-             Argument.CUDA_VERSIONS, Argument.RECIPE_CONFIG_FILE,
-             Argument.RECIPES, Argument.WORKING_DIRECTORY,
+ARGUMENTS = inputs.PRIMARY_BUILD_ARGS + \
+            [Argument.RECIPE_CONFIG_FILE,
+             Argument.RECIPES,
+             Argument.WORKING_DIRECTORY,
              Argument.LOCAL_SRC_DIR]
 
 def get_conda_build_config():
@@ -97,12 +96,11 @@ def _set_local_src_dir(local_src_dir_arg, recipe, recipe_config_file):
 def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, too-many-locals
                                  recipe_config_file=None,
                                  output_folder=utils.DEFAULT_OUTPUT_FOLDER,
-                                 conda_build_config=utils.DEFAULT_CONDA_BUILD_CONFIG,
                                  local_src_dir=None):
     '''
     Build a feedstock from a build_command object.
     '''
-    utils.check_if_conda_build_exists()
+    utils.check_if_package_exists('conda-build')
 
     # pylint: disable=import-outside-toplevel
     import conda_build.api
@@ -127,10 +125,10 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
                 continue
 
             config = get_or_merge_config(None, variant=variant)
-            config.skip_existing = True
+            config.skip_existing = False
             config.prefix_length = 225
             config.output_folder = output_folder
-            config.variant_config_files = [conda_build_config] if os.path.exists(conda_build_config) else []
+            config.variant_config_files = [config for config in command.conda_build_configs if os.path.exists(config)]
 
             recipe_conda_build_config = get_conda_build_config()
             if recipe_conda_build_config:
@@ -165,7 +163,8 @@ def build_feedstock(args):
                            build_type=args.build_types,
                            mpi_type=args.mpi_types,
                            cudatoolkit=args.cuda_versions,
-                           channels=args.channels_list)
+                           channels=args.channels_list,
+                           conda_build_configs=args.conda_build_configs)
 
     # Before we build, ensure CUDA_HOME is set and warn if there is a version mismatch
     if 'cuda' in command.build_type:
@@ -174,7 +173,6 @@ def build_feedstock(args):
     build_feedstock_from_command(command,
                                  recipe_config_file=args.recipe_config_file,
                                  output_folder=args.output_folder,
-                                 local_src_dir=args.local_src_dir,
-                                 conda_build_config=args.conda_build_config)
+                                 local_src_dir=args.local_src_dir)
 
 ENTRY_FUNCTION = build_feedstock

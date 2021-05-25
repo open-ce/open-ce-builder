@@ -35,7 +35,7 @@ from open_ce import inputs # pylint: disable=wrong-import-position
 def _make_parser():
     ''' Parser input arguments '''
     parser = inputs.make_parser([git_utils.Argument.PUBLIC_ACCESS_TOKEN, git_utils.Argument.REPO_DIR,
-                                    git_utils.Argument.BRANCH],
+                                    git_utils.Argument.BRANCH, git_utils.Argument.SKIPPED_REPOS],
                                     description = 'A script that can be used to cut an open-ce release.')
 
     parser.add_argument(
@@ -109,7 +109,7 @@ def _main(arg_strings=None):
                                 branch=args.branch,
                                 repo_dir=args.repo_dir,
                                 pat=args.pat,
-                                skipped_repos=args.primary_repo,
+                                skipped_repos=[args.primary_repo, ".github"] + inputs.parse_arg_list(args.skipped_repos),
                                 prev_tag=None)
 
     release = git_utils.ask_for_input("Would you like to create a github release?")

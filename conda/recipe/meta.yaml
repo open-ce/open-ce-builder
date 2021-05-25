@@ -1,5 +1,5 @@
 {% set name = "open-ce-builder" %}
-{% set version = "2.0.0" %}
+{% set version = "4.0.0" %}
 
 package:
   name: {{ name }}
@@ -25,6 +25,7 @@ requirements:
     - jinja2
     - python
     - git
+    - matplotlib
 
 test:
   commands:

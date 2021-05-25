@@ -21,20 +21,21 @@ from logging import ERROR, getLogger
 from datetime import datetime
 import functools
 
-import yaml
-
 # Disabling pylint warning "cyclic-import" locally here doesn't work. So, added it in .pylintrc
 # according to https://github.com/PyCQA/pylint/issues/59
-from open_ce.utils import validate_dict_schema, check_if_conda_build_exists, generalize_version # pylint: disable=cyclic-import
+from open_ce.utils import validate_dict_schema, check_if_package_exists, generalize_version # pylint: disable=cyclic-import
 from open_ce.errors import OpenCEError, Error
+import open_ce.yaml_utils
+from open_ce import __version__ as open_ce_version
 
-check_if_conda_build_exists()
+check_if_package_exists('conda-build')
 
 # pylint: disable=wrong-import-position,wrong-import-order
 import conda_build.api
 from conda_build.config import get_or_merge_config
 import conda_build.metadata
 import conda.cli.python_api
+from conda.models.match_spec import MatchSpec
 # pylint: enable=wrong-import-position,wrong-import-order
 
 def render_yaml(path, variants=None, variant_config_files=None, schema=None, permit_undefined_jinja=False):
@@ -101,7 +102,7 @@ def conda_package_info(channels, package):
     for entry in std_out.split("\n\n"):
         _, file_name, rest = entry.partition("file name")
         if file_name:
-            entry = yaml.safe_load(file_name + rest)
+            entry = open_ce.yaml_utils.load(file_name + rest)
             # Convert time string into a timestamp (if there is a timestamp)
             if "timestamp" in entry:
                 entry["timestamp"] = datetime.timestamp(datetime.strptime(entry["timestamp"], '%Y-%m-%d %H:%M:%S %Z'))
@@ -133,3 +134,22 @@ def get_latest_package_info(channels, package):
         if package_info["timestamp"] > retval["timestamp"]:
             retval = package_info
     return retval
+
+def version_matches_spec(spec_string, version=open_ce_version):
+    '''
+    Uses conda version specification syntax to check if version matches spec_string.
+    e.g.
+    version_matches_spec(">=1.2,<1.3", "1.2.1") -> True
+    version_matches_spec(">=1.2,<1.3", "1.3.0") -> False
+    '''
+    match_spec = MatchSpec("test[version='{}']".format(spec_string))
+    query_pkg = {"name": "test", "version": version, "build": "", "build_number": 0}
+    return match_spec.match(query_pkg)
+
+def output_file_to_string(output_file):
+    '''
+    Given a package file name,
+    returns a string that can be used within a conda environment file to reference the package specifically.
+    '''
+    match_spec = MatchSpec.from_dist_str(os.path.basename(output_file))
+    return "{} {} {}".format(match_spec.get("name", ""), match_spec.get("version", ""), match_spec.get("build", "")).strip()

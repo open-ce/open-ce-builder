@@ -16,14 +16,26 @@
 
 import os
 import pathlib
+import glob
+import tempfile
 from collections import Counter
 import networkx
 
+from importlib.util import spec_from_loader, module_from_spec
+from importlib.machinery import SourceFileLoader
+
 test_dir = pathlib.Path(__file__).parent.absolute()
 
+spec = spec_from_loader("opence", SourceFileLoader("opence", os.path.join(test_dir, '..', 'open_ce', 'open-ce-builder')))
+opence = module_from_spec(spec)
+spec.loader.exec_module(opence)
+
+import open_ce.build_env as build_env
 import open_ce.build_tree as build_tree
 import open_ce.conda_env_file_generator as conda_env_file_generator
 import open_ce.utils as utils
+
+external_deps = ["external_pac1    1.2", "external_pack2", "external_pack3=1.2.3"]
 
 def sample_build_commands() :
     retval = networkx.DiGraph()
@@ -34,6 +46,7 @@ def sample_build_commands() :
                                                                                                     build_type="cuda",
                                                                                                     mpi_type="openmpi",
                                                                                                     cudatoolkit="10.2",
+                                                                                                    output_files=["package1a-1.0-py36_cuda10.2.tar.bz2", "package1b-1.0-py36_cuda10.2.tar.bz2"],
                                                                                                     run_dependencies=["python     >=3.6", "pack1    1.0", "pack2   >=2.0", "pack3 9b"]))
     node2 = build_tree.DependencyNode(packages=["package2a"], build_command=build_tree.BuildCommand("recipe2",
                                                                                                     "repo2",
@@ -42,6 +55,7 @@ def sample_build_commands() :
                                                                                                     build_type="cpu",
                                                                                                     mpi_type="system",
                                                                                                     cudatoolkit="10.2",
+                                                                                                    output_files=["package2a-1.0-py36_cuda10.2.tar.bz2"],
                                                                                                     run_dependencies=["python ==3.6", "pack1 >=1.0", "pack2   ==2.0", "pack3 3.3 build"]))
     node3 = build_tree.DependencyNode(packages=["package3a", "package3b"], build_command=build_tree.BuildCommand("recipe3",
                                                                                                     "repo3",
@@ -50,6 +64,7 @@ def sample_build_commands() :
                                                                                                     build_type="cpu",
                                                                                                     mpi_type="openmpi",
                                                                                                     cudatoolkit="10.2",
+                                                                                                    output_files=["package3a-1.0-py37_cuda10.2.tar.bz2", "package3b-1.0-py37_cuda10.2.tar.bz2"],
                                                                                                     run_dependencies=["python 3.7", "pack1==1.0", "pack2 <=2.0", "pack3   3.0.*",
                                                                                                                     "pack4=1.15.0=py38h6ffa863_0"]))
     node4 = build_tree.DependencyNode(packages=["package4a", "package4b"], build_command=build_tree.BuildCommand("recipe4",
@@ -59,6 +74,7 @@ def sample_build_commands() :
                                                                                                     build_type="cuda",
                                                                                                     mpi_type="system",
                                                                                                     cudatoolkit="10.2",
+                                                                                                    output_files=["package4a-1.0-py37_cuda.tar.bz2", "package4b-1.0-py37_cuda.tar.bz2"],
                                                                                                     run_dependencies=["pack1==1.0", "pack2 <=2.0", "pack3-suffix 3.0"]))
 
     retval.add_node(node1)
@@ -66,34 +82,31 @@ def sample_build_commands() :
     retval.add_node(node3)
     retval.add_node(node4)
 
-    return retval
+    for dep in external_deps:
+        retval.add_node(build_tree.DependencyNode({dep}))
 
-external_deps = ["external_pac1    1.2", "external_pack2", "external_pack3=1.2.3"]
+    return retval
 
 def test_conda_env_file_content():
     '''
     Tests that the conda env file content are being populated correctly
     '''
-    packages = build_tree.get_installable_packages(sample_build_commands(), external_deps, starting_nodes=[list(sample_build_commands().nodes)[0]])
-    mock_conda_env_file_generator = conda_env_file_generator.CondaEnvFileGenerator(packages)
-    expected_deps = set(["python >=3.6", "pack1 1.0.*", "pack2 >=2.0", "package1a", "package1b",
+    mock_conda_env_file_generator = build_tree.get_conda_file_packages(sample_build_commands(), external_deps, starting_nodes=[list(sample_build_commands().nodes)[0]])
+    expected_deps = set(["python >=3.6", "pack1 1.0.*", "pack2 >=2.0", "package1a 1.0.* py36_cuda10.2", "package1b 1.0.* py36_cuda10.2",
                          "pack3 9b", "external_pac1 1.2.*", "external_pack2", "external_pack3=1.2.3"])
     assert Counter(expected_deps) == Counter(mock_conda_env_file_generator._dependency_set)
 
-    packages = build_tree.get_installable_packages(sample_build_commands(), [], starting_nodes=[list(sample_build_commands().nodes)[1]])
-    mock_conda_env_file_generator = conda_env_file_generator.CondaEnvFileGenerator(packages)
-    expected_deps = set(["python ==3.6.*", "pack1 >=1.0", "pack2 ==2.0.*", "package2a", "pack3 3.3.* build"])
+    mock_conda_env_file_generator = build_tree.get_conda_file_packages(sample_build_commands(), [], starting_nodes=[list(sample_build_commands().nodes)[1]])
+    expected_deps = set(["python ==3.6.*", "pack1 >=1.0", "pack2 ==2.0.*", "package2a 1.0.* py36_cuda10.2", "pack3 3.3.* build"])
     assert Counter(expected_deps) == Counter(mock_conda_env_file_generator._dependency_set)
 
-    packages = build_tree.get_installable_packages(sample_build_commands(), external_deps, starting_nodes=[list(sample_build_commands().nodes)[2]])
-    mock_conda_env_file_generator = conda_env_file_generator.CondaEnvFileGenerator(packages)
-    expected_deps = set(["python 3.7.*", "pack1==1.0.*", "pack2 <=2.0", "pack3 3.0.*", "package3a", "package3b",
+    mock_conda_env_file_generator = build_tree.get_conda_file_packages(sample_build_commands(), external_deps, starting_nodes=[list(sample_build_commands().nodes)[2]])
+    expected_deps = set(["python 3.7.*", "pack1==1.0.*", "pack2 <=2.0", "pack3 3.0.*", "package3a 1.0.* py37_cuda10.2", "package3b 1.0.* py37_cuda10.2",
                      "pack4=1.15.0=py38h6ffa863_0", "external_pac1 1.2.*", "external_pack2", "external_pack3=1.2.3"])
     assert Counter(expected_deps) == Counter(mock_conda_env_file_generator._dependency_set)
 
-    packages = build_tree.get_installable_packages(sample_build_commands(), [], starting_nodes=[list(sample_build_commands().nodes)[3]])
-    mock_conda_env_file_generator = conda_env_file_generator.CondaEnvFileGenerator(packages)
-    expected_deps = set(["pack1==1.0.*", "pack2 <=2.0", "pack3-suffix 3.0.*", "package4a", "package4b"])
+    mock_conda_env_file_generator = build_tree.get_conda_file_packages(sample_build_commands(), [], starting_nodes=[list(sample_build_commands().nodes)[3]])
+    expected_deps = set(["pack1==1.0.*", "pack2 <=2.0", "pack3-suffix 3.0.*", "package4a 1.0.* py37_cuda", "package4b 1.0.* py37_cuda"])
     assert Counter(expected_deps) == Counter(mock_conda_env_file_generator._dependency_set)
 
 def test_create_channels():
@@ -114,3 +127,32 @@ def test_get_variant_string_no_string(mocker):
     mocker.patch('builtins.open', mocker.mock_open(read_data=test_env_file))
 
     assert conda_env_file_generator.get_variant_string("some_file.yaml") is None
+
+def test_variant_specific_env_files():
+    tmp_test = tempfile.TemporaryDirectory()
+    base_arg_strings = ["build", build_env.COMMAND, "--skip_build",
+                   "--python_versions", "3.7", "--repository_folder", os.path.join(tmp_test.name, "repos"),
+                   "--output_folder", os.path.join(tmp_test.name, "output"),
+                   "https://raw.githubusercontent.com/open-ce/open-ce/open-ce-v1.2.1/envs/opence-env.yaml"]
+
+    opence._main(base_arg_strings + ["--build_types", "cuda,cpu"])
+    file = open(glob.glob(os.path.join(tmp_test.name, "output", "*cpu*.yaml"))[0],mode='r')
+    cpu_env = file.read()
+    file.close()
+    assert "cuda" not in cpu_env
+    file = open(glob.glob(os.path.join(tmp_test.name, "output", "*cuda*.yaml"))[0],mode='r')
+    cuda_env = file.read()
+    file.close()
+    assert "cuda" in cuda_env
+
+    opence._main(base_arg_strings + ["--build_types", "cpu,cuda"])
+    file = open(glob.glob(os.path.join(tmp_test.name, "output", "*cpu*.yaml"))[0],mode='r')
+    cpu_env = file.read()
+    file.close()
+    assert "cuda" not in cpu_env
+    file = open(glob.glob(os.path.join(tmp_test.name, "output", "*cuda*.yaml"))[0],mode='r')
+    cuda_env = file.read()
+    file.close()
+    assert "cuda" in cuda_env
+
+    tmp_test.cleanup()

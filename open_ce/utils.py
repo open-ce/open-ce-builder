@@ -24,8 +24,9 @@ from itertools import product
 import re
 import urllib.request
 import tempfile
+import multiprocessing as mp
 import pkg_resources
-from open_ce.errors import OpenCEError, Error
+from open_ce.errors import OpenCEError, Error, show_warning
 from open_ce import inputs
 
 
@@ -52,27 +53,35 @@ OPEN_CE_INFO_FILE = "open-ce-info.yaml"
 CONTAINER_TOOLS = ["podman", "docker"]
 DEFAULT_CONTAINER_TOOL = next(filter(lambda tool: os.system("which {} &> /dev/null".format(tool))
                                       == 0, CONTAINER_TOOLS), None)
+NUM_THREAD_POOL = 16
+OPEN_CE_VERSION_STRING = "Open-CE Version"
+DEFAULT_GRAPH_FILE = "graph.png"
 
 def make_variants(python_versions=DEFAULT_PYTHON_VERS, build_types=DEFAULT_BUILD_TYPES, mpi_types=DEFAULT_MPI_TYPES,
 cuda_versions=DEFAULT_CUDA_VERS):
     '''Create a cross product of possible variant combinations.'''
-    variants = { 'python' : inputs.parse_arg_list(python_versions),
-                 'build_type' : inputs.parse_arg_list(build_types),
-                 'mpi_type' :  inputs.parse_arg_list(mpi_types),
-                 'cudatoolkit' : inputs.parse_arg_list(cuda_versions)}
-    return [dict(zip(variants,y)) for y in product(*variants.values())]
+    results = []
+    for build_type in inputs.parse_arg_list(build_types):
+        variants = { 'python' : inputs.parse_arg_list(python_versions),
+                     'build_type' : [build_type],
+                     'mpi_type' :  inputs.parse_arg_list(mpi_types)}
+        if build_type == "cuda":
+            variants["cudatoolkit"] = inputs.parse_arg_list(cuda_versions)
+        results += [dict(zip(variants,y)) for y in product(*variants.values())]
+
+    return results
 
 def remove_version(package):
     '''Remove conda version from dependency.'''
     return package.split()[0].split("=")[0]
 
-def check_if_conda_build_exists():
+def check_if_package_exists(package):
     '''Checks if conda-build is installed and exits if it is not'''
     try:
-        pkg_resources.get_distribution('conda-build')
+        pkg_resources.get_distribution(package)
     except pkg_resources.DistributionNotFound:
-        print("Cannot find `conda_build`, please see https://github.com/open-ce/open-ce-builder#requirements"
-              " for a list of requirements.")
+        print("Cannot find `{}`, please see https://github.com/open-ce/open-ce-builder#requirements"
+              " for a list of requirements.".format(package))
         sys.exit(1)
 
 def make_schema_type(data_type,required=False):
@@ -107,8 +116,8 @@ def validate_dict_schema(dictionary, schema):
 
 def run_command_capture(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=None):
     """Run a shell command and capture the ret_code, stdout and stderr."""
-    if cwd and not os.path.exists(cwd):
-        os.mkdir(cwd)
+    if cwd:
+        os.makedirs(cwd, exist_ok=True)
     process = subprocess.Popen(
         cmd,
         stdout=stdout,
@@ -153,8 +162,9 @@ def variant_string_to_dict(var_string):
     variants = var_string.split("-")
     variant_dict = { 'python' : variants[0][2:],
                      'build_type' : variants[1],
-                     'mpi_type' : variants[2],
-                     'cudatoolkit' : variants[3] }
+                     'mpi_type' : variants[2] }
+    if variant_dict["build_type"] == "cuda":
+        variant_dict["cudatoolkit"] = variants[3]
 
     return variant_dict
 
@@ -302,15 +312,15 @@ def replace_conda_env_channels(conda_env_file, original_channel, new_channel):
     Regex 'original_channel' is replaced with 'new_channel'
     '''
     #pylint: disable=import-outside-toplevel
-    import yaml
+    import open_ce.yaml_utils
 
     with open(conda_env_file, 'r') as file_handle:
-        env_info = yaml.safe_load(file_handle)
+        env_info = open_ce.yaml_utils.load(file_handle)
 
     env_info['channels'] = [re.sub(original_channel, new_channel, channel) for channel in env_info['channels']]
 
     with open(conda_env_file, 'w') as file_handle:
-        yaml.safe_dump(env_info, file_handle)
+        open_ce.yaml_utils.dump(env_info, file_handle)
 
 def get_branch_of_tag(git_tag):
     """
@@ -353,3 +363,90 @@ def git_clone(git_url, git_tag, location, up_to_date=False):
         raise OpenCEError(Error.CLONE_REPO, git_url)
 
     return clone_successful
+
+def get_container_tool_ver(tool):
+    '''
+    Returns the version of the tool
+    '''
+    cmd = tool + " version"
+    output = get_output(cmd)
+    version = None
+    for line in output.split("\n"):
+        matched = re.match(r'(\s*Version:\s* (.*))', line)
+        if matched:
+            version = matched.group(2)
+            version = version.strip()
+            break
+
+    return version
+
+def get_open_ce_version(conda_env_file):
+    '''
+    Parses conda environment files to retrieve Open-CE version
+    '''
+    conda_file = None
+    version = "open-ce"
+    try:
+        with open(conda_env_file, 'r') as conda_file:
+            lines = conda_file.readlines()
+            for line in lines:
+                matched = re.match(r'(#'+OPEN_CE_VERSION_STRING+':(.*))', line)
+                if matched:
+                    version = matched.group(2)
+                    break
+
+    except IOError:
+        show_warning(Error.CONDA_IO_ERROR, conda_env_file)
+    finally:
+        if conda_file:
+            conda_file.close()
+    return version
+
+def _run_helper(func, *args, **kwargs):
+    try:
+        return func(*args, **kwargs)
+    except SystemExit as err:
+        raise OpenCEError(Error.ERROR, str(err)) from err
+
+def run_in_parallel(function, arguments):
+    '''
+    Run function in parallel across all arguments.
+    '''
+    new_args = [tuple([function]) + x for x in arguments]
+    pool = mp.Pool(NUM_THREAD_POOL)
+    retval = pool.starmap(_run_helper, new_args)
+    pool.close()
+    return retval
+
+def get_conda_build_configs(configs):
+    '''
+    Get a list of all of the conda_build_config file paths.
+    If a path is a URL it will be downloaded.
+    If a path doesn't exist, it won't be added.
+    '''
+    result = []
+    for config in configs:
+        if is_url(config):
+            result.append(download_file(config, filename=CONDA_BUILD_CONFIG_FILE))
+        elif os.path.exists(config):
+            result.append(os.path.abspath(config))
+
+    return result
+
+def check_conda_build_configs_exist(conda_build_configs):
+    '''
+    Verify that all non-url conda_build_config files exist locally.
+    '''
+    for conda_build_config in conda_build_configs:
+        if not is_url(conda_build_config) and not os.path.exists(conda_build_config):
+            raise OpenCEError(Error.CONDA_BUILD_CONFIG_FILE_NOT_FOUND, conda_build_config)
+
+def expanded_path(path, relative_to=None):
+    '''
+    Expand a path relative to another file.
+    '''
+    result = os.path.expanduser(path)
+    if not os.path.isabs(result) and relative_to:
+        result = os.path.join(os.path.dirname(relative_to), result)
+
+    return result

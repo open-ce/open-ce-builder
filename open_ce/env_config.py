@@ -20,12 +20,15 @@ import os
 from enum import Enum, unique, auto
 
 from open_ce import utils
-from open_ce.errors import OpenCEError, Error
+from open_ce.errors import OpenCEError, Error, show_warning
+from open_ce import __version__ as open_ce_version
 
 @unique
 class Key(Enum):
     '''Enum for Env Config Keys'''
+    builder_version = auto()
     imported_envs = auto()
+    conda_build_configs = auto()
     channels = auto()
     packages = auto()
     git_tag_for_env = auto()
@@ -49,10 +52,12 @@ _PACKAGE_SCHEMA ={
 }
 
 _ENV_CONFIG_SCHEMA = {
+    Key.builder_version.name: utils.make_schema_type(str),
     Key.imported_envs.name: utils.make_schema_type([str]),
     Key.channels.name: utils.make_schema_type([str]),
     Key.git_tag_for_env.name: utils.make_schema_type(str),
     Key.external_dependencies.name: utils.make_schema_type([str]),
+    Key.conda_build_configs.name: utils.make_schema_type([str]),
     Key.packages.name: utils.make_schema_type([_PACKAGE_SCHEMA])
 }
 
@@ -64,10 +69,26 @@ def _validate_config_file(env_file, variants):
     try:
         if utils.is_url(env_file):
             env_file = utils.download_file(env_file)
-        meta_obj = conda_utils.render_yaml(env_file, variants=variants, schema=_ENV_CONFIG_SCHEMA)
-        if not (Key.packages.name in meta_obj.keys() or Key.imported_envs.name in meta_obj.keys()):
-            raise OpenCEError(Error.CONFIG_CONTENT)
-        meta_obj[Key.opence_env_file_path.name] = env_file
+
+        # First, partially render yaml to validate builder version number.
+        version_check_obj = conda_utils.render_yaml(env_file, permit_undefined_jinja=True)
+        if Key.builder_version.name in version_check_obj.keys():
+            if not conda_utils.version_matches_spec(version_check_obj.get(Key.builder_version.name)):
+                raise OpenCEError(Error.SCHEMA_VERSION_MISMATCH,
+                                  env_file,
+                                  version_check_obj.get(Key.builder_version.name),
+                                  open_ce_version)
+
+        meta_obj = None
+        try:
+            meta_obj = conda_utils.render_yaml(env_file, variants=variants, schema=_ENV_CONFIG_SCHEMA)
+            if not (Key.packages.name in meta_obj.keys() or Key.imported_envs.name in meta_obj.keys()):
+                raise OpenCEError(Error.CONFIG_CONTENT)
+            meta_obj[Key.opence_env_file_path.name] = env_file
+        except OpenCEError as exc:
+            if Key.builder_version.name not in version_check_obj.keys():
+                show_warning(Error.SCHEMA_VERSION_NOT_FOUND, env_file, Key.builder_version.name)
+            raise exc
         return meta_obj
     except (Exception, SystemExit) as exc: #pylint: disable=broad-except
         raise OpenCEError(Error.ERROR, "Error in {}:\n  {}".format(env_file, str(exc))) from exc
@@ -91,9 +112,8 @@ def load_env_config_files(config_files, variants):
         if not imported_envs:
             imported_envs = []
         for imported_env in imported_envs:
-            imported_env = os.path.expanduser(imported_env)
-            if not utils.is_url(imported_env) and not os.path.isabs(imported_env):
-                imported_env = os.path.join(os.path.dirname(env_config_files[0]), imported_env)
+            if not utils.is_url(imported_env):
+                imported_env = utils.expanded_path(imported_env, relative_to=env_config_files[0])
             if not imported_env in env_config_files and not imported_env in loaded_files:
                 new_config_files += [imported_env]
 

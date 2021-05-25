@@ -18,10 +18,10 @@ import os
 from collections import Counter
 import pathlib
 import pytest
-import networkx
 
 test_dir = pathlib.Path(__file__).parent.absolute()
 
+from open_ce import graph
 import open_ce.build_tree as build_tree
 import open_ce.utils as utils
 import open_ce.env_config as env_config
@@ -154,7 +154,7 @@ def test_feedstock_args():
 
         build_tree.BuildCommand("recipe2", "repo2", {"pkg1", "pkg2"},
                                 python="3.2", mpi_type="system",
-                                build_type="cuda", cudatoolkit="10.0")
+                                build_type="cuda", cudatoolkit="10.0", conda_build_configs=["conda_build_config5.yaml"])
     ]
 
     for build_command in build_commands:
@@ -173,6 +173,8 @@ def test_feedstock_args():
             assert "--mpi_types {}".format(build_command.mpi_type) in build_string
         if build_command.cudatoolkit:
             assert "--cuda_versions {}".format(build_command.cudatoolkit) in build_string
+        if build_command.conda_build_configs:
+            assert "--conda_build_configs \'{}\'".format(",".join(build_command.conda_build_configs)) in build_string
 
 def test_clone_repo(mocker):
     '''
@@ -401,29 +403,42 @@ def test_check_recipe_path_package_field():
                     assert package.get(env_config.Key.recipe_path.name) == "package11_recipe_path"
 
 def sample_build_commands() :
-    retval = networkx.DiGraph()
+    retval = graph.OpenCEGraph()
     node1 = build_tree.DependencyNode(packages=["package1a", "package1b"], build_command=build_tree.BuildCommand("recipe1",
                                                                                                                  "repo1",
                                                                                                                  ["package1a", "package1b"],
                                                                                                                  python="2.6",
                                                                                                                  build_type="cuda",
                                                                                                                  mpi_type="openmpi",
-                                                                                                                 cudatoolkit="10.2"))
+                                                                                                                 cudatoolkit="10.2",
+                                                                                                                 output_files=["package1a-py26-cuda-openmpi", "package1b-py26-cuda-openmpi"]))
     node2 = build_tree.DependencyNode(packages=["package2a"], build_command=build_tree.BuildCommand("recipe2",
                                                                                                     "repo2",
                                                                                                     ["package2a"],
                                                                                                     python="2.6",
                                                                                                     build_type="cpu",
                                                                                                     mpi_type="openmpi",
-                                                                                                    cudatoolkit="10.2"))
+                                                                                                    cudatoolkit="10.2",
+                                                                                                    output_files=["package2a-noarch"]))
     node3 = build_tree.DependencyNode(packages=["package3a", "package3b"], build_command=build_tree.BuildCommand("recipe3",
                                                                                                                  "repo3",
-                                                                                                                 ["package3a", "package3b"]))
+                                                                                                                 ["package3a", "package3b"],
+                                                                                                                 output_files=["package3a-py26-cpu-openmpi", "package3b-py26-cpu-openmpi"]))
+    # This node is a duplicate and nothing should happen when it's added.
+    node4 = build_tree.DependencyNode(packages=["package2a"], build_command=build_tree.BuildCommand("recipe2",
+                                                                                                    "repo2",
+                                                                                                    ["package2a"],
+                                                                                                    python="3.6",
+                                                                                                    build_type="cuda",
+                                                                                                    mpi_type="system",
+                                                                                                    cudatoolkit="10.2",
+                                                                                                    output_files=["package2a-noarch"]))
 
     retval.add_node(node1)
     retval.add_node(node2)
     retval.add_node(node3)
-    retval.add_edge(node1, node2)
+    retval.add_node(node4)
+    retval.add_edge(node1, node4)
     retval.add_edge(node1, node3)
     retval.add_edge(node3, node2)
 
@@ -457,24 +472,27 @@ def test_build_tree_cycle_fail():
     '''
     Tests that a cycle is detected in a build_tree.
     '''
-    cycle_build_commands = networkx.DiGraph()
+    cycle_build_commands = graph.OpenCEGraph()
     node1 = build_tree.DependencyNode(packages=["package1a", "package1b"], build_command=build_tree.BuildCommand("recipe1",
                                                                                                                  "repo1",
                                                                                                                  ["package1a", "package1b"],
                                                                                                                  python="2.6",
                                                                                                                  build_type="cuda",
                                                                                                                  mpi_type="openmpi",
-                                                                                                                 cudatoolkit="10.2"))
+                                                                                                                 cudatoolkit="10.2",
+                                                                                                                 output_files=["package1a-py26-cuda-openmpi", "package1b-py26-cuda-openmpi"]))
     node2 = build_tree.DependencyNode(packages=["package2a"], build_command=build_tree.BuildCommand("recipe2",
                                                                                                     "repo2",
                                                                                                     ["package2a"],
                                                                                                     python="2.6",
                                                                                                     build_type="cpu",
                                                                                                     mpi_type="openmpi",
-                                                                                                    cudatoolkit="10.2"))
+                                                                                                    cudatoolkit="10.2",
+                                                                                                    output_files=["package2a-py26-cuda-openmpi"]))
     node3 = build_tree.DependencyNode(packages=["package3a", "package3b"], build_command=build_tree.BuildCommand("recipe3",
                                                                                                                  "repo3",
-                                                                                                                 ["package3a", "package3b"]))
+                                                                                                                 ["package3a", "package3b"],
+                                                                                                                 output_files=["package3a-py26-cuda-openmpi", "package3b-py26-cuda-openmpi"]))
 
     cycle_build_commands.add_node(node1)
     cycle_build_commands.add_node(node2)
@@ -506,7 +524,7 @@ def test_get_installable_package_for_non_runtime_package():
     Tests that `get_installable_package` doesn't return the packages marked as
     non-runtime i.e. build command with runtime_package=False.
     '''
-    build_commands = networkx.DiGraph()
+    build_commands = graph.OpenCEGraph()
     node1 = build_tree.DependencyNode(packages=["package1a"], build_command=build_tree.BuildCommand("recipe1",
                                                                                                                 "repo1",
                                                                                                                 ["package1a"],
@@ -514,20 +532,24 @@ def test_get_installable_package_for_non_runtime_package():
                                                                                                                 python="2.6",
                                                                                                                 build_type="cuda",
                                                                                                                 mpi_type="openmpi",
-                                                                                                                cudatoolkit="10.2"))
+                                                                                                                cudatoolkit="10.2",
+                                                                                                                output_files=["package1a-py26-cuda-openmpi"]))
     node2 = build_tree.DependencyNode(packages=["package2a"], build_command=build_tree.BuildCommand("recipe2",
                                                                                                     "repo2",
                                                                                                     ["package2a"],
                                                                                                     python="2.6",
                                                                                                     build_type="cpu",
                                                                                                     mpi_type="openmpi",
-                                                                                                    cudatoolkit="10.2"))
+                                                                                                    cudatoolkit="10.2",
+                                                                                                    output_files=["package2a-py26-cuda-openmpi"]))
 
     build_commands.add_node(node1)
     build_commands.add_node(node2)
     build_commands.add_edge(node1, node2)
 
     external_deps = ["external_pac1    1.2", "external_pack2", "external_pack3=1.2.3"]
+    for dep in external_deps:
+        build_commands.add_node(build_tree.DependencyNode({dep}))
     packages = build_tree.get_installable_packages(build_commands, external_deps)
     assert not "package1a" in packages
 
@@ -535,20 +557,23 @@ def test_get_installable_package_with_no_duplicates():
     '''
     This test verifies that get_installable_package doesn't return duplicate dependencies.
     '''
-    build_commands = networkx.DiGraph()
+    build_commands = graph.OpenCEGraph()
     node1 = build_tree.DependencyNode(packages=["package1a"], build_command=build_tree.BuildCommand("recipe1",
                                                                                                     "repo1",
                                                                                                     ["package1a"],
                                                                                                     runtime_package=False,
+                                                                                                    output_files=["package1a-1.0-py37_4.tar.bz2"],
                                                                                                     run_dependencies=["python 3.7", "pack1a==1.0"]))
     node2 = build_tree.DependencyNode(packages=["package2a"], build_command=build_tree.BuildCommand("recipe2",
                                                                                                     "repo2",
                                                                                                     ["package2a"],
+                                                                                                    output_files=["package2a-2.0-py37.tar.bz2"],
                                                                                                     run_dependencies=["python 3.7", "pack1 ==1.0", "pack1", "pack2 <=2.0",
                                                                                                     "pack2 2.0", "pack3   3.0.*", "pack2"]))
     node3 = build_tree.DependencyNode(packages=["package3a", "package3b"], build_command=build_tree.BuildCommand("recipe3",
                                                                                                                 "repo3",
                                                                                                                 ["package3a", "package3b"],
+                                                                                                                output_files=["package3a-1.5-cpu.tar.bz2", "package3b-1.5-cpu.tar.bz2"],
                                                                                                                 run_dependencies=["pack1 >=1.0", "pack1", "pack4 <=2.0",
                                                                                                                 "pack2 2.0", "pack3   3.0.*", "pack4"]))
 
@@ -557,14 +582,16 @@ def test_get_installable_package_with_no_duplicates():
     build_commands.add_node(node3)
 
     external_deps = ["external_pac1    1.2"]
+    for dep in external_deps:
+        build_commands.add_node(build_tree.DependencyNode({dep}))
     packages = build_tree.get_installable_packages(build_commands, external_deps)
-    assert not "package1a" in packages
-    assert not "pack1a" in packages
+    assert not "package1a" in str(packages)
+    assert not "pack1a" in str(packages)
 
     print("Packages: ", packages)
 
-    expected_packages = ["package2a", "python 3.7.*", "pack1 ==1.0.*", "pack2 <=2.0", "pack3 3.0.*",
-                         "package3a", "package3b", "pack4 <=2.0", "external_pac1 1.2.*"]
+    expected_packages = ["package2a 2.0.* py37", "python 3.7.*", "pack1 ==1.0.*", "pack2 <=2.0", "pack3 3.0.*",
+                         "package3a 1.5.* cpu", "package3b 1.5.* cpu", "pack4 <=2.0", "external_pac1 1.2.*"]
     assert Counter(packages) == Counter(expected_packages)
 
 def test_get_build_copmmand_dependencies():

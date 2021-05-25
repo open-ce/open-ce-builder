@@ -70,7 +70,8 @@ def test_build_env(mocker, capsys):
         side_effect=dirTracker.validate_chdir
     )
     mocker.patch(
-        'open_ce.validate_config.validate_build_tree'
+        'open_ce.utils.run_command_capture',
+        return_value=(True, "", "")
     )
     #            +-------+
     #     +------+   15  +-----+
@@ -230,8 +231,8 @@ def test_build_env(mocker, capsys):
     )
 
     env_file = os.path.join(test_dir, 'test-env2.yaml')
-    opence._main(["build", build_env.COMMAND, env_file, "--cuda_versions", cuda_version])
-    validate_and_remove_conda_env_files(cuda_versions=cuda_version)
+    opence._main(["build", build_env.COMMAND, env_file, "--cuda_versions", cuda_version, "--build_types", "cuda"])
+    validate_and_remove_conda_env_files(build_types="cuda", cuda_versions=cuda_version)
 
     #---The seventh test specifies specific packages that should be built (plus their dependencies)
     package_deps = {"package11": ["package15"],
@@ -300,7 +301,7 @@ def validate_and_remove_conda_env_files(py_versions=utils.DEFAULT_PYTHON_VERS,
     for variant in variants:
         cuda_env_file = os.path.join(os.getcwd(), utils.DEFAULT_OUTPUT_FOLDER,
                                      "{}{}.yaml".format(utils.CONDA_ENV_FILENAME_PREFIX,
-                                     utils.variant_string(variant['python'], variant['build_type'], variant['mpi_type'], variant['cudatoolkit'])))
+                                     utils.variant_string(variant.get('python'), variant.get('build_type'), variant.get('mpi_type'), variant.get('cudatoolkit'))))
         assert os.path.exists(cuda_env_file)
         # Remove the file once it's existence is verified
         os.remove(cuda_env_file)
@@ -438,6 +439,17 @@ def test_build_env_if_no_conda_build(mocker):
     mocker.patch('pkg_resources.get_distribution', return_value=None)
     with pytest.raises(OpenCEError):
         opence._main(arg_strings)
+
+def test_system_exit(mocker):
+    '''
+    Test that SystemExit exceptions are handled properly from within pool.
+    '''
+    mocker.patch("open_ce.build_tree.BuildTree._get_repo", side_effect=SystemExit(1))
+
+    arg_strings = ["build", build_env.COMMAND, "tests/test-env1.yaml"]
+    with pytest.raises(OpenCEError) as exc:
+        opence._main(arg_strings)
+    assert "Unexpected Error: 1" in str(exc.value)
 
 def test_run_tests(mocker):
     '''

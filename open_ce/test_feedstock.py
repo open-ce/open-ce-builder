@@ -111,8 +111,7 @@ class TestCommand():
         """
         print("Running: " + self.name)
         # Create file containing bash commands
-        if not os.path.exists(self.working_dir):
-            os.mkdir(self.working_dir)
+        os.makedirs(self.working_dir, exist_ok=True)
         with tempfile.NamedTemporaryFile(mode='w+t', dir=self.working_dir, delete=False) as temp:
             temp.write("set -e\n")
             temp.write(self.get_test_command(conda_env_file))

@@ -104,12 +104,16 @@ def test_execute_in_container(mocker):
     container = "my_container"
     command = "my_script.py arg1 arg2"
     container_tool = "docker"
+    user_option = ""
+    if container_build._use_root_user(container_tool):
+        user_option = "--user root "
 
     mocker.patch(
         'os.system',
         return_value=0,
-        side_effect=(lambda x: helpers.validate_cli(x, expect=[container_tool + " exec " + container,
-                                                               "my_script.py arg1 arg2"])))
+        side_effect=(lambda x: helpers.validate_cli(x, expect=[container_tool + 
+                                                       " exec {}".format(user_option) + container,
+                                                       "my_script.py arg1 arg2"])))
 
     container_build._execute_in_container(container, command, container_tool)
 
@@ -118,7 +122,7 @@ def make_args(command="build",
               output_folder="condabuild",
               env_config_file=None,
               provided_env_files=None,
-              conda_build_config="conda_build_config.yaml",
+              conda_build_config=None,
               build_types="cuda",
               cuda_versions="10.2",
               container_build_args="",
@@ -129,7 +133,7 @@ def make_args(command="build",
                      output_folder = output_folder,
                      env_config_file = env_config_file if env_config_file else ["open-ce.yaml"],
                      provided_env_files = provided_env_files if provided_env_files else ["open-ce.yaml"],
-                     conda_build_config = conda_build_config,
+                     conda_build_configs = conda_build_config if conda_build_config else ["tests/conda_build_config.yaml"],
                      build_types=build_types,
                      cuda_versions=cuda_versions,
                      container_build_args=container_build_args,
