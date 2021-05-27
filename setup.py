@@ -30,7 +30,7 @@ REQUIRED_PACKAGES = [
     "requests",
     "jinja2",
     "networkx",
-    "matplotlib",
+    #"matplotlib", broken on ppc
 ]
 
 setup(
