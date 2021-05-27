@@ -89,6 +89,7 @@ usage: open-ce build env [-h] [--conda_build_configs CONDA_BUILD_CONFIG]
                          [--test_labels TEST_LABELS]
                          [--container_build_args CONTAINER_BUILD_ARGS]
                          [--container_tool CONTAINER_TOOL]
+                         [--conda_pkg_format CONDA_PKG_FORMAT]
                          env_config_file [env_config_file ...]
 
 positional arguments:
@@ -168,6 +169,9 @@ optional arguments:
   --container_tool CONTAINER_TOOL
                         Container tool to be used. Default is taken from the
                         system, podman has preference over docker. (default: )
+  --conda_pkg_format CONDA_PKG_FORMAT
+                        Conda package format to be used, such as "tarball" or
+                        "conda". (default: tarball)
 ==============================================================================
 ```
 
@@ -236,6 +240,7 @@ usage: open-ce build feedstock [-h] [--conda_build_configs CONDA_BUILD_CONFIG]
                                [--recipes RECIPE_LIST]
                                [--working_directory WORKING_DIRECTORY]
                                [--local_src_dir LOCAL_SRC_DIR]
+                               [--conda_pkg_format CONDA_PKG_FORMAT]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -286,6 +291,9 @@ optional arguments:
   --local_src_dir LOCAL_SRC_DIR
                         Path where package source is downloaded in the form of
                         RPM/Debians/Tar. (default: None)
+  --conda_pkg_format CONDA_PKG_FORMAT
+                        Conda package format to be used, such as "tarball" or
+                        "conda". (default: tarball)
 ==============================================================================
 ```
 
