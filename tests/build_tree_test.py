@@ -624,9 +624,9 @@ def test_dag_cleanup():
     mock_build_tree._tree = sample_build_commands()
 
     external_node = build_tree.DependencyNode(packages=["external_package"])
-    nodes = mock_build_tree._tree.nodes()
-    parent_node = list(mock_build_tree._tree.nodes())[0]
-    child_node = list(mock_build_tree._tree.nodes())[1]
+    nodes = list(mock_build_tree._tree.nodes())
+    parent_node = nodes[0]
+    child_node = nodes[1]
     mock_build_tree._tree.add_node(external_node)
     mock_build_tree._tree.add_edge(parent_node, external_node)
     mock_build_tree._tree.add_edge(external_node, child_node)
