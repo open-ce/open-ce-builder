@@ -33,7 +33,8 @@ ARGUMENTS = inputs.PRIMARY_BUILD_ARGS + \
             [Argument.RECIPE_CONFIG_FILE,
              Argument.RECIPES,
              Argument.WORKING_DIRECTORY,
-             Argument.LOCAL_SRC_DIR]
+             Argument.LOCAL_SRC_DIR,
+             Argument.CONDA_PKG_FORMAT]
 
 def get_conda_build_config():
     '''
@@ -96,7 +97,8 @@ def _set_local_src_dir(local_src_dir_arg, recipe, recipe_config_file):
 def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, too-many-locals
                                  recipe_config_file=None,
                                  output_folder=utils.DEFAULT_OUTPUT_FOLDER,
-                                 local_src_dir=None):
+                                 local_src_dir=None,
+                                 pkg_format=utils.DEFAULT_PKG_FORMAT):
     '''
     Build a feedstock from a build_command object.
     '''
@@ -129,6 +131,9 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
             config.prefix_length = 225
             config.output_folder = output_folder
             config.variant_config_files = [config for config in command.conda_build_configs if os.path.exists(config)]
+
+            if pkg_format == "conda":
+                config.conda_pkg_format = "2"     # set to .conda format
 
             recipe_conda_build_config = get_conda_build_config()
             if recipe_conda_build_config:
@@ -169,6 +174,7 @@ def build_feedstock(args):
     build_feedstock_from_command(command,
                                  recipe_config_file=args.recipe_config_file,
                                  output_folder=args.output_folder,
-                                 local_src_dir=args.local_src_dir)
+                                 local_src_dir=args.local_src_dir,
+                                 pkg_format=args.conda_pkg_format)
 
 ENTRY_FUNCTION = build_feedstock
