@@ -461,19 +461,19 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         Can be used to get the name of all a node's dependencies.
         '''
         deps = [dep for dep in self._tree.successors(node) if dep.build_command]
+
+        # Get unique package groups.
         dep_packages = []
         for dep in deps:
             if not dep.packages in dep_packages:
                 dep_packages += [dep.packages]
+
+        # Get one dependency for each package group.
         terms = []
         for dep_package in dep_packages:
-            # This is choosing only one package for each set of equivalent dependencies to use as a dependency:
             terms += [next(x.build_command.name() for x in deps if dep_package == x.packages)]
-            # To logically or all equivalent dependencies for this package use the following instead:
-            # terms += [" || ".join(x.build_command.name() for x in deps if dep_package == x.packages)]
-        if terms:
-            return "\"{}\"".format(" && ".join("( {} )".format(x) for x in terms))
-        return ""
+
+        return ", ".join("'{}'".format(x) for x in terms)
 
     def remove_external_deps_from_dag(self):
         '''
