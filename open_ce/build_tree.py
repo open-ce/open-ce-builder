@@ -467,7 +467,10 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
                 dep_packages += [dep.packages]
         ors = []
         for dep_package in dep_packages:
-            ors += [" || ".join(x.build_command.name() for x in deps if dep_package == x.packages)]
+            # This is choosing only one package for each set of equivalent dependencies to use as a dependency:
+            ors += [next(x.build_command.name() for x in deps if dep_package == x.packages)]
+            # To logically or all equivalent dependencies for this package use the following instead:
+            # ors += [" || ".join(x.build_command.name() for x in deps if dep_package == x.packages)]
         if ors:
             return "\"{}\"".format(" && ".join("( {} )".format(x) for x in ors))
         return ""
