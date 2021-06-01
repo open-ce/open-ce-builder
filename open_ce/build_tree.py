@@ -500,6 +500,11 @@ def _create_commands(repository, runtime_package, recipe_path,
     recipes_from_config = config_data.get('recipes', [])
     if recipes_from_config is None:
         recipes_from_config = []
+
+    channels_from_config = config_data.get('channels', [])
+    if channels_from_config is not None:
+        channels += channels_from_config
+
     for recipe in recipes_from_config:
         if recipes and not recipe.get('name') in recipes:
             continue
