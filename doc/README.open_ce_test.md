@@ -76,6 +76,9 @@ usage: open-ce test env [-h] [--conda_build_configs CONDA_BUILD_CONFIG]
                         [--git_location GIT_LOCATION]
                         [--git_tag_for_env GIT_TAG_FOR_ENV]
                         [--test_labels TEST_LABELS]
+                        [--container_build_args CONTAINER_BUILD_ARGS]
+                        [--container_tool CONTAINER_TOOL]
+                        [--conda_pkg_format CONDA_PKG_FORMAT]
                         env_config_file [env_config_file ...]
 
 positional arguments:
@@ -138,6 +141,17 @@ optional arguments:
   --test_labels TEST_LABELS
                         Comma delimited list of labels indicating what tests
                         to run. (default: )
+  --container_build_args CONTAINER_BUILD_ARGS
+                        Container build arguments like environment variables
+                        to be set in the container or cpus or gpus to be used
+                        such as "--build-arg ENV1=test1 --cpuset-cpus 0,1".
+                        (default: )
+  --container_tool CONTAINER_TOOL
+                        Container tool to be used. Default is taken from the
+                        system, podman has preference over docker. (default: )
+  --conda_pkg_format CONDA_PKG_FORMAT
+                        Conda package format to be used, such as "tarball" or
+                        "conda". (default: tarball)
 ==============================================================================
 ```
 

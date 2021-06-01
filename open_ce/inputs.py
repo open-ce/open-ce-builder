@@ -251,6 +251,11 @@ path of \"recipe\"."""))
                                      action='version',
                                      version="Open-CE Builder {}".format(open_ce_version)))
 
+    CONDA_PKG_FORMAT = (lambda parser: parser.add_argument(
+                                        '--conda_pkg_format',
+                                        type=str,
+                                        default=utils.DEFAULT_PKG_FORMAT,
+                                        help='Conda package format to be used, such as "tarball" or "conda".'))
     WIDTH = (lambda parser: parser.add_argument(
                                      '--width',
                                      type=int,
