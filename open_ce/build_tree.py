@@ -465,14 +465,14 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         for dep in deps:
             if not dep.packages in dep_packages:
                 dep_packages += [dep.packages]
-        ors = []
+        terms = []
         for dep_package in dep_packages:
             # This is choosing only one package for each set of equivalent dependencies to use as a dependency:
-            ors += [next(x.build_command.name() for x in deps if dep_package == x.packages)]
+            terms += [next(x.build_command.name() for x in deps if dep_package == x.packages)]
             # To logically or all equivalent dependencies for this package use the following instead:
-            # ors += [" || ".join(x.build_command.name() for x in deps if dep_package == x.packages)]
-        if ors:
-            return "\"{}\"".format(" && ".join("( {} )".format(x) for x in ors))
+            # terms += [" || ".join(x.build_command.name() for x in deps if dep_package == x.packages)]
+        if terms:
+            return "\"{}\"".format(" && ".join("( {} )".format(x) for x in terms))
         return ""
 
     def remove_external_deps_from_dag(self):
