@@ -235,6 +235,8 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         # Execute validate_build_tree in parallel
         utils.run_in_parallel(validate_config.validate_build_tree, validate_args)
 
+        self.remove_external_deps_from_dag()
+
     def _get_repo(self, env_config_data, package):
         # If the feedstock value starts with any of the SUPPORTED_GIT_PROTOCOLS, treat it as a url. Otherwise
         # combine with git_location and append "-feedstock.git"
@@ -458,8 +460,34 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         '''
         Can be used to get the name of all a node's dependencies.
         '''
-        return ", ".join("'{}'".format(dep.build_command.name()) for dep in networkx.descendants(self._tree, node)
-                                                                    if dep.build_command)
+        deps = [dep for dep in self._tree.successors(node) if dep.build_command]
+
+        # Get unique package groups.
+        dep_packages = []
+        for dep in deps:
+            if not dep.packages in dep_packages:
+                dep_packages += [dep.packages]
+
+        # Get one dependency for each package group.
+        terms = []
+        for dep_package in dep_packages:
+            terms += [next(x.build_command.name() for x in deps if dep_package == x.packages)]
+
+        return ", ".join("'{}'".format(x) for x in terms)
+
+    def remove_external_deps_from_dag(self):
+        '''
+        Bypasses all external dependencies in the DAG and removes them.
+        '''
+        external_nodes = {node for node in self._tree.nodes() if node.build_command is None}
+        for node in external_nodes:
+            predecessors = self._tree.predecessors(node)
+            successors = self._tree.successors(node)
+            for predecessor in predecessors:
+                for successor in successors:
+                    self._tree.add_edge(predecessor, successor)
+            self._tree.remove_node(node)
+
 
 def _create_edges(tree):
     # Use set() to create a copy of the nodes since they change during the loop.
