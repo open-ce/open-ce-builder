@@ -374,9 +374,12 @@ def run_in_parallel(function, arguments):
     '''
     new_args = [tuple([function]) + x for x in arguments]
     pool = mp.Pool(NUM_THREAD_POOL)
-    retval = pool.starmap(_run_helper, new_args)
-    pool.close()
-    return retval
+    try:
+        retval = pool.starmap(_run_helper, new_args)
+        return retval
+    finally:
+        pool.close()
+        pool.join()
 
 def get_conda_build_configs(configs):
     '''
