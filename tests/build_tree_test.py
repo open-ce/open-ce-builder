@@ -615,3 +615,24 @@ def test_search_no_timestamp(mocker):
     package_info = conda_utils.get_latest_package_info([], package)
 
     print("Package Info: ", package_info)
+
+def test_dag_cleanup():
+    '''
+    Test that external packages are removed during cleanup.
+    '''
+    mock_build_tree = TestBuildTree([], "3.6", "cpu", "openmpi", "10.2")
+    mock_build_tree._tree = sample_build_commands()
+
+    external_node = build_tree.DependencyNode(packages=["external_package"])
+    nodes = list(mock_build_tree._tree.nodes())
+    parent_node = nodes[0]
+    child_node = nodes[1]
+    mock_build_tree._tree.add_node(external_node)
+    mock_build_tree._tree.add_edge(parent_node, external_node)
+    mock_build_tree._tree.add_edge(external_node, child_node)
+
+    mock_build_tree.remove_external_deps_from_dag()
+
+    assert not external_node in mock_build_tree._tree.nodes()
+    assert child_node in mock_build_tree._tree.successors(parent_node)
+    assert parent_node in mock_build_tree._tree.predecessors(child_node)
