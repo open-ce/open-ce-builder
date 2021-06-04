@@ -173,7 +173,7 @@ def generalize_version(package):
     package = re.sub(r'\s+', ' ', package)
 
     # Check if we want to add .* to the end of versions
-    py_matched = re.match(r'([\w-]+)([\s=<>]*)(\d[.\d*\w*]*)([=\s]*.*)', package)
+    py_matched = re.match(r'([\w-]+)([\s=<>]*)(\d[.\d*\w*!]*)([=\s]*.*)', package)
 
     if py_matched:
         name = py_matched.group(1)

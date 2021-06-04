@@ -70,6 +70,12 @@ def get_output_file_paths(meta, variants):
     config = get_or_merge_config(None, variant=variants)
     config.verbose = False
 
+    # Fix case where output build string hasn't been properly added to the package build string
+    # This has been seen in the torchvision-cpu package.
+    output = meta.get_rendered_output(meta.name(), permit_undefined_jinja=True)
+    if output:
+        conda_build.metadata.combine_top_level_metadata_with_output(meta, output)
+
     out_files = conda_build.api.get_output_file_paths(meta, config=config)
 
     # Only return the package name and the parent directory. This will show where within the output

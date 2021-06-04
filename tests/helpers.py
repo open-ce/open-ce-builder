@@ -118,15 +118,17 @@ def make_render_result(package_name, build_reqs=None, run_reqs=None, host_reqs=N
     if not host_reqs: host_reqs = []
     if not test_reqs: test_reqs = []
     if not string: string = ''
+    meta = {'package': {'name': package_name, 'version': '1.2.3'},
+            'source': {'git_url': 'https://github.com/'+package_name+'.git', 'git_rev': 'v0.19.5', 'patches': []},
+            'build': {'number': '1', 'string': 'py37_1'},
+            'requirements': {'build': build_reqs, 'host': host_reqs, 'run': run_reqs + ["upstreamdep1   2.3","upstreamdep2   2"], 'run_constrained': []},
+            'test': {'requires': test_reqs},
+            'about': {'home': 'https://github.com/'+package_name+'.git', 'license_file': 'LICENSE', 'summary': package_name},
+            'extra': {'final': True}}
 
-    retval = [(Namespace(meta={
-                            'package': {'name': package_name, 'version': '1.2.3'},
-                            'source': {'git_url': 'https://github.com/'+package_name+'.git', 'git_rev': 'v0.19.5', 'patches': []},
-                            'build': {'number': '1', 'string': 'py37_1'},
-                            'requirements': {'build': build_reqs, 'host': host_reqs, 'run': run_reqs + ["upstreamdep1   2.3","upstreamdep2   2"], 'run_constrained': []},
-                            'test': {'requires': test_reqs},
-                            'about': {'home': 'https://github.com/'+package_name+'.git', 'license_file': 'LICENSE', 'summary': package_name},
-                            'extra': {'final': True}}),
+    retval = [(Namespace(meta=meta,
+                         name=lambda : package_name,
+                         get_rendered_output=lambda name,permit_undefined_jinja : meta),
                       True,
                       None)]
     return retval
