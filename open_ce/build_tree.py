@@ -336,7 +336,8 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         try:
             while deps:
                 node = deps.pop()
-                ancestor_build_cmds = {x.build_command for x in networkx.ancestors(dep_graph, node) if x.build_command is not None}
+                ancestor_build_cmds = {x.build_command for x in networkx.ancestors(dep_graph, node)
+                                                                if x.build_command is not None}
                 ancestor_channels = []
                 for cmd in ancestor_build_cmds:
                     ancestor_channels += cmd.channels
@@ -345,7 +346,8 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
                     if package_name in seen:
                         continue
                     seen.add(package_name)
-                    package_info = conda_utils.get_latest_package_info(self._channels + node.channels + ancestor_channels, package)
+                    package_info = conda_utils.get_latest_package_info(self._channels + node.channels + ancestor_channels,
+                                                                       package)
                     dep_graph.add_node(DependencyNode({package}))
                     for dep in package_info['dependencies']:
                         dep_name = utils.remove_version(dep)
