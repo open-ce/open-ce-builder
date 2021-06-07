@@ -82,25 +82,38 @@ def get_output_file_paths(meta, variants):
 
     return result
 
-def conda_package_info(channels, package):
+# Turn the channels argument into a tuple so that it can be hashable. This will allow the results
+# of get_latest_package_info to be memoizable using lru_cache.
+def _make_hashable_args(function):
+    def wrapper(channels, package):
+        return function(tuple(channels), package)
+    return wrapper
+
+@_make_hashable_args
+@functools.lru_cache(maxsize=1024)
+def get_latest_package_info(channels, package):
     '''
-    Get conda package info.
+    Get the latest conda package info with the following priority:
+      1. Most Specific Channel
+      2. Latest Version
+      3. Largest Build Number
+      4. Latest Timestamp
     '''
-    # Call "conda search --info" through conda's cli.python_api
-    all_channel_args = sum(([["-c", channel]] for channel in channels), [[]])
-    entries = list()
-    fail_count = 0
+    channel_args = sum(([["--override-channels", "-c", channel]] for channel in channels), [])
+    channel_args += [[]] # use defaults for last search
     all_std_out = ""
-    for index, channel_args in enumerate(all_channel_args):
-        search_args = ["--info", generalize_version(package)] + channel_args
+    for channel_arg in channel_args:
+        search_args = ["--info", generalize_version(package)] + channel_arg
         # Setting the logging level allows us to ignore unnecessary output
         getLogger("conda.common.io").setLevel(ERROR)
-        std_out, _, ret_code = conda.cli.python_api.run_command(conda.cli.python_api.Commands.SEARCH,
+        # Call "conda search --info" through conda's cli.python_api
+        std_out, _, _ = conda.cli.python_api.run_command(conda.cli.python_api.Commands.SEARCH,
                                 search_args, use_exception_handler=True)
         all_std_out += std_out
         # Parsing the normal output from "conda search --info" instead of using the json flag. Using the json
         # flag adds a lot of extra time due to a slow regex in the conda code that is attempting to parse out
         # URL tokens
+        entries = list()
         for entry in std_out.split("\n\n"):
             _, file_name, rest = entry.partition("file name")
             if file_name:
@@ -113,39 +126,36 @@ def conda_package_info(channels, package):
                 if not entry["dependencies"]:
                     entry["dependencies"] = []
                 entry["version_order"] = VersionOrder(str(entry["version"]))
-                entry["channel_order"] = index
                 entries.append(entry)
-        if ret_code:
-            fail_count += 1
-    if not entries or (fail_count > 0 and fail_count >= len(channels)):
-        raise OpenCEError(Error.CONDA_PACKAGE_INFO, generalize_version(package), all_std_out)
-    return entries
-
-# Turn the channels argument into a tuple so that it can be hashable. This will allow the results
-# of get_latest_package_info to be memoizable using lru_cache.
-def _make_hashable_args(function):
-    def wrapper(channels, package):
-        return function(tuple(channels), package)
-    return wrapper
-
-@_make_hashable_args
-@functools.lru_cache(maxsize=1024)
-def get_latest_package_info(channels, package):
-    '''
-    Get the conda package info for the most recent search result.
-    '''
-    package_infos = conda_package_info(channels, package)
-    retval = package_infos[0]
-    for package_info in package_infos:
-        if package_info["version_order"] > retval["version_order"]:
-            retval = package_info
-        elif package_info["version_order"] == retval["version_order"]:
-            if package_info["channel_order"] > retval["channel_order"]:
+        if entries:
+            retval = entries[0]
+            for package_info in entries:
+                if package_info["version_order"] < retval["version_order"]:
+                    continue
+                if package_info["build number"] < retval["build number"]:
+                    continue
+                if package_info["timestamp"] < retval["timestamp"]:
+                    continue
                 retval = package_info
-            elif package_info["channel_order"] == retval["channel_order"]:
-                if package_info["timestamp"] > retval["timestamp"]:
-                    retval = package_info
-    return retval
+            return retval
+    raise OpenCEError(Error.CONDA_PACKAGE_INFO, "conda search --info " + generalize_version(package), all_std_out)
+
+# def (channels, package):
+#     '''
+#     Get the conda package info for the most recent search result.
+#     '''
+#     package_infos = conda_package_info(channels, package)
+#     retval = package_infos[0]
+#     for package_info in package_infos:
+#         if package_info["version_order"] > retval["version_order"]:
+#             retval = package_info
+#         elif package_info["version_order"] == retval["version_order"]:
+#             if package_info["channel_order"] > retval["channel_order"]:
+#                 retval = package_info
+#             elif package_info["channel_order"] == retval["channel_order"]:
+#                 if package_info["timestamp"] > retval["timestamp"]:
+#                     retval = package_info
+#     return retval
 
 def version_matches_spec(spec_string, version=open_ce_version):
     '''
