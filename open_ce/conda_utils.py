@@ -140,23 +140,6 @@ def get_latest_package_info(channels, package):
             return retval
     raise OpenCEError(Error.CONDA_PACKAGE_INFO, "conda search --info " + generalize_version(package), all_std_out)
 
-# def (channels, package):
-#     '''
-#     Get the conda package info for the most recent search result.
-#     '''
-#     package_infos = conda_package_info(channels, package)
-#     retval = package_infos[0]
-#     for package_info in package_infos:
-#         if package_info["version_order"] > retval["version_order"]:
-#             retval = package_info
-#         elif package_info["version_order"] == retval["version_order"]:
-#             if package_info["channel_order"] > retval["channel_order"]:
-#                 retval = package_info
-#             elif package_info["channel_order"] == retval["channel_order"]:
-#                 if package_info["timestamp"] > retval["timestamp"]:
-#                     retval = package_info
-#     return retval
-
 def version_matches_spec(spec_string, version=open_ce_version):
     '''
     Uses conda version specification syntax to check if version matches spec_string.
