@@ -87,12 +87,11 @@ def conda_package_info(channels, package):
     Get conda package info.
     '''
     # Call "conda search --info" through conda's cli.python_api
-    channel_args = sum((["-c", channel] for channel in channels), [])
+    all_channel_args = sum(([["-c", channel]] for channel in channels), [[]])
     entries = list()
     fail_count = 0
     all_std_out = ""
-    for index, channel in enumerate(channels):
-        channel_args = ["-c", channel]
+    for index, channel_args in enumerate(all_channel_args):
         search_args = ["--info", generalize_version(package)] + channel_args
         # Setting the logging level allows us to ignore unnecessary output
         getLogger("conda.common.io").setLevel(ERROR)
@@ -118,7 +117,7 @@ def conda_package_info(channels, package):
                 entries.append(entry)
         if ret_code:
             fail_count += 1
-    if fail_count > 0 and fail_count >= len(channels):
+    if not entries or (fail_count > 0 and fail_count >= len(channels)):
         raise OpenCEError(Error.CONDA_PACKAGE_INFO, generalize_version(package), all_std_out)
     return entries
 
