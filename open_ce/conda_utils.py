@@ -90,14 +90,15 @@ def conda_package_info(channels, package):
     channel_args = sum((["-c", channel] for channel in channels), [])
     entries = list()
     fail_count = 0
+    all_std_out = ""
     for index, channel in enumerate(channels):
         channel_args = ["-c", channel]
         search_args = ["--info", generalize_version(package)] + channel_args
         # Setting the logging level allows us to ignore unnecessary output
-        conda_logger = getLogger("conda.common.io")
-        conda_logger.setLevel(ERROR)
+        getLogger("conda.common.io").setLevel(ERROR)
         std_out, _, ret_code = conda.cli.python_api.run_command(conda.cli.python_api.Commands.SEARCH,
                                 search_args, use_exception_handler=True)
+        all_std_out += std_out
         # Parsing the normal output from "conda search --info" instead of using the json flag. Using the json
         # flag adds a lot of extra time due to a slow regex in the conda code that is attempting to parse out
         # URL tokens
@@ -117,8 +118,8 @@ def conda_package_info(channels, package):
                 entries.append(entry)
         if ret_code:
             fail_count += 1
-    if fail_count >= len(channels):
-        raise OpenCEError(Error.CONDA_PACKAGE_INFO, generalize_version(package), std_out)
+    if fail_count > 0 and fail_count >= len(channels):
+        raise OpenCEError(Error.CONDA_PACKAGE_INFO, generalize_version(package), all_std_out)
     return entries
 
 # Turn the channels argument into a tuple so that it can be hashable. This will allow the results
