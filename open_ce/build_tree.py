@@ -44,9 +44,7 @@ class DependencyNode():
                  channels=None):
         self.packages = packages
         self.build_command = build_command
-        self.channels = channels
-        if not self.channels:
-            self.channels = []
+        self.channels = channels if channels else []
         self._hash_val = hash(self.build_command)
 
     def __repr__(self):

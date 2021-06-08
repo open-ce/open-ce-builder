@@ -137,6 +137,7 @@ def get_latest_package_info(channels, package):
                 if package_info["timestamp"] < retval["timestamp"]:
                     continue
                 retval = package_info
+            print(retval)
             return retval
     raise OpenCEError(Error.CONDA_PACKAGE_INFO, "conda search --info " + generalize_version(package), all_std_out)
 
