@@ -31,6 +31,8 @@ The `open-ce` tool allows a user to build collections of conda recipes described
 * `python` >= 3.6
 * `docker` >= 1.13 or `podman` >= 2.0.5
   * docker or podman required only when building within a container (see below).
+* `matplotlib` >= 3.3
+  * Required only when exporting the dependency graph.
 
 ### CUDA Requirements
 
@@ -147,4 +149,3 @@ After performing the build using `open-ce build env`, the `open-ce build image` 
 ### Contributions
 
 For contribution information, please see the [CONTRIBUTING.md](CONTRIBUTING.md) page.
-

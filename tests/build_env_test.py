@@ -522,3 +522,17 @@ def test_build_env_url(mocker):
     with pytest.raises(OpenCEError) as exc:
         opence._main(["build", build_env.COMMAND, env_file])
     assert "Unexpected key chnnels was found in " in str(exc.value)
+
+def test_build_env_conda_pkg_format(mocker):
+    '''
+    Test that passing --conda_pkg_format argument works correctly.
+    '''
+	
+    mocker.patch(
+        'open_ce.build_tree.BuildTree',
+    )
+
+    pkg_format = "conda"
+    arg_strings = ["build", build_env.COMMAND,
+                  "--conda_pkg_format", pkg_format, "tests/test-env1.yaml"]
+    opence._main(arg_strings)

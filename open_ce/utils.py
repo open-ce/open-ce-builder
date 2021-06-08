@@ -17,7 +17,6 @@
 """
 
 import os
-import sys
 import subprocess
 import errno
 from itertools import product
@@ -53,6 +52,7 @@ OPEN_CE_INFO_FILE = "open-ce-info.yaml"
 CONTAINER_TOOLS = ["podman", "docker"]
 DEFAULT_CONTAINER_TOOL = next(filter(lambda tool: os.system("which {} &> /dev/null".format(tool))
                                       == 0, CONTAINER_TOOLS), None)
+DEFAULT_PKG_FORMAT = "tarball"  # use .tar.bz2 output format
 NUM_THREAD_POOL = 16
 OPEN_CE_VERSION_STRING = "Open-CE Version"
 DEFAULT_GRAPH_FILE = "graph.png"
@@ -76,13 +76,11 @@ def remove_version(package):
     return package.split()[0].split("=")[0]
 
 def check_if_package_exists(package):
-    '''Checks if conda-build is installed and exits if it is not'''
+    '''Checks if a package is installed'''
     try:
         pkg_resources.get_distribution(package)
-    except pkg_resources.DistributionNotFound:
-        print("Cannot find `{}`, please see https://github.com/open-ce/open-ce-builder#requirements"
-              " for a list of requirements.".format(package))
-        sys.exit(1)
+    except pkg_resources.DistributionNotFound as exc:
+        raise OpenCEError(Error.PACKAGE_NOT_FOUND, package) from exc
 
 def make_schema_type(data_type,required=False):
     '''Make a schema type tuple.'''
@@ -414,9 +412,12 @@ def run_in_parallel(function, arguments):
     '''
     new_args = [tuple([function]) + x for x in arguments]
     pool = mp.Pool(NUM_THREAD_POOL)
-    retval = pool.starmap(_run_helper, new_args)
-    pool.close()
-    return retval
+    try:
+        retval = pool.starmap(_run_helper, new_args)
+        return retval
+    finally:
+        pool.close()
+        pool.join()
 
 def get_conda_build_configs(configs):
     '''
