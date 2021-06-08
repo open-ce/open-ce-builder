@@ -89,12 +89,14 @@ class TestBuildTree(build_tree.BuildTree):
                  mpi_types,
                  cuda_versions,
                  repository_folder="./",
+                 channels=None,
                  git_location=utils.DEFAULT_GIT_LOCATION,
                  git_tag_for_env=utils.DEFAULT_GIT_TAG,
                  git_up_to_date = False,
                  conda_build_config=utils.DEFAULT_CONDA_BUILD_CONFIG):
         self._env_config_files = env_config_files
         self._repository_folder = repository_folder
+        self._channels = channels if channels else []
         self._git_location = git_location
         self._git_tag_for_env = git_tag_for_env
         self._git_up_to_date = git_up_to_date
@@ -636,3 +638,116 @@ def test_dag_cleanup():
     assert not external_node in mock_build_tree._tree.nodes()
     assert child_node in mock_build_tree._tree.successors(parent_node)
     assert parent_node in mock_build_tree._tree.predecessors(child_node)
+
+def test_search_channels(mocker):
+    '''
+    Test that recipe specific channels are used for remote dependency discovery.
+    '''
+    mock_build_tree = TestBuildTree([], "3.6", "cpu", "openmpi", "10.2", channels=["defaults"])
+    dep_graph = sample_build_commands()
+
+    external_node = build_tree.DependencyNode(packages=["external_package"])
+    nodes = list(dep_graph.nodes())
+    parent_node = nodes[0]
+    parent_node.build_command.channels = ["conda_forge"]
+    dep_graph.add_node(external_node)
+    dep_graph.add_edge(parent_node, external_node)
+
+    def validate_channels(channels, package):
+        assert "defaults" in channels
+        if package == "external_package":
+            assert "conda_forge" in channels, \
+                   "The conda_forge channel should come from the parent node."
+
+            assert channels.index("conda_forge") < channels.index("defaults"), \
+                   "The conda_forge channel should be higher priority, since it is from a parent node and the defaults channel is from the env file."
+        return {'dependencies': []}
+
+    mocker.patch(
+        'open_ce.conda_utils.get_latest_package_info',
+        side_effect=validate_channels
+    )
+
+    mock_build_tree._create_remote_deps(dep_graph)
+
+def make_search_result(package_name="some_package",
+                       package_version="1.0",
+                       build_number="1",
+                       deps=None):
+    if not deps:
+        deps = []
+
+    return '''
+Loading channels: done
+{0} {1} {2}
+-----------------
+file name   : {0}-{1}.conda
+name        : {0}
+version     : {1}
+build       : 0
+build number: {2}
+size        : 20 KB
+license     : BSD
+subdir      : linux-ppc64le
+url         : https://repo.anaconda.com/pkgs/main/linux-ppc64le/
+md5         : 4691146ff587f371f83f0e7bab93b63b
+dependencies: 
+{3}
+
+
+
+'''.format(package_name, package_version, build_number, "\n".join("    - {}".format(dep) for dep in deps)), 0, 0
+
+def empty_search_result(package_name):
+    return '''
+Loading channels: done
+No match found for: {0}. Search: *{0}*
+
+
+'''.format(package_name), 0, 1
+
+def test_search_package_priority(mocker):
+    '''
+    Test remote package priority.
+    '''
+    mock_build_tree = TestBuildTree([], "3.6", "cpu", "openmpi", "10.2", channels=["defaults"])
+    dep_graph = sample_build_commands()
+
+    external_node = build_tree.DependencyNode(packages=["external_package"])
+    nodes = list(dep_graph.nodes())
+    parent_node = nodes[0]
+    #defaults is the highest priority conda channel, a package should only come from conda_forge if there are none in defaults, regardless of version.
+    parent_node.build_command.channels = ["defaults", "conda_forge"]
+    dep_graph.add_node(external_node)
+    dep_graph.add_edge(parent_node, external_node)
+
+
+    def mocked_search(*arguments, **_):
+        search_results = {("external_package", "conda_forge"): make_search_result(package_name="external_package",
+                                                                                  package_version="2.0",
+                                                                                  deps=["conda_forge_dep"]),
+                          ("external_package", "defaults"): make_search_result(package_name="external_package",
+                                                                               package_version="1.0",
+                                                                               deps=["defaults_dep"]),
+                          ("defaults_dep", "conda_forge"): make_search_result(package_name="defaults_dep",
+                                                                              deps=["defaults_dep_conda_forge_dep"]),
+                          ("defaults_dep", "defaults"): empty_search_result("defaults_dep")}
+        package = arguments[1][1]
+        channel = arguments[1][4] if "-c" in arguments[1] else ""
+        if (package, channel) in search_results:
+            return search_results[(package, channel)]
+        else:
+            return make_search_result(package_name=package)
+
+    mocker.patch(
+        'conda.cli.python_api.run_command',
+        side_effect=mocked_search
+    )
+
+    dep_graph = mock_build_tree._create_remote_deps(dep_graph)
+
+    assert build_tree.DependencyNode(packages={"defaults_dep"}) in list(dep_graph.successors(external_node)), \
+           "defaults_dep should be found, even though the conda_forge package is a newer version"
+
+    assert build_tree.DependencyNode(packages={"defaults_dep_conda_forge_dep"}) in list(dep_graph.successors(build_tree.DependencyNode(packages={"defaults_dep"}))), \
+           "There is no defaults_dep package in the defaults channel, so conda_forge should be used."
