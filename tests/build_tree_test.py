@@ -722,7 +722,7 @@ def test_search_package_priority(mocker):
     dep_graph.add_edge(parent_node, external_node)
 
 
-    def mocked_search(command, *arguments, **kwargs):
+    def mocked_search(*arguments, **_):
         search_results = {("external_package", "conda_forge"): make_search_result(package_name="external_package",
                                                                                   package_version="2.0",
                                                                                   deps=["conda_forge_dep"]),
@@ -732,9 +732,8 @@ def test_search_package_priority(mocker):
                           ("defaults_dep", "conda_forge"): make_search_result(package_name="defaults_dep",
                                                                               deps=["defaults_dep_conda_forge_dep"]),
                           ("defaults_dep", "defaults"): empty_search_result("defaults_dep")}
-        print(arguments[0])
-        package = arguments[0][1]
-        channel = arguments[0][4] if "-c" in arguments[0] else ""
+        package = arguments[1][1]
+        channel = arguments[1][4] if "-c" in arguments[1] else ""
         if (package, channel) in search_results:
             return search_results[(package, channel)]
         else:
