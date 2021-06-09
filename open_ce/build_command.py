@@ -49,9 +49,7 @@ class BuildCommand():
         self.version = version
         self.recipe_path = recipe_path
         self.runtime_package = runtime_package
-        self.output_files = set()
-        if output_files:
-            self.output_files = set(output_files)
+        self.output_files = set(output_files) if output_files else set()
         self.python = python
         self.build_type = build_type
         self.mpi_type = mpi_type
@@ -60,7 +58,7 @@ class BuildCommand():
         self.host_dependencies = host_dependencies
         self.build_dependencies = build_dependencies
         self.test_dependencies = test_dependencies
-        self.channels = channels
+        self.channels = channels if channels else []
         self.conda_build_configs = conda_build_configs
 
     def feedstock_args(self):
