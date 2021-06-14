@@ -37,20 +37,14 @@ def validate_config(args):
     # existence of conda-build as BuildTree uses conda_build APIs.
     from open_ce.build_tree import construct_build_tree  # pylint: disable=import-outside-toplevel
 
-    variants = utils.make_variants(args.python_versions, args.build_types, args.mpi_types, args.cuda_versions)
-
-    for variant in variants:
-        for env_file in args.env_config_file:
-            print('Validating {} for {} : {}'.format(args.conda_build_configs, env_file, variant))
-            try:
-                args.python_versions = variant.get('python')
-                args.build_types = variant.get('build_type')
-                args.mpi_types = variant.get('mpi_type')
-                args.cuda_versions = variant.get('cudatoolkit')
-                _ = construct_build_tree(args)
-            except OpenCEError as err:
-                raise OpenCEError(Error.VALIDATE_CONFIG, args.conda_build_configs, env_file, variant, err.msg) from err
-            print('Successfully validated {} for {} : {}'.format(args.conda_build_configs, env_file, variant))
+    for env_file in list(args.env_config_file): #make a copy of the env_file list
+        print('Validating {} for {}'.format(args.conda_build_configs, env_file))
+        try:
+            args.env_config_file = [env_file]
+            _ = construct_build_tree(args)
+        except OpenCEError as err:
+            raise OpenCEError(Error.VALIDATE_CONFIG, args.conda_build_configs, env_file, err.msg) from err
+        print('Successfully validated {} for {}'.format(args.conda_build_configs, env_file))
 
 def validate_build_tree(tree, external_deps, start_nodes=None):
     '''
