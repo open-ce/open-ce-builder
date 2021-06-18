@@ -101,7 +101,8 @@ def test_add_licenses_from_info_file(capsys):
     '''
     output_folder = "get_licenses_output"
     gen = get_licenses.LicenseGenerator()
-    gen.add_licenses_from_info_file(os.path.join("tests", "test-open-ce-info-1.yaml"))
+    license_info = get_licenses._get_info_file_packages(os.path.join("tests", "test-open-ce-info-1.yaml"))
+    gen.add_licenses_from_info_files(license_info)
 
     captured = capsys.readouterr()
     assert "Unable to clone source for bad_git_package" in captured.out
@@ -131,7 +132,8 @@ def test_no_info_file():
     '''
     output_folder = "get_licenses_output"
     gen = get_licenses.LicenseGenerator()
-    gen.add_licenses_from_info_file(os.path.join("tests", "no-file.yaml"))
+    license_info = get_licenses._get_info_file_packages(os.path.join("tests", "no-file.yaml"))
+    gen.add_licenses_from_info_files(license_info)
     gen.write_licenses_file(output_folder)
 
     output_file = os.path.join(output_folder, utils.DEFAULT_LICENSES_FILE)
