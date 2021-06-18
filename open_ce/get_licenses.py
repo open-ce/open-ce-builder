@@ -93,8 +93,8 @@ class LicenseGenerator():
             self.version = version
             self.url = url if isinstance(url, list) else [url]
             self.license_type = _clean_license_type(license_type) if license_type else license_type
-            self.license_files = license_files
-            self.copyrights = copyrights
+            self.license_files = license_files if license_files else []
+            self.copyrights = copyrights if copyrights else []
 
         def __str__(self):
             return "{}\t{}\t{}\t{}\t{}".format(self.name,
@@ -141,28 +141,25 @@ class LicenseGenerator():
         """
         Add all of the license information from a list of open-ce-info licence info.
         """
-        # Get all of the license information from package's open-ce-info files.
-        info_file_licenses = utils.run_in_parallel(self._get_licenses_from_info_file_helper, license_data)
+        info_file_licenses = utils.run_in_parallel(self._get_licenses_from_info_file_helper, set(license_data))
         self._licenses.update(filter(None, info_file_licenses))
 
-    def _get_licenses_from_info_file_helper(self, package):
-        if LicenseGenerator.LicenseInfo(package[Key.name.name], package[Key.version.name]) in self._licenses:
+    def _get_licenses_from_info_file_helper(self, info):
+        if info in self._licenses:
             return None
 
         source_folder = os.path.join(utils.TMP_LICENSE_DIR,
-                                     package[Key.name.name] + "-" + str(package[Key.version.name]))
+                                     info.name + "-" + str(info.version))
         if not os.path.exists(source_folder):
             os.makedirs(source_folder)
 
-            urls = [package[Key.license_url.name]] if Key.license_url.name in package else package[Key.url.name]
-
             # Download the source from each URL
-            for url in urls:
+            for url in info.url:
                 if url.endswith(".git"):
                     try:
-                        utils.git_clone(url, package[Key.version.name], source_folder)
+                        utils.git_clone(url, info.version, source_folder)
                     except OpenCEError:
-                        print("Unable to clone source for " + package[Key.name.name])
+                        print("Unable to clone source for " + info.name)
                 else:
                     try:
                         res = requests.get(url)
@@ -173,23 +170,15 @@ class LicenseGenerator():
 
                     #pylint: disable=broad-except
                     except Exception:
-                        print("Unable to download source for " + package[Key.name.name])
+                        print("Unable to download source for " + info.name)
 
         # Find every license file within the downloaded source
-        license_files = _find_license_files(source_folder, package.get(Key.license_files.name))
+        info.license_files = _find_license_files(source_folder, info.license_files)
 
         # Get copyright information from the downloaded source (unless the copyright string is provided)
-        if Key.copyright_string.name in package:
-            copyright_string = [package[Key.copyright_string.name]]
-        else:
-            copyright_string = _get_copyrights_from_files(license_files)
+        if not info.copyrights:
+            info.copyrights = _get_copyrights_from_files(info.license_files)
 
-        info = LicenseGenerator.LicenseInfo(package[Key.name.name],
-                                            package[Key.version.name],
-                                            package[Key.url.name],
-                                            package[Key.license.name],
-                                            copyright_string,
-                                            license_files)
         return info
 
     def write_licenses_file(self, output_folder):
@@ -236,7 +225,6 @@ class LicenseGenerator():
         # For each meta-pkg within an environment, find its about.json file.
         meta_file_args = [(meta_file, conda_env) for meta_file in os.listdir(os.path.join(conda_env, "conda-meta"))
                           if meta_file.endswith('.json')]
-
         licenses = utils.run_in_parallel(self._add_licenses_from_environment_helper, meta_file_args)
         local_licenses, info_file_packages = zip(*licenses)
 
@@ -255,7 +243,8 @@ class LicenseGenerator():
         with open(os.path.join(package_info_dir, "about.json")) as file_stream:
             about_data = open_ce.yaml_utils.load(file_stream)
 
-        info_file_packages = _get_info_file_packages(package_info_dir)
+        open_ce_info = os.path.join(package_info_dir, "recipe", utils.OPEN_CE_INFO_FILE)
+        info_file_packages = _get_info_file_packages(open_ce_info)
 
         copyright_strings, license_files = _get_copyrights_from_conda_package(meta_data["extracted_package_dir"])
 
@@ -267,11 +256,10 @@ class LicenseGenerator():
                                             license_files)
         return info, info_file_packages
 
-def _get_info_file_packages(package_info_dir):
+def _get_info_file_packages(open_ce_info):
     """
     Get a list of all of the license information from a package's open-ce-info file.
     """
-    open_ce_info = os.path.join(package_info_dir, "recipe", utils.OPEN_CE_INFO_FILE)
     if not os.path.exists(open_ce_info):
         return []
 
@@ -280,7 +268,19 @@ def _get_info_file_packages(package_info_dir):
 
     utils.validate_dict_schema(license_data, _OPEN_CE_INFO_SCHEMA)
 
-    return license_data.get(Key.third_party_packages.name, [])
+    third_party_info = []
+    for package in license_data.get(Key.third_party_packages.name, []):
+        info = LicenseGenerator.LicenseInfo(package[Key.name.name],
+                                            package[Key.version.name],
+                                            [package[Key.license_url.name]] if Key.license_url.name in package else
+                                                package[Key.url.name],
+                                            package.get(Key.license.name),
+                                            [package[Key.copyright_string.name]] if Key.copyright_string.name in package
+                                                else None,
+                                            package.get(Key.license_files.name))
+        third_party_info.append(info)
+
+    return third_party_info
 
 def _get_copyrights_from_conda_package(pkg_dir):
     """
