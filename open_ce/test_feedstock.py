@@ -22,6 +22,9 @@ import os
 import tempfile
 import subprocess
 from enum import Enum, unique, auto
+import time
+
+from junit_xml import TestSuite, TestCase
 
 from open_ce import utils
 from open_ce import conda_env_file_generator
@@ -125,7 +128,7 @@ class TestCommand():
         # Remove file containing bash commands
         os.remove(temp_file_name)
 
-        result = TestResult(self.name, retval, output)
+        result = TestResult(self.name, conda_env_file, retval, output)
 
         if not retval:
             result.display_failed()
@@ -141,10 +144,22 @@ class TestResult():
         returncode (int): The return code of the test that was run.
         output (str): The resuling output from running the test.
     """
-    def __init__(self, name, returncode, output):
+    def __init__(self, name, conda_env_file, returncode, output):
         self.name = name
         self.output = output
         self.returncode = returncode
+        self.conda_env_file = conda_env_file
+
+        #---Junit Reporting--------------------------------
+        self.junit_test_case = TestCase(name=self.name,
+                                        log=self.output,
+                                        elapsed_sec=0,
+                                        timestamp=time.time(),
+                                        classname=self.conda_env_file)
+        if self.failed():
+            self.junit_test_case.add_failure_info(message="Failed test: " + self.name,
+                                                  output=self.output)
+        #---/junit Reporting--------------------------------
 
     def display_failed(self):
         """
@@ -222,13 +237,7 @@ def run_test_commands(conda_env_file, test_commands):
         conda_env_file (str): The name of the conda environment file used to create the conda environment.
         test_commands (:obj:`list` of :obj:`TestCommand): List of test commands to run.
     """
-    failed_tests = []
-    for test_command in test_commands:
-        test_result = test_command.run(conda_env_file)
-        if test_result.failed():
-            failed_tests.append(test_result)
-
-    return failed_tests
+    return [x.run(conda_env_file) for x in test_commands]
 
 def display_failed_tests(failed_tests):
     """
@@ -264,25 +273,27 @@ def test_feedstock(conda_env_file, test_labels=None,
     for test_label in inputs.parse_arg_list(test_labels):
         variant_dict[test_label] = True
     test_commands = gen_test_commands(working_dir=test_working_dir, variants=variant_dict)
-    failed_tests = run_test_commands(conda_env_file, test_commands)
+    test_results = run_test_commands(conda_env_file, test_commands)
 
     if saved_working_directory:
         os.chdir(saved_working_directory)
 
-    return failed_tests
+    return test_results
 
 def test_feedstock_entry(args):
     '''Entry Function'''
     if not args.conda_env_files:
         raise OpenCEError(Error.CONDA_ENV_FILE_REQUIRED)
 
-    test_failures = []
+    test_results = []
     for conda_env_file in inputs.parse_arg_list(args.conda_env_files):
-        test_failures += test_feedstock(conda_env_file,
+        test_results += test_feedstock(conda_env_file,
                                        args.test_labels,
                                        args.test_working_dir,
                                        args.working_directory)
-
+    ts = TestSuite("Open-CE Test Suite", test_results)
+    print(TestSuite.to_xml_string([ts]))
+    test_failures = [x for x in test_results if x.failed()]
     if test_failures:
         display_failed_tests(test_failures)
         raise OpenCEError(Error.FAILED_TESTS, len(test_failures))

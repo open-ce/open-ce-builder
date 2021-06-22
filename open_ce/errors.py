@@ -17,7 +17,18 @@
 """
 
 import sys
+import logging
 from enum import Enum, unique
+
+log = logging.getLogger("OPEN-CE")
+log_out_handler = logging.StreamHandler(sys.stdout)
+log_out_handler.setLevel(logging.DEBUG)
+log_out_handler.addFilter(lambda record: record.levelno <= logging.INFO)
+log_err_handler = logging.StreamHandler(sys.stderr)
+log_err_handler.setLevel(logging.WARNING)
+log.addHandler(log_out_handler)
+log.addHandler(log_err_handler)
+
 
 @unique
 class Error(Enum):
@@ -81,9 +92,9 @@ class OpenCEError(Exception):
         super().__init__(msg, **kwargs)
         self.msg = msg
 
-def show_warning(warning, *additional_args, file=sys.stderr, **kwargs):
+def show_warning(warning, *additional_args, **kwargs):
     """
     Prints an Open-CE Warning.
     """
     msg = "[OPEN-CE-WARNING-{}] {}".format(warning.value[0], warning.value[1].format(*additional_args))
-    print(msg, file=file, **kwargs)
+    log.warning(msg, **kwargs)

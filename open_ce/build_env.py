@@ -20,6 +20,8 @@
 import os
 import sys
 
+from junit_xml import TestSuite, TestCase
+
 from open_ce import build_feedstock
 from open_ce import container_build
 from open_ce import utils
@@ -50,7 +52,7 @@ def _run_tests(build_tree, test_labels, conda_env_files):
         conda_env_files (dict): A dictionary where the key is a variant string and the value
                                 is the name of a conda environment file.
     """
-    failed_tests = []
+    test_results = []
     # Run test commands for each conda environment that was generated
     for variant_string, conda_env_file in conda_env_files.items():
         test_feedstocks = build_tree.get_test_feedstocks(variant_string)
@@ -58,13 +60,13 @@ def _run_tests(build_tree, test_labels, conda_env_files):
             print("\n*** Running tests within the " + os.path.basename(conda_env_file) + " conda environment ***\n")
         for feedstock in test_feedstocks:
             print("Running tests for " + feedstock)
-            failed_tests += test_feedstock.test_feedstock(conda_env_file,
+            test_results += test_feedstock.test_feedstock(conda_env_file,
                                                           test_labels=test_labels,
                                                           working_directory=feedstock)
-
-    test_feedstock.display_failed_tests(failed_tests)
-    if failed_tests:
-        raise OpenCEError(Error.FAILED_TESTS, len(failed_tests))
+    test_failures = [x for x in test_results if x.failed()]
+    test_feedstock.display_failed_tests(test_failures)
+    if test_failures:
+        raise OpenCEError(Error.FAILED_TESTS, len(test_failures))
 
 def build_env(args):
     '''Entry Function'''

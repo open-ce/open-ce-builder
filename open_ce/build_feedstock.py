@@ -23,7 +23,7 @@ import traceback
 from open_ce import utils
 from open_ce import inputs
 from open_ce.inputs import Argument
-from open_ce.errors import OpenCEError, Error
+from open_ce.errors import OpenCEError, Error, log
 
 COMMAND = 'feedstock'
 
@@ -121,7 +121,7 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
         # Build each recipe
         if build_config_data['recipes'] is None:
             build_config_data['recipes'] = []
-            print("INFO: No recipe to build for given configuration.")
+            log.info("No recipe to build for given configuration.")
         for recipe in build_config_data['recipes']:
             if recipes_to_build and recipe['name'] not in recipes_to_build:
                 continue
