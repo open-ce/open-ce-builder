@@ -36,6 +36,7 @@ from conda_build.config import get_or_merge_config
 import conda_build.metadata
 import conda.cli.python_api
 from conda.models.match_spec import MatchSpec
+from conda.models.version import VersionOrder
 # pylint: enable=wrong-import-position,wrong-import-order
 
 def render_yaml(path, variants=None, variant_config_files=None, schema=None, permit_undefined_jinja=False):
@@ -81,40 +82,6 @@ def get_output_file_paths(meta, variants):
 
     return result
 
-def conda_package_info(channels, package):
-    '''
-    Get conda package info.
-    '''
-
-    # Call "conda search --info" through conda's cli.python_api
-    channel_args = sum((["-c", channel] for channel in channels), [])
-    search_args = ["--info", generalize_version(package)] + channel_args
-    # Setting the logging level allows us to ignore unnecessary output
-    conda_logger = getLogger("conda.common.io")
-    conda_logger.setLevel(ERROR)
-    std_out, _, ret_code = conda.cli.python_api.run_command(conda.cli.python_api.Commands.SEARCH,
-                               search_args, use_exception_handler=True, stderr=None)
-
-    # Parsing the normal output from "conda search --info" instead of using the json flag. Using the json
-    # flag adds a lot of extra time due to a slow regex in the conda code that is attempting to parse out
-    # URL tokens.
-    entries = []
-    for entry in std_out.split("\n\n"):
-        _, file_name, rest = entry.partition("file name")
-        if file_name:
-            entry = open_ce.yaml_utils.load(file_name + rest)
-            # Convert time string into a timestamp (if there is a timestamp)
-            if "timestamp" in entry:
-                entry["timestamp"] = datetime.timestamp(datetime.strptime(entry["timestamp"], '%Y-%m-%d %H:%M:%S %Z'))
-            else:
-                entry["timestamp"] = 0
-            if not entry["dependencies"]:
-                entry["dependencies"] = []
-            entries.append(entry)
-    if ret_code:
-        raise OpenCEError(Error.CONDA_PACKAGE_INFO, str(search_args), std_out)
-    return entries
-
 # Turn the channels argument into a tuple so that it can be hashable. This will allow the results
 # of get_latest_package_info to be memoizable using lru_cache.
 def _make_hashable_args(function):
@@ -126,14 +93,52 @@ def _make_hashable_args(function):
 @functools.lru_cache(maxsize=1024)
 def get_latest_package_info(channels, package):
     '''
-    Get the conda package info for the most recent search result.
+    Get the latest conda package info with the following priority:
+      1. Most Specific Channel
+      2. Latest Version
+      3. Largest Build Number
+      4. Latest Timestamp
     '''
-    package_infos = conda_package_info(channels, package)
-    retval = package_infos[0]
-    for package_info in package_infos:
-        if package_info["timestamp"] > retval["timestamp"]:
-            retval = package_info
-    return retval
+    channel_args = sum(([["--override-channels", "-c", channel]] for channel in channels), [])
+    channel_args += [[]] # use defaults for last search
+    all_std_out = ""
+    for channel_arg in channel_args:
+        search_args = ["--info", generalize_version(package)] + channel_arg
+        # Setting the logging level allows us to ignore unnecessary output
+        getLogger("conda.common.io").setLevel(ERROR)
+        # Call "conda search --info" through conda's cli.python_api
+        std_out, _, _ = conda.cli.python_api.run_command(conda.cli.python_api.Commands.SEARCH,
+                                search_args, use_exception_handler=True)
+        all_std_out += std_out
+        # Parsing the normal output from "conda search --info" instead of using the json flag. Using the json
+        # flag adds a lot of extra time due to a slow regex in the conda code that is attempting to parse out
+        # URL tokens
+        entries = list()
+        for entry in std_out.split("\n\n"):
+            _, file_name, rest = entry.partition("file name")
+            if file_name:
+                entry = open_ce.yaml_utils.load(file_name + rest)
+                # Convert time string into a timestamp (if there is a timestamp)
+                if "timestamp" in entry:
+                    entry["timestamp"] = datetime.timestamp(datetime.strptime(entry["timestamp"], '%Y-%m-%d %H:%M:%S %Z'))
+                else:
+                    entry["timestamp"] = 0
+                if not entry["dependencies"]:
+                    entry["dependencies"] = []
+                entry["version_order"] = VersionOrder(str(entry["version"]))
+                entries.append(entry)
+        if entries:
+            retval = entries[0]
+            for package_info in entries:
+                if package_info["version_order"] < retval["version_order"]:
+                    continue
+                if package_info["build number"] < retval["build number"]:
+                    continue
+                if package_info["timestamp"] < retval["timestamp"]:
+                    continue
+                retval = package_info
+            return retval
+    raise OpenCEError(Error.CONDA_PACKAGE_INFO, "conda search --info " + generalize_version(package), all_std_out)
 
 def version_matches_spec(spec_string, version=open_ce_version):
     '''
