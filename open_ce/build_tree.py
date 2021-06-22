@@ -28,7 +28,7 @@ from open_ce import graph
 from open_ce import env_config
 from open_ce import validate_config
 from open_ce import build_feedstock
-from open_ce.errors import OpenCEError, Error
+from open_ce.errors import OpenCEError, Error, log
 from open_ce.conda_env_file_generator import CondaEnvFileGenerator
 from open_ce.build_command import BuildCommand
 from open_ce import inputs
@@ -217,7 +217,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
             if packages:
                 for package in packages:
                     if not {n for n in traverse_build_commands(variant_tree, return_node=True) if package in n.packages}:
-                        print("INFO: No recipes were found for " + package + " for variant " + variant_string)
+                        log.info("No recipes were found for '%s' for variant '%s'", package, variant_string)
                 variant_start_nodes = {n for n in traverse_build_commands(variant_tree, return_node=True)
                                             if n.packages.intersection(packages)}
 
@@ -395,7 +395,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
                         patch_file = os.path.join(os.path.dirname(env_config_data.get(
                                                   env_config.Key.opence_env_file_path.name)), patch)
                     patch_apply_cmd = "git apply {}".format(patch_file)
-                    print("Patch apply command: ", patch_apply_cmd)
+                    log.info("Patch apply command: %s", patch_apply_cmd)
                     patch_apply_res = os.system(patch_apply_cmd)
                     if patch_apply_res != 0:
                         raise OpenCEError(Error.PATCH_APPLICATION, patch, package[env_config.Key.feedstock.name])

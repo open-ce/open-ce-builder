@@ -20,7 +20,7 @@
 
 from open_ce import utils
 from open_ce.inputs import ENV_BUILD_ARGS
-from open_ce.errors import OpenCEError, Error
+from open_ce.errors import OpenCEError, Error, log
 
 COMMAND = 'config'
 
@@ -38,13 +38,13 @@ def validate_config(args):
     from open_ce.build_tree import construct_build_tree  # pylint: disable=import-outside-toplevel
 
     for env_file in list(args.env_config_file): #make a copy of the env_file list
-        print('Validating {} for {}'.format(args.conda_build_configs, env_file))
+        log.info('Validating %s for %s', args.conda_build_configs, env_file)
         try:
             args.env_config_file = [env_file]
             _ = construct_build_tree(args)
         except OpenCEError as err:
             raise OpenCEError(Error.VALIDATE_CONFIG, args.conda_build_configs, env_file, err.msg) from err
-        print('Successfully validated {} for {}'.format(args.conda_build_configs, env_file))
+        log.info('Successfully validated %s for %s', args.conda_build_configs, env_file)
 
 def validate_build_tree(tree, external_deps, start_nodes=None):
     '''

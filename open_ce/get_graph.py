@@ -22,6 +22,7 @@ import os
 from open_ce.inputs import Argument, ENV_BUILD_ARGS
 from open_ce import graph
 from open_ce import utils
+from open_ce.errors import log
 
 COMMAND = "graph"
 
@@ -41,6 +42,6 @@ def export_graph(args):
     os.makedirs(args.output_folder, exist_ok=True)
     graph_output = os.path.join(args.output_folder, utils.DEFAULT_GRAPH_FILE)
     graph.export_image(build_tree._tree, graph_output, args.width, args.height) # pylint: disable=protected-access
-    print("Build graph successfully output to: {}".format(graph_output))
+    log.info("Build graph successfully output to: %s", graph_output)
 
 ENTRY_FUNCTION = export_graph

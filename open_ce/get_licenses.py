@@ -31,7 +31,7 @@ import requests
 from jinja2 import Environment, FileSystemLoader
 
 from open_ce import utils
-from open_ce.errors import OpenCEError, Error
+from open_ce.errors import OpenCEError, Error, log
 from open_ce.inputs import Argument, parse_arg_list
 import open_ce.yaml_utils
 
@@ -162,7 +162,7 @@ class LicenseGenerator():
                         try:
                             utils.git_clone(url, package[Key.version.name], source_folder)
                         except OpenCEError:
-                            print("Unable to clone source for " + package[Key.name.name])
+                            log.warning("Unable to clone source for '%s'.", package[Key.name.name])
                     else:
                         try:
                             res = requests.get(url)
@@ -173,7 +173,7 @@ class LicenseGenerator():
 
                         #pylint: disable=broad-except
                         except Exception:
-                            print("Unable to download source for " + package[Key.name.name])
+                            log.warning("Unable to download source for '%s'.", package[Key.name.name])
 
             # Find every license file within the downloaded source
             license_files = _find_license_files(source_folder, package.get(Key.license_files.name))
@@ -208,7 +208,7 @@ class LicenseGenerator():
         with open(licenses_file, 'w') as file_stream:
             file_stream.write(result)
 
-        print("INFO: Licenses file generated: " + licenses_file)
+        log.info("Licenses file generated: %s", licenses_file)
 
     def gen_file_from_template(self, template, output_folder):
         """
@@ -230,7 +230,7 @@ class LicenseGenerator():
         with open(os.path.join(output_folder, output_name), 'w') as stream:
             stream.write(output)
 
-        print("INFO: {} generated from {}".format(os.path.join(output_folder, output_name), template))
+        log.info("%s generated from %s", os.path.join(output_folder, output_name), template)
 
     def _add_licenses_from_environment(self, conda_env):
         # For each meta-pkg within an environment, find its about.json file.
@@ -317,7 +317,7 @@ def _get_source_from_conda_package(pkg_dir):
                     local_path, _ = conda_build.source.download_to_cache(source_folder, pkg_dir, source, False)
                     _extract(local_path, source_folder)
                 except RuntimeError:
-                    print("Unable to download source for " + os.path.basename(pkg_dir))
+                    log.warning("Unable to download source for '%s'.", os.path.basename(pkg_dir))
             elif source.get("git_url"):
                 git_url = source["git_url"]
                 try:
@@ -335,7 +335,7 @@ def _get_source_from_conda_package(pkg_dir):
                         else:
                             raise error
                     except OpenCEError:
-                        print("Unable to clone source for " + os.path.basename(pkg_dir))
+                        log.warning("Unable to clone source for '%s'.", os.path.basename(pkg_dir))
 
     return source_folder
 

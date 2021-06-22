@@ -25,7 +25,7 @@ import urllib.request
 import tempfile
 import multiprocessing as mp
 import pkg_resources
-from open_ce.errors import OpenCEError, Error, show_warning
+from open_ce.errors import OpenCEError, Error, show_warning, log
 from open_ce import inputs
 
 
@@ -129,12 +129,12 @@ def run_command_capture(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd
 
 def run_and_log(command):
     '''Print a shell command and then execute it.'''
-    print("--->{}".format(command))
+    log.info("--->%s", command)
     return os.system(command)
 
 def get_output(command):
     '''Print and execute a shell command and then return the output.'''
-    print("--->{}".format(command))
+    log.info("--->%s", command)
     _,std_out,_ = run_command_capture(command, stderr=subprocess.STDOUT)
     return std_out.strip()
 
@@ -304,7 +304,7 @@ def git_clone(git_url, git_tag, location, up_to_date=False):
     Clone a git repository and checkout a certain branch.
     '''
     clone_cmd = "git clone " + git_url + " " + location
-    print("Clone cmd: ", clone_cmd)
+    log.info("Clone cmd: %s", clone_cmd)
     clone_result = os.system(clone_cmd)
 
     cur_dir = os.getcwd()
@@ -315,7 +315,7 @@ def git_clone(git_url, git_tag, location, up_to_date=False):
             if up_to_date:
                 git_tag = get_branch_of_tag(git_tag)
             checkout_cmd = "git checkout " + git_tag
-            print("Checkout branch/tag command: ", checkout_cmd)
+            log.info("Checkout branch/tag command: %s", checkout_cmd)
             checkout_res = os.system(checkout_cmd)
             os.chdir(cur_dir)
             clone_successful = checkout_res == 0
