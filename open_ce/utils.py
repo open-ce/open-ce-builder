@@ -372,7 +372,7 @@ def run_in_parallel(function, arguments):
     '''
     Run function in parallel across all arguments.
     '''
-    new_args = [tuple([function]) + x for x in arguments]
+    new_args = [tuple([function]) + x if isinstance(x, tuple) else (function, x) for x in arguments]
     pool = mp.Pool(NUM_THREAD_POOL)
     try:
         retval = pool.starmap(_run_helper, new_args)
