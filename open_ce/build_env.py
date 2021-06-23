@@ -43,7 +43,7 @@ ARGUMENTS = ENV_BUILD_ARGS + \
              Argument.CONTAINER_TOOL,
              Argument.CONDA_PKG_FORMAT]
 
-def _run_tests(build_tree, test_labels, conda_env_files):
+def _run_tests(build_tree, test_labels, conda_env_files, output_folder):
     """
     Run through all of the tests within a build tree for the given conda environment files.
 
@@ -52,7 +52,7 @@ def _run_tests(build_tree, test_labels, conda_env_files):
         conda_env_files (dict): A dictionary where the key is a variant string and the value
                                 is the name of a conda environment file.
     """
-    test_results = []
+    test_results = {}
     # Run test commands for each conda environment that was generated
     for variant_string, conda_env_file in conda_env_files.items():
         test_feedstocks = build_tree.get_test_feedstocks(variant_string)
@@ -60,10 +60,20 @@ def _run_tests(build_tree, test_labels, conda_env_files):
             log.info("\n*** Running tests within the %s conda environment ***\n", os.path.basename(conda_env_file))
         for feedstock in test_feedstocks:
             log.info("Running tests for %s", feedstock)
-            test_results += test_feedstock.test_feedstock(conda_env_file,
-                                                          test_labels=test_labels,
-                                                          working_directory=feedstock)
-    test_failures = [x for x in test_results if x.failed()]
+            test_result = test_feedstock.test_feedstock(conda_env_file,
+                                                        test_labels=test_labels,
+                                                        working_directory=feedstock)
+            if feedstock not in test_results.keys():
+                test_results[feedstock] = test_result
+            else:
+                test_results[feedstock] += test_result
+    label_string = ""
+    if test_labels:
+        label_string = "with labels: {}".format(str(test_labels))
+    test_suites = [TestSuite("Open-CE tests for {} {}".format(feedstock, label_string), test_results[feedstock]) for feedstock in test_results]
+    with open(os.path.join(output_folder, "test_results.xml"), 'w') as outfile:
+        outfile.write(TestSuite.to_xml_string(test_suites))
+    test_failures = [x for key in test_results for x in test_results[key] if x.is_failure()]
     test_feedstock.display_failed_tests(test_failures)
     if test_failures:
         raise OpenCEError(Error.FAILED_TESTS, len(test_failures))
@@ -105,6 +115,6 @@ def build_env(args):
                 log.info("Skipping build of %s because it already exists.",  + build_command.recipe)
 
     if args.run_tests:
-        _run_tests(build_tree, inputs.parse_arg_list(args.test_labels), conda_env_files)
+        _run_tests(build_tree, inputs.parse_arg_list(args.test_labels), conda_env_files, os.path.abspath(args.output_folder))
 
 ENTRY_FUNCTION = build_env

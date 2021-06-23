@@ -337,7 +337,7 @@ def _create_env_config_paths(args):
                 new_url = "https://raw.githubusercontent.com/{}/{}/{}/envs/{}".format(
                                                   organization, utils.DEFAULT_ENVS_REPO, branch, file_name)
 
-                log.info("Unable to find '%s' locally. Attempting to use '%s'.", config_file, + new_url)
+                log.info("Unable to find '%s' locally. Attempting to use '%s'.", config_file, new_url)
                 args.env_config_file[index] = new_url
 
 def parse_args(parser, arg_strings=None):

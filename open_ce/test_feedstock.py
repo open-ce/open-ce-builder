@@ -294,9 +294,14 @@ def test_feedstock_entry(args):
                                        args.test_labels,
                                        args.test_working_dir,
                                        args.working_directory)
-    ts = TestSuite("Open-CE Test Suite", test_results)
-    with open("test_results.xml", 'w') as outfile:
-            outfile.write(TestSuite.to_xml_string([ts]))
+    label_string = ""
+    if args.test_labels:
+        label_string = "with labels: {}".format(str(args.test_labels))
+    test_name = "Open-CE tests for {} {}".format(os.path.basename(os.path.abspath(args.working_directory)),
+                                                           label_string)
+    ts = TestSuite(test_name, test_results)
+    with open(os.path.join(args.test_working_dir, "test_results.xml"), 'w') as outfile:
+        outfile.write(TestSuite.to_xml_string([ts]))
     test_failures = [x for x in test_results if x.is_failure()]
     if test_failures:
         display_failed_tests(test_failures)
