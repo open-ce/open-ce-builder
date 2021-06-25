@@ -20,7 +20,7 @@
 import os
 import sys
 
-from junit_xml import TestSuite, TestCase
+from junit_xml import TestSuite
 
 from open_ce import build_feedstock
 from open_ce import container_build
@@ -67,16 +67,7 @@ def _run_tests(build_tree, test_labels, conda_env_files, output_folder):
                 test_results[feedstock] = test_result
             else:
                 test_results[feedstock] += test_result
-    label_string = ""
-    if test_labels:
-        label_string = "with labels: {}".format(str(test_labels))
-    test_suites = [TestSuite("Open-CE tests for {} {}".format(feedstock, label_string), test_results[feedstock]) for feedstock in test_results]
-    with open(os.path.join(output_folder, "test_results.xml"), 'w') as outfile:
-        outfile.write(TestSuite.to_xml_string(test_suites))
-    test_failures = [x for key in test_results for x in test_results[key] if x.is_failure()]
-    test_feedstock.display_failed_tests(test_failures)
-    if test_failures:
-        raise OpenCEError(Error.FAILED_TESTS, len(test_failures))
+    test_feedstock.process_test_results(test_results, output_folder, test_labels)
 
 def build_env(args):
     '''Entry Function'''

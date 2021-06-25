@@ -20,7 +20,6 @@
 import datetime
 import os
 import tempfile
-import subprocess
 from enum import Enum, unique, auto
 import time
 
@@ -65,7 +64,7 @@ class TestCommand():
         clean_env (bool): Whether this is the command to remove a conda environment.
         working_dir (str): Working directory to be used when executing the bash command.
     """
-    #pylint: disable=too-many-arguments
+    #pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(self, name, conda_env=None, bash_command="",
                  create_env=False, clean_env=False, working_dir=os.getcwd(),
                  test_file=None):
@@ -283,28 +282,35 @@ def test_feedstock(conda_env_file, test_labels=None,
 
     return test_results
 
+def process_test_results(test_results, output_folder="./", test_labels=None):
+    """
+    This function writes test results to a file, displays failed tests to stdout,
+    and throws an exception if there are test failures.
+    """
+    label_string = ""
+    if test_labels:
+        label_string = "with labels: {}".format(str(test_labels))
+    test_suites = [TestSuite("Open-CE tests for {} {}".format(feedstock, label_string), test_results[feedstock])
+                        for feedstock in test_results]
+    with open(os.path.join(output_folder, utils.DEFAULT_TEST_RESULT_FILE), 'w') as outfile:
+        outfile.write(TestSuite.to_xml_string(test_suites))
+    test_failures = [x for key in test_results for x in test_results[key] if x.is_failure()]
+    display_failed_tests(test_failures)
+    if test_failures:
+        raise OpenCEError(Error.FAILED_TESTS, len(test_failures))
+
 def test_feedstock_entry(args):
     '''Entry Function'''
     if not args.conda_env_files:
         raise OpenCEError(Error.CONDA_ENV_FILE_REQUIRED)
 
-    test_results = []
+    feedstock = os.path.basename(os.path.abspath(args.working_directory))
+    test_results = {feedstock: []}
     for conda_env_file in inputs.parse_arg_list(args.conda_env_files):
-        test_results += test_feedstock(conda_env_file,
+        test_results[feedstock] += test_feedstock(conda_env_file,
                                        args.test_labels,
                                        args.test_working_dir,
                                        args.working_directory)
-    label_string = ""
-    if args.test_labels:
-        label_string = "with labels: {}".format(str(args.test_labels))
-    test_name = "Open-CE tests for {} {}".format(os.path.basename(os.path.abspath(args.working_directory)),
-                                                           label_string)
-    ts = TestSuite(test_name, test_results)
-    with open(os.path.join(args.test_working_dir, "test_results.xml"), 'w') as outfile:
-        outfile.write(TestSuite.to_xml_string([ts]))
-    test_failures = [x for x in test_results if x.is_failure()]
-    if test_failures:
-        display_failed_tests(test_failures)
-        raise OpenCEError(Error.FAILED_TESTS, len(test_failures))
+    process_test_results(test_results, args.test_working_dir, args.test_labels)
 
 ENTRY_FUNCTION = test_feedstock_entry

@@ -56,6 +56,7 @@ DEFAULT_PKG_FORMAT = "tarball"  # use .tar.bz2 output format
 NUM_THREAD_POOL = 16
 OPEN_CE_VERSION_STRING = "Open-CE Version"
 DEFAULT_GRAPH_FILE = "graph.png"
+DEFAULT_TEST_RESULT_FILE = "test_results.xml"
 
 def make_variants(python_versions=DEFAULT_PYTHON_VERS, build_types=DEFAULT_BUILD_TYPES, mpi_types=DEFAULT_MPI_TYPES,
 cuda_versions=DEFAULT_CUDA_VERS):
