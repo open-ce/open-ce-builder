@@ -28,7 +28,7 @@ spec = spec_from_loader("opence", SourceFileLoader("opence", os.path.join(test_d
 opence = module_from_spec(spec)
 spec.loader.exec_module(opence)
 
-import open_ce.test_feedstock as test_feedstock
+import open_ce.test_utils as test_feedstock
 import open_ce.utils as utils
 from open_ce.errors import OpenCEError
 

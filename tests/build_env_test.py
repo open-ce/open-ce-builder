@@ -31,7 +31,7 @@ import open_ce.build_env as build_env
 import open_ce.utils as utils
 from open_ce.errors import OpenCEError
 from build_tree_test import TestBuildTree
-import open_ce.test_feedstock as test_feedstock
+import open_ce.test_utils as test_utils
 
 class PackageBuildTracker(object):
     def __init__(self):
@@ -457,14 +457,14 @@ def test_run_tests(mocker):
     '''
     dirTracker = helpers.DirTracker()
     mock_build_tree = TestBuildTree([], "3.6", "cpu,cuda", "openmpi", "10.2")
-    mock_test_commands = [test_feedstock.TestCommand("Test1",
+    mock_test_commands = [test_utils.TestCommand("Test1",
                                                       conda_env="test-conda-env2.yaml",
                                                       bash_command="echo Test1"),
-                          test_feedstock.TestCommand("Test2",
+                          test_utils.TestCommand("Test2",
                                                       conda_env="test-conda-env2.yaml",
                                                       bash_command="[ 1 -eq 2 ]")]
 
-    mocker.patch("open_ce.test_feedstock.gen_test_commands", return_value=mock_test_commands)
+    mocker.patch("open_ce.test_utils.gen_test_commands", return_value=mock_test_commands)
     mocker.patch(
         'os.chdir',
         side_effect=dirTracker.validate_chdir
@@ -478,7 +478,7 @@ def test_run_tests(mocker):
 
     # Note: All of the tests should fail, since there isn't a real conda environment to activate
     with pytest.raises(OpenCEError) as exc:
-        build_env._run_tests(mock_build_tree, [], conda_env_files)
+        build_env._run_tests(mock_build_tree, [], conda_env_files, "./")
     assert "There were 4 test failures" in str(exc.value)
 
 def test_build_env_url(mocker):
