@@ -24,13 +24,17 @@ log = logging.getLogger("OPEN-CE")
 log.setLevel(logging.DEBUG)
 formatter = logging.Formatter('[%(name)s-%(levelname)s] %(message)s')
 log_out_handler = logging.StreamHandler(sys.stdout)
-log_out_handler.setLevel(logging.INFO)
+log_out_handler.setLevel(logging.DEBUG)
+log_out_handler.addFilter(lambda record: record.levelno < logging.WARNING)
 log_out_handler.setFormatter(formatter)
-log_out_handler.addFilter(lambda record: record.levelno <= logging.INFO)
+log_warn_handler = logging.StreamHandler(sys.stderr)
+log_warn_handler.setLevel(logging.WARNING)
+log_warn_handler.addFilter(lambda record: record.levelno < logging.ERROR)
+log_warn_handler.setFormatter(formatter)
 log_err_handler = logging.StreamHandler(sys.stderr)
-log_err_handler.setLevel(logging.WARNING)
-log_err_handler.setFormatter(formatter)
+log_err_handler.setLevel(logging.ERROR)
 log.addHandler(log_out_handler)
+log.addHandler(log_warn_handler)
 log.addHandler(log_err_handler)
 
 
@@ -93,7 +97,7 @@ class OpenCEError(Exception):
         if isinstance(error, str):
             msg = error
         else:
-            msg = "[OPEN-CE-ERROR-{}] {}".format(error.value[0], error.value[1].format(*additional_args))
+            msg = "[OPEN-CE-ERROR]-{} {}".format(error.value[0], error.value[1].format(*additional_args))
         super().__init__(msg, **kwargs)
         self.msg = msg
 
@@ -101,5 +105,5 @@ def show_warning(warning, *additional_args, **kwargs):
     """
     Prints an Open-CE Warning.
     """
-    msg = "{} - {}".format(warning.value[0], warning.value[1].format(*additional_args))
+    msg = "-{} {}".format(warning.value[0], warning.value[1].format(*additional_args))
     log.warning(msg, **kwargs)

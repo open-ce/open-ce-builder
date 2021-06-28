@@ -23,13 +23,16 @@ import tempfile
 from enum import Enum, unique, auto
 import time
 
-from junit_xml import TestSuite, TestCase
-
 from open_ce import utils
 from open_ce import conda_env_file_generator
 from open_ce import inputs
 from open_ce.inputs import Argument
 from open_ce.errors import OpenCEError, Error, log
+
+utils.check_if_package_exists('junit_xml')
+# pylint: disable=wrong-import-position,wrong-import-order
+from junit_xml import TestSuite, TestCase
+# pylint: enable=wrong-import-position,wrong-import-order
 
 COMMAND = 'feedstock'
 DESCRIPTION = 'Test a feedstock as part of Open-CE'
