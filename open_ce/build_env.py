@@ -20,8 +20,6 @@
 import os
 import sys
 
-from junit_xml import TestSuite
-
 from open_ce import build_feedstock
 from open_ce import container_build
 from open_ce import utils

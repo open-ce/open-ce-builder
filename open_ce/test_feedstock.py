@@ -139,7 +139,7 @@ class TestCommand():
                             elapsed_sec = time.time() - start_time)
 
         if not retval:
-            log.info(result.display_failed())
+            log.error(result.display_failed())
 
         return result
 
@@ -241,21 +241,6 @@ def run_test_commands(conda_env_file, test_commands):
     """
     return [x.run(conda_env_file) for x in test_commands]
 
-def display_failed_tests(failed_tests):
-    """
-    Display a list of failed tests.
-
-    Args:
-        failed_tests (:obj:`list` of :obj:`TestResult`): A list of failed TestResult's.
-    """
-    # If any collected output, return 1, else return 0
-    if failed_tests:
-        for failed_test in failed_tests:
-            log.error(failed_test.display_failed())
-        log.error("The following tests failed: %s", str([failed_test.name for failed_test in failed_tests]))
-    else:
-        log.info("All tests passed!")
-
 def test_feedstock(conda_env_file, test_labels=None,
                    test_working_dir=utils.DEFAULT_TEST_WORKING_DIRECTORY, working_directory=None):
     """
@@ -294,10 +279,10 @@ def process_test_results(test_results, output_folder="./", test_labels=None):
                         for feedstock in test_results]
     with open(os.path.join(output_folder, utils.DEFAULT_TEST_RESULT_FILE), 'w') as outfile:
         outfile.write(TestSuite.to_xml_string(test_suites))
-    test_failures = [x for key in test_results for x in test_results[key] if x.is_failure()]
-    display_failed_tests(test_failures)
-    if test_failures:
-        raise OpenCEError(Error.FAILED_TESTS, len(test_failures))
+    failed_tests = [x for key in test_results for x in test_results[key] if x.is_failure()]
+    if failed_tests:
+        raise OpenCEError(Error.FAILED_TESTS, len(failed_tests), str([failed_test.name for failed_test in failed_tests]))
+    log.info("All tests passed!")
 
 def test_feedstock_entry(args):
     '''Entry Function'''

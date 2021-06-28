@@ -22,11 +22,14 @@ from enum import Enum, unique
 
 log = logging.getLogger("OPEN-CE")
 log.setLevel(logging.DEBUG)
+formatter = logging.Formatter('[%(name)s-%(levelname)s] %(message)s')
 log_out_handler = logging.StreamHandler(sys.stdout)
 log_out_handler.setLevel(logging.INFO)
+log_out_handler.setFormatter(formatter)
 log_out_handler.addFilter(lambda record: record.levelno <= logging.INFO)
 log_err_handler = logging.StreamHandler(sys.stderr)
 log_err_handler.setLevel(logging.WARNING)
+log_err_handler.setFormatter(formatter)
 log.addHandler(log_out_handler)
 log.addHandler(log_err_handler)
 
@@ -61,7 +64,7 @@ class Error(Enum):
     INCOMPAT_CUDA = (18, "Driver level \"{}\" is not new enough to support cuda \"{}\"")
     UNSUPPORTED_CUDA = (19, "Cannot build using container image for cuda \"{}\" no Dockerfile currently exists")
     TOO_MANY_CUDA = (20, "Only one cuda version allowed to be built with container build at a time")
-    FAILED_TESTS = (21, "There were {} test failures")
+    FAILED_TESTS = (21, "There were {} test failures. The following tests failed: {}")
     CONDA_ENV_FILE_REQUIRED = (22, "The '--conda_env_file' argument is required.")
     PATCH_APPLICATION = (23, "Failed to apply patch {} on feedstock {}")
     GET_LICENSES = (24, "Error generating licenses file.\nCommand:\n{}\nOUTPUT:\n{}Error:\n{}")
@@ -79,6 +82,7 @@ class Error(Enum):
                                     "But this version is '{}'.")
     PACKAGE_NOT_FOUND = (36, "Cannot find `{}`, please see https://github.com/open-ce/open-ce-builder#requirements" +
                              " for a list of requirements.")
+    TEMP_BUILD_IMAGE_FILES = (37, "Error removing temporary files created during build image.")
 
 class OpenCEError(Exception):
     """
@@ -97,5 +101,5 @@ def show_warning(warning, *additional_args, **kwargs):
     """
     Prints an Open-CE Warning.
     """
-    msg = "[OPEN-CE-WARNING-{}] {}".format(warning.value[0], warning.value[1].format(*additional_args))
+    msg = "{} - {}".format(warning.value[0], warning.value[1].format(*additional_args))
     log.warning(msg, **kwargs)

@@ -141,7 +141,7 @@ def cleanup(local_conda_channel):
     try:
         shutil.rmtree(os.path.join(local_conda_channel, TEMP_FILES))
     except OSError:
-        log.info("Error removing temporary files created during build image.") #TODO: Switch to an opence warning.
+        show_warning(Error.TEMP_BUILD_IMAGE_FILES)
 
 
 ENTRY_FUNCTION = build_runtime_container_image

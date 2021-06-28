@@ -136,6 +136,6 @@ if __name__ == '__main__':
     try:
         _main()
     except OpenCEError as err:
-        log.exception(err.msg)
+        log.error(err.msg)
         sys.exit(1)
     sys.exit(0)
