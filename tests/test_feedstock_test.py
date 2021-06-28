@@ -41,7 +41,7 @@ def test_test_feedstock(mocker, capsys):
     This is a complete test of `test_feedstock`.
     '''
 
-    mocker.patch('open_ce.test_feedstock.load_test_file', side_effect=(lambda x, y: mock_load_test_file(os.path.join(test_dir, "open-ce-tests1.yaml"), y)))
+    mocker.patch('open_ce.test_utils.load_test_file', side_effect=(lambda x, y: mock_load_test_file(os.path.join(test_dir, "open-ce-tests1.yaml"), y)))
 
     opence._main(["test", test_feedstock.COMMAND, "--conda_env_file", "tests/test-conda-env2.yaml"])
     captured = capsys.readouterr()

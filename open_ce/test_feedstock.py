@@ -36,7 +36,10 @@ def test_feedstock_entry(args):
     if not args.conda_env_files:
         raise OpenCEError(Error.CONDA_ENV_FILE_REQUIRED)
 
-    feedstock = os.path.basename(os.path.abspath(args.working_directory))
+    if args.working_directory:
+        feedstock = os.path.basename(os.path.abspath(args.working_directory))
+    else:
+        feedstock = os.path.basename(os.getcwd())
     test_results = {feedstock: []}
     for conda_env_file in inputs.parse_arg_list(args.conda_env_files):
         test_results[feedstock] += test_feedstock(conda_env_file,

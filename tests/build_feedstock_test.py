@@ -16,6 +16,7 @@
 
 import os
 import pathlib
+import logging
 import pytest
 from importlib.util import spec_from_loader, module_from_spec
 from importlib.machinery import SourceFileLoader
@@ -153,7 +154,7 @@ def test_build_feedstock_nonexist_config_file(mocker):
         opence._main(["build", build_feedstock.COMMAND, "--recipe-config-file", "my_config.yml"])
     assert "Unable to open provided config file: my_config.yml" in str(exc.value)
 
-def test_recipe_config_file_for_inapplicable_configuration(mocker, capsys):
+def test_recipe_config_file_for_inapplicable_configuration(mocker, caplog):
     """
     Tests the case when build is triggered for a configuration for which no recipes are applicable.
     """
@@ -163,10 +164,9 @@ def test_recipe_config_file_for_inapplicable_configuration(mocker, capsys):
         'conda_build.api.build',
         side_effect=(lambda x, **kwargs: helpers.validate_conda_build_args(x, expect_recipe=expect_recipe, **kwargs))
     )
-    
+
     opence._main(["build", build_feedstock.COMMAND, "--recipe-config-file", os.path.join(test_dir, "my_config.yaml"), "--python_versions", "4.1"])
-    captured = capsys.readouterr()
-    assert "INFO: No recipe to build for given configuration." in captured.out
+    assert ("OPEN-CE", logging.INFO, "No recipe to build for given configuration.") in caplog.record_tuples
 
 def test_build_feedstock_local_src_dir_args(mocker):
     """
