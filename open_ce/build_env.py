@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 # *****************************************************************
 # (C) Copyright IBM Corp. 2020, 2021. All Rights Reserved.
@@ -49,9 +48,9 @@ def _run_tests(build_tree, test_labels, conda_env_files, output_folder):
         conda_env_files (dict): A dictionary where the key is a variant string and the value
                                 is the name of a conda environment file.
     """
-    # Importing test_feedstock is intentionally done here because it checks for the
+    # Importing test_utils is intentionally done here because it checks for the
     # existence of junit_xml.
-    from open_ce.test_feedstock import test_feedstock, process_test_results  # pylint: disable=import-outside-toplevel
+    from open_ce.test_utils import test_feedstock, process_test_results  # pylint: disable=import-outside-toplevel
 
     test_results = {}
     # Run test commands for each conda environment that was generated
