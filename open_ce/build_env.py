@@ -103,7 +103,7 @@ def build_env(args):
                 except OpenCEError as exc:
                     raise OpenCEError(Error.BUILD_RECIPE, build_command.repository, exc.msg) from exc
             else:
-                log.info("Skipping build of %s because it already exists.",  + build_command.recipe)
+                log.info("Skipping build of %s because it already exists.", build_command.recipe)
 
     if args.run_tests:
         _run_tests(build_tree, inputs.parse_arg_list(args.test_labels), conda_env_files, os.path.abspath(args.output_folder))

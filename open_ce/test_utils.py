@@ -30,7 +30,7 @@ from open_ce.errors import OpenCEError, Error, log
 
 utils.check_if_package_exists('junit_xml')
 # pylint: disable=wrong-import-position,wrong-import-order
-from junit_xml import TestSuite, TestCase
+from junit_xml import TestSuite, TestCase, to_xml_report_string
 # pylint: enable=wrong-import-position,wrong-import-order
 
 COMMAND = 'feedstock'
@@ -280,7 +280,7 @@ def process_test_results(test_results, output_folder="./", test_labels=None):
     test_suites = [TestSuite("Open-CE tests for {} {}".format(feedstock, label_string), test_results[feedstock])
                         for feedstock in test_results]
     with open(os.path.join(output_folder, utils.DEFAULT_TEST_RESULT_FILE), 'w') as outfile:
-        outfile.write(TestSuite.to_xml_string(test_suites))
+        outfile.write(to_xml_report_string(test_suites))
     failed_tests = [x for key in test_results for x in test_results[key] if x.is_failure()]
     if failed_tests:
         raise OpenCEError(Error.FAILED_TESTS, len(failed_tests), str([failed_test.name for failed_test in failed_tests]))
