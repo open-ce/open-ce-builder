@@ -25,7 +25,6 @@ jobs:
         shell: bash -l {0}
         run: |
           conda install -y conda-build
-          conda install -y -c conda-forge junit-xml
           pip install .
       - name: Build XGBoost
         shell: bash -l {0}

@@ -36,10 +36,10 @@ jobs:
                            conda-build \
                            networkx \
                            matplotlib \
+                           junit-xml \
                            pytest=6.0.1 \
                            pytest-cov=2.10.1 \
                            pytest-mock=3.2.0
-          conda install -y -c conda-forge junit-xml
           pip install yamllint==1.24.2
       - name: Lint with pylint
         shell: bash -l {0}
