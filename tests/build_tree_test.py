@@ -17,7 +17,6 @@
 import os
 from collections import Counter
 import pathlib
-import logging
 import pytest
 
 test_dir = pathlib.Path(__file__).parent.absolute()
