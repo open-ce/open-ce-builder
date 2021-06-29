@@ -61,7 +61,7 @@ def test_get_licenses(mocker, capfd):
         template_contents = file_stream.read()
 
     print(template_contents)
-    assert "libopus" in template_contents
+    assert "libopus" in template_contents or "tzdata" in template_contents
 
     shutil.rmtree(output_folder)
 
