@@ -24,6 +24,7 @@ from open_ce import container_build
 from open_ce import utils
 from open_ce import inputs
 from open_ce.inputs import Argument, ENV_BUILD_ARGS
+from open_ce import test_feedstock
 from open_ce.errors import OpenCEError, Error, log
 
 COMMAND = "env"
@@ -48,10 +49,6 @@ def _run_tests(build_tree, test_labels, conda_env_files, output_folder):
         conda_env_files (dict): A dictionary where the key is a variant string and the value
                                 is the name of a conda environment file.
     """
-    # Importing test_utils is intentionally done here because it checks for the
-    # existence of junit_xml.
-    from open_ce.test_utils import test_feedstock, process_test_results  # pylint: disable=import-outside-toplevel
-
     test_results = {}
     # Run test commands for each conda environment that was generated
     for variant_string, conda_env_file in conda_env_files.items():
@@ -60,14 +57,14 @@ def _run_tests(build_tree, test_labels, conda_env_files, output_folder):
             log.info("\n*** Running tests within the %s conda environment ***\n", os.path.basename(conda_env_file))
         for feedstock in test_feedstocks:
             log.info("Running tests for %s", feedstock)
-            test_result = test_feedstock(conda_env_file,
-                                         test_labels=test_labels,
-                                         working_directory=feedstock)
+            test_result = test_feedstock.test_feedstock(conda_env_file,
+                                                        test_labels=test_labels,
+                                                        working_directory=feedstock)
             if feedstock not in test_results.keys():
                 test_results[feedstock] = test_result
             else:
                 test_results[feedstock] += test_result
-    process_test_results(test_results, output_folder, test_labels)
+    test_feedstock.process_test_results(test_results, output_folder, test_labels)
 
 def build_env(args):
     '''Entry Function'''

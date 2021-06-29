@@ -28,7 +28,7 @@ spec = spec_from_loader("opence", SourceFileLoader("opence", os.path.join(test_d
 opence = module_from_spec(spec)
 spec.loader.exec_module(opence)
 
-import open_ce.test_utils as test_feedstock
+import open_ce.test_feedstock as test_feedstock
 import open_ce.utils as utils
 from open_ce.errors import OpenCEError
 
@@ -41,7 +41,7 @@ def test_test_feedstock(mocker, caplog):
     This is a complete test of `test_feedstock`.
     '''
 
-    mocker.patch('open_ce.test_utils.load_test_file', side_effect=(lambda x, y: mock_load_test_file(os.path.join(test_dir, "open-ce-tests1.yaml"), y)))
+    mocker.patch('open_ce.test_feedstock.load_test_file', side_effect=(lambda x, y: mock_load_test_file(os.path.join(test_dir, "open-ce-tests1.yaml"), y)))
 
     opence._main(["test", test_feedstock.COMMAND, "--conda_env_file", "tests/test-conda-env2.yaml"])
     assert "Running: Create conda environment " + utils.CONDA_ENV_FILENAME_PREFIX in caplog.text
@@ -54,7 +54,7 @@ def test_test_feedstock_failed_tests(mocker, caplog):
     Test that failed tests work correctly.
     '''
 
-    mocker.patch('open_ce.test_utils.load_test_file', side_effect=(lambda x, y: mock_load_test_file(os.path.join(test_dir, "open-ce-tests2.yaml"), y)))
+    mocker.patch('open_ce.test_feedstock.load_test_file', side_effect=(lambda x, y: mock_load_test_file(os.path.join(test_dir, "open-ce-tests2.yaml"), y)))
     mocker.patch('open_ce.conda_env_file_generator.get_variant_string', return_value=None)
 
     with pytest.raises(OpenCEError) as exc:
@@ -72,7 +72,7 @@ def test_test_feedstock_working_dir(mocker, caplog):
 
     working_dir = "./my_working_dir"
     my_variants = {'build_type' : 'cpu'}
-    mocker.patch('open_ce.test_utils.load_test_file', side_effect=(lambda x, y: mock_load_test_file(os.path.join(test_dir, "open-ce-tests1.yaml"), my_variants)))
+    mocker.patch('open_ce.test_feedstock.load_test_file', side_effect=(lambda x, y: mock_load_test_file(os.path.join(test_dir, "open-ce-tests1.yaml"), my_variants)))
 
     assert not os.path.exists(working_dir)
     opence._main(["test", test_feedstock.COMMAND, "--conda_env_file", "tests/test-conda-env2.yaml", "--test_working_dir", working_dir])
@@ -88,7 +88,7 @@ def test_test_feedstock_labels(mocker, caplog):
     Test that labels work correctly.
     '''
 
-    mocker.patch('open_ce.test_utils.load_test_file', side_effect=(lambda x, y: mock_load_test_file(os.path.join(test_dir, "open-ce-tests3.yaml"), y)))
+    mocker.patch('open_ce.test_feedstock.load_test_file', side_effect=(lambda x, y: mock_load_test_file(os.path.join(test_dir, "open-ce-tests3.yaml"), y)))
 
     opence._main(["test", test_feedstock.COMMAND, "--conda_env_file", "tests/test-conda-env2.yaml"])
     assert not "Running: Create conda environment " + utils.CONDA_ENV_FILENAME_PREFIX in caplog.text
@@ -123,7 +123,7 @@ def test_test_feedstock_invalid_test_file(mocker,):
     Test that labels work correctly.
     '''
 
-    mocker.patch('open_ce.test_utils.load_test_file', side_effect=(lambda x, y: mock_load_test_file(os.path.join(test_dir, "open-ce-tests4.yaml"), y)))
+    mocker.patch('open_ce.test_feedstock.load_test_file', side_effect=(lambda x, y: mock_load_test_file(os.path.join(test_dir, "open-ce-tests4.yaml"), y)))
 
     with pytest.raises(OpenCEError) as exc:
         opence._main(["test", test_feedstock.COMMAND, "--conda_env_file", "tests/test-conda-env2.yaml"])

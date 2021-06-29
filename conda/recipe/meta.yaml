@@ -26,6 +26,7 @@ requirements:
     - python
     - git
     - matplotlib
+    - junit-xml
 
 test:
   commands:
