@@ -22,7 +22,7 @@ from enum import Enum, unique
 
 log = logging.getLogger("OPEN-CE")
 log.setLevel(logging.DEBUG)
-formatter = logging.Formatter('[%(name)s-%(levelname)s] %(message)s')
+formatter = logging.Formatter('[%(name)s-%(levelname)s]%(message)s')
 log_out_handler = logging.StreamHandler(sys.stdout)
 log_out_handler.setLevel(logging.DEBUG)
 log_out_handler.addFilter(lambda record: record.levelno < logging.WARNING)
@@ -87,6 +87,8 @@ class Error(Enum):
     PACKAGE_NOT_FOUND = (36, "Cannot find `{}`, please see https://github.com/open-ce/open-ce-builder#requirements" +
                              " for a list of requirements.")
     TEMP_BUILD_IMAGE_FILES = (37, "Error removing temporary files created during build image.")
+    UNABLE_DOWNLOAD_SOURCE = (38, "Unable to download source for '{}'.")
+    UNABLE_CLONE_SOURCE = (39, "Unable to clone source for '{}'.")
 
 class OpenCEError(Exception):
     """

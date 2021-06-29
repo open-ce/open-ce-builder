@@ -16,9 +16,9 @@
 
 import os
 import pathlib
-import logging
 import pytest
 import shutil
+import sys
 from importlib.util import spec_from_loader, module_from_spec
 from importlib.machinery import SourceFileLoader
 
@@ -32,16 +32,19 @@ import open_ce.get_licenses as get_licenses
 import open_ce.utils as utils
 from open_ce.errors import OpenCEError
 
-def test_get_licenses(caplog):
+def test_get_licenses(mocker, capfd):
     '''
     This is a complete test of `get_licenses`.
     '''
-    caplog.set_level(logging.INFO, logger="OPEN-CE")
+    mocker.patch("open_ce.get_licenses.show_warning",
+                 side_effect=(lambda warning, *additional_args, **kwargs: print(warning.value[1].format(*additional_args), file=sys.stderr, **kwargs)))
+
     output_folder = "get_licenses_output"
     template_file = "tests/open-ce-licenses.template"
     opence._main(["get", get_licenses.COMMAND, "--conda_env_file", "tests/test-conda-env3.yaml", "--output_folder", output_folder, "--template_files", template_file])
 
-    assert ("OPEN-CE", logging.WARNING, "Unable to download source for icu-58.2") in caplog.record_tuples
+    captured = capfd.readouterr()
+    assert "Unable to download source for 'icu-58.2" in captured.err
 
     output_file = os.path.join(output_folder, utils.DEFAULT_LICENSES_FILE)
     assert os.path.exists(output_file)
@@ -96,17 +99,20 @@ def test_get_licenses_no_conda_env():
 
     assert "The \'--conda_env_file\' argument is required." in str(err.value)
 
-def test_add_licenses_from_info_file(caplog):
+def test_add_licenses_from_info_file(mocker, capfd):
     '''
     This is a complete test of the add_licenses_from_info_file method.
     '''
+    mocker.patch("open_ce.get_licenses.show_warning",
+                 side_effect=(lambda warning, *additional_args, **kwargs: print(warning.value[1].format(*additional_args), file=sys.stderr, **kwargs)))
     output_folder = "get_licenses_output"
     gen = get_licenses.LicenseGenerator()
     license_info = get_licenses._get_info_file_packages(os.path.join("tests", "test-open-ce-info-1.yaml"))
     gen.add_licenses_from_info_files(license_info)
 
-    assert "Unable to clone source for bad_git_package" in caplog.text
-    assert "Unable to download source for bad_url" in caplog.text
+    captured = capfd.readouterr()
+    assert "Unable to clone source for 'bad_git_package" in captured.err
+    assert "Unable to download source for 'bad_url" in captured.err
 
     gen.write_licenses_file(output_folder)
 

@@ -32,7 +32,7 @@ import requests
 from jinja2 import Environment, FileSystemLoader
 
 from open_ce import utils
-from open_ce.errors import OpenCEError, Error, log
+from open_ce.errors import OpenCEError, Error, show_warning, log
 from open_ce.inputs import Argument, parse_arg_list
 import open_ce.yaml_utils
 
@@ -159,7 +159,7 @@ class LicenseGenerator():
                     try:
                         utils.git_clone(url, info.version, source_folder)
                     except OpenCEError:
-                        log.warning("Unable to clone source for '%s'.", info.name)
+                        show_warning(Error.UNABLE_CLONE_SOURCE, info.name)
                 else:
                     try:
                         res = requests.get(url)
@@ -170,7 +170,7 @@ class LicenseGenerator():
 
                     #pylint: disable=broad-except
                     except Exception:
-                        log.warning("Unable to download source for '%s'.", info.name)
+                        show_warning(Error.UNABLE_DOWNLOAD_SOURCE, info.name)
 
         # Find every license file within the downloaded source
         info.license_files = _find_license_files(source_folder, info.license_files)
@@ -337,7 +337,7 @@ def _get_source_from_conda_package(pkg_dir):
                     local_path, _ = conda_build.source.download_to_cache(source_folder, pkg_dir, source, False)
                     _extract(local_path, source_folder)
                 except RuntimeError:
-                    log.warning("Unable to download source for '%s'.", os.path.basename(pkg_dir))
+                    show_warning(Error.UNABLE_DOWNLOAD_SOURCE, os.path.basename(pkg_dir))
             elif source.get("git_url"):
                 git_url = source["git_url"]
                 try:
@@ -355,7 +355,7 @@ def _get_source_from_conda_package(pkg_dir):
                         else:
                             raise error
                     except OpenCEError:
-                        log.warning("Unable to clone source for '%s'.", os.path.basename(pkg_dir))
+                        show_warning(Error.UNABLE_CLONE_SOURCE, os.path.basename(pkg_dir))
 
     return source_folder
 
