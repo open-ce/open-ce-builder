@@ -36,7 +36,7 @@ def test_validate_env():
     env_file = os.path.join(test_dir, 'test-env2.yaml')
     opence._main(["validate", validate_env.COMMAND, env_file])
 
-def test_validate_env_negative(mocker, caplog):
+def test_validate_env_negative(caplog):
     '''
     Negative test for validate_env.
     '''
