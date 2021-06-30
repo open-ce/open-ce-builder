@@ -29,7 +29,7 @@ class Error(Enum):
     BUILD_IN_CONTAINER = (4, "Error executing build in container: \"{}\"")
     BUILD_IMAGE = (5, "Failure building image: \"{}\"")
     VALIDATE_ENV = (6, "Error validating \"{}\" for variant {}\n{}")
-    VALIDATE_CONFIG = (7, "Error validating \"{}\" for \"{}\" in variant \"{}\"\n{}")
+    VALIDATE_CONFIG = (7, "Error validating \"{}\" for \"{}\":\n{}")
     CONFIG_CONTENT = (8, "Content Error!:\n"
                          "An environment file needs to specify packages or "
                          "import another environment file.")
