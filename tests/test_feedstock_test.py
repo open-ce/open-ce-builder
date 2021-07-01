@@ -37,6 +37,30 @@ orig_load_test_file = test_feedstock.load_test_file
 def mock_load_test_file(x, y):
     return orig_load_test_file(x, y)
 
+def validate_junit(required_test_results,
+                   excluded_test_results,
+                   expected_test_cases,
+                   junit_file=os.path.join("./", utils.DEFAULT_TEST_RESULT_FILE),
+                   expected_failures = ["0"]):
+    '''
+    Used to validate the contents of a junit file.
+    '''
+    test_results = ET.parse(junit_file)
+    testsuites = list(test_results.getroot())
+    assert len(testsuites) == len(expected_failures)
+    for i, testsuite in enumerate(testsuites):
+        assert testsuite.attrib['failures'] == str(expected_failures[i])
+        testcases = list(testsuite)
+        print(testcases)
+        assert len(testcases) == expected_test_cases[i]
+        testcase_names = ";".join((testcase.attrib["name"] for testcase in testcases))
+        for test_result in required_test_results[i]:
+            if "name" in test_result:
+                assert test_result["name"] in testcase_names
+        for test_result in excluded_test_results:
+            if "name" in test_result:
+                assert test_result["name"] not in testcase_names
+
 def test_test_feedstock_complete(mocker, caplog):
     '''
     This is a complete test of `test_feedstock`.
@@ -49,13 +73,11 @@ def test_test_feedstock_complete(mocker, caplog):
     assert "Running: Test 1" in caplog.text
     assert not "Running: Test 2" in caplog.text
     assert "Running: Remove conda environment " + utils.CONDA_ENV_FILENAME_PREFIX in caplog.text
-    result_file = os.path.join("./", utils.DEFAULT_TEST_RESULT_FILE)
-    tree = ET.parse(result_file)
-    print(tree)
-    testsuites = list(tree.getroot())
-    assert len(testsuites) == 1
-    for testsuite in testsuites:
-        assert testsuite.attrib['failures'] == '0'
+    validate_junit([[{"name": "Create conda environment " + utils.CONDA_ENV_FILENAME_PREFIX},
+                     {"name": "Test 1"},
+                     {"name": "Remove conda environment " + utils.CONDA_ENV_FILENAME_PREFIX}]],
+                   [[{"name": "Test 2"}]],
+                   [3])
 
 def test_test_feedstock_failed_tests(mocker, caplog):
     '''
@@ -71,6 +93,14 @@ def test_test_feedstock_failed_tests(mocker, caplog):
     assert "Failed test: Test 1" in caplog.text
     assert "Failed test: Test 3" in caplog.text
     assert not "Failed test: Test 2" in caplog.text
+    validate_junit([[{"name": "Create conda environment " + utils.CONDA_ENV_FILENAME_PREFIX},
+                     {"name": "Test 1"},
+                     {"name": "Test 2"},
+                     {"name": "Test 3"},
+                     {"name": "Remove conda environment " + utils.CONDA_ENV_FILENAME_PREFIX}]],
+                   [[]],
+                   [5],
+                   expected_failures = [2])
 
 def test_test_feedstock_working_dir(mocker, caplog):
     '''
@@ -104,6 +134,9 @@ def test_test_feedstock_labels(mocker, caplog):
     assert not "Running: Test Distributed" in caplog.text
     assert not "Running: Test Long and Distributed" in caplog.text
     assert not "Running: Remove conda environment " + utils.CONDA_ENV_FILENAME_PREFIX in caplog.text
+    validate_junit([[]],
+                   [[]],
+                   [0])
     caplog.clear()
     opence._main(["test", test_feedstock.COMMAND, "--conda_env_file", "tests/test-conda-env2.yaml", "--test_labels", "long"])
     assert "Running: Create conda environment " + utils.CONDA_ENV_FILENAME_PREFIX in caplog.text
@@ -111,6 +144,12 @@ def test_test_feedstock_labels(mocker, caplog):
     assert not "Running: Test Distributed" in caplog.text
     assert not "Running: Test Long and Distributed" in caplog.text
     assert "Running: Remove conda environment " + utils.CONDA_ENV_FILENAME_PREFIX in caplog.text
+    validate_junit([[{"name": "Create conda environment " + utils.CONDA_ENV_FILENAME_PREFIX},
+                     {"name": "Test Long"},
+                     {"name": "Remove conda environment " + utils.CONDA_ENV_FILENAME_PREFIX}]],
+                   [[{"name": "Test Distributed"},
+                     {"name": "Test Long and Distributed"}]],
+                   [3])
     caplog.clear()
     opence._main(["test", test_feedstock.COMMAND, "--conda_env_file", "tests/test-conda-env2.yaml", "--test_labels", "distributed"])
     assert "Running: Create conda environment " + utils.CONDA_ENV_FILENAME_PREFIX in caplog.text
@@ -118,6 +157,12 @@ def test_test_feedstock_labels(mocker, caplog):
     assert "Running: Test Distributed" in caplog.text
     assert not "Running: Test Long and Distributed" in caplog.text
     assert "Running: Remove conda environment " + utils.CONDA_ENV_FILENAME_PREFIX in caplog.text
+    validate_junit([[{"name": "Create conda environment " + utils.CONDA_ENV_FILENAME_PREFIX},
+                     {"name": "Test Distributed"},
+                     {"name": "Remove conda environment " + utils.CONDA_ENV_FILENAME_PREFIX}]],
+                   [[{"name": "Test Long"},
+                     {"name": "Test Long and Distributed"}]],
+                   [3])
     caplog.clear()
     opence._main(["test", test_feedstock.COMMAND, "--conda_env_file", "tests/test-conda-env2.yaml", "--test_labels", "long,distributed"])
     assert "Running: Create conda environment " + utils.CONDA_ENV_FILENAME_PREFIX in caplog.text
@@ -125,6 +170,13 @@ def test_test_feedstock_labels(mocker, caplog):
     assert "Running: Test Distributed" in caplog.text
     assert "Running: Test Long and Distributed" in caplog.text
     assert "Running: Remove conda environment " + utils.CONDA_ENV_FILENAME_PREFIX in caplog.text
+    validate_junit([[{"name": "Create conda environment " + utils.CONDA_ENV_FILENAME_PREFIX},
+                     {"name": "Test Distributed"},
+                     {"name": "Remove conda environment " + utils.CONDA_ENV_FILENAME_PREFIX},
+                     {"name": "Test Long"},
+                     {"name": "Test Long and Distributed"}]],
+                   [[]],
+                   [5])
 
 def test_test_feedstock_invalid_test_file(mocker,):
     '''
