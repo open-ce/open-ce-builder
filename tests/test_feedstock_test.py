@@ -18,6 +18,7 @@ import os
 import pathlib
 import pytest
 import shutil
+import xml.etree.ElementTree as ET
 
 from importlib.util import spec_from_loader, module_from_spec
 from importlib.machinery import SourceFileLoader
@@ -36,7 +37,7 @@ orig_load_test_file = test_feedstock.load_test_file
 def mock_load_test_file(x, y):
     return orig_load_test_file(x, y)
 
-def test_test_feedstock(mocker, caplog):
+def test_test_feedstock_complete(mocker, caplog):
     '''
     This is a complete test of `test_feedstock`.
     '''
@@ -48,6 +49,13 @@ def test_test_feedstock(mocker, caplog):
     assert "Running: Test 1" in caplog.text
     assert not "Running: Test 2" in caplog.text
     assert "Running: Remove conda environment " + utils.CONDA_ENV_FILENAME_PREFIX in caplog.text
+    result_file = os.path.join("./", utils.DEFAULT_TEST_RESULT_FILE)
+    tree = ET.parse(result_file)
+    print(tree)
+    testsuites = list(tree.getroot())
+    assert len(testsuites) == 1
+    for testsuite in testsuites:
+        assert testsuite.attrib['failures'] == '0'
 
 def test_test_feedstock_failed_tests(mocker, caplog):
     '''
