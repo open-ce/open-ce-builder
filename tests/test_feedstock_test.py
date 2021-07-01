@@ -41,10 +41,12 @@ def validate_junit(required_test_results,
                    excluded_test_results,
                    expected_test_cases,
                    junit_file=os.path.join("./", utils.DEFAULT_TEST_RESULT_FILE),
-                   expected_failures = ["0"]):
+                   expected_failures=None):
     '''
     Used to validate the contents of a junit file.
     '''
+    if expected_failures is None:
+        expected_failures = ["0"]
     test_results = ET.parse(junit_file)
     testsuites = list(test_results.getroot())
     assert len(testsuites) == len(expected_failures)
