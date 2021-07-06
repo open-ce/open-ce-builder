@@ -7,5 +7,4 @@ dependencies:
 - icu 58.2
 - libgcc-ng=8.2
 - libstdcxx-ng=8.2
-  #- libgfortran-ng=7.3
 name: opence-conda-env-py3.6-cuda-openmpi
