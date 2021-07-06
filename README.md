@@ -29,6 +29,7 @@ The `open-ce` tool allows a user to build collections of conda recipes described
   * Once `conda` is installed, `conda-build` can be installed with the command: `conda install conda-build`
 * `networkx` >= 2.5
 * `python` >= 3.6
+* `junit-xml` >= 1.9
 * `docker` >= 1.13 or `podman` >= 2.0.5
   * docker or podman required only when building within a container (see below).
 * `matplotlib` >= 3.3
