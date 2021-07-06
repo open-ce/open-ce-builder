@@ -219,7 +219,7 @@ def gen_test_commands(test_file=utils.DEFAULT_TEST_CONFIG_FILE, variants=None, w
                                          conda_env=conda_env,
                                          bash_command=test.get('command'),
                                          working_dir=working_dir,
-                                     test_file=test_file))
+                                         test_file=test_file))
 
     test_commands.append(TestCommand(name="Remove conda environment " + conda_env,
                                      conda_env=conda_env,
