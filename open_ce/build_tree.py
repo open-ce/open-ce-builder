@@ -347,6 +347,10 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
                     # Pass in channels ordered by priority.
                     package_info = conda_utils.get_latest_package_info(node.channels + ancestor_channels + self._channels,
                                                                        package)
+                    # package_info is empty for a virtual package.
+                    # As of now, this is just one case of package_info being empty.
+                    if package_info == "":
+                        continue
                     dep_graph.add_node(DependencyNode({package}))
                     for dep in package_info['dependencies']:
                         dep_name = utils.remove_version(dep)

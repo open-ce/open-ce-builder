@@ -99,6 +99,11 @@ def get_latest_package_info(channels, package):
       3. Largest Build Number
       4. Latest Timestamp
     '''
+
+    # Skip virtual packages (these have leading "__" in the name)
+    if package.startswith("__"):
+        return ""
+
     channel_args = sum(([["--override-channels", "-c", channel]] for channel in channels), [])
     channel_args += [[]] # use defaults for last search
     all_std_out = ""
