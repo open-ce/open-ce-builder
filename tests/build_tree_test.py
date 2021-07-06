@@ -205,7 +205,7 @@ def test_clone_repo(mocker):
 
     mock_build_tree._clone_repo(git_location + "/my_repo.git", "/test/my_repo", None, None)
 
-def test_get_repo_git_tag_options(mocker, capsys):
+def test_get_repo_git_tag_options(mocker, caplog):
     '''
     Test for `_get_repo` that verifies `git_tag` and `git_tag_for_env` priorities.
     '''
@@ -236,7 +236,7 @@ def test_get_repo_git_tag_options(mocker, capsys):
             packages = env_config_data.get(env_config.Key.packages.name, [])
             for package in packages:
                 _ = mock_build_tree._get_repo(env_config_data, package)
-                validate_git_tags(mock_build_tree._git_tag_for_env, env_config_data, package, capsys)
+                validate_git_tags(mock_build_tree._git_tag_for_env, env_config_data, package, caplog)
 
         # Setting git_tag_for_env in BuildTree should override whatever is in the config file
         mock_build_tree._git_tag_for_env = "test_tag_for_all"
@@ -245,7 +245,7 @@ def test_get_repo_git_tag_options(mocker, capsys):
             packages = env_config_data.get(env_config.Key.packages.name, [])
             for package in packages:
                 _ = mock_build_tree._get_repo(env_config_data, package)
-                validate_git_tags(mock_build_tree._git_tag_for_env, env_config_data, package, capsys)
+                validate_git_tags(mock_build_tree._git_tag_for_env, env_config_data, package, caplog)
 
         # Setting git_tag_for_env in BuildTree back to Default and no git tags
         # specified in the config file too.
@@ -262,9 +262,9 @@ def test_get_repo_git_tag_options(mocker, capsys):
             packages = env_config_data.get(env_config.Key.packages.name, [])
             for package in packages:
                 _ = mock_build_tree._get_repo(env_config_data, package)
-                validate_git_tags(mock_build_tree._git_tag_for_env, env_config_data, package, capsys)
+                validate_git_tags(mock_build_tree._git_tag_for_env, env_config_data, package, caplog)
 
-def test_get_repo_with_patches(mocker, capsys):
+def test_get_repo_with_patches(mocker, caplog):
     '''
     Test for `_get_repo` that verifies `patches` field
     '''
@@ -297,8 +297,7 @@ def test_get_repo_with_patches(mocker, capsys):
 
                 if package.get(env_config.Key.feedstock.name) == "package22":
                     _ = mock_build_tree._get_repo(env_config_data, package)
-                    captured = capsys.readouterr()
-                    assert "Patch apply command:  git apply" in captured.out
+                    assert "Patch apply command: git apply" in caplog.text
                     break
 
 def test_get_repo_for_nonexisting_patch(mocker):
@@ -336,24 +335,21 @@ def test_get_repo_for_nonexisting_patch(mocker):
                         _ = mock_build_tree._get_repo(env_config_data, package)
                     assert "Failed to apply patch " in str(exc.value)
 
-def validate_git_tags(git_tag_for_env, env_config_data, package, capsys):
+def validate_git_tags(git_tag_for_env, env_config_data, package, caplog):
     '''
     Validation function for git tag being used for each feedstock. Note, this logic depends
     on logic used in code to decide which git_tag to be used. If that changes, this also needs
     to be updated.
     '''
-    captured = capsys.readouterr()
     git_branch = git_tag_for_env
     if not git_branch:
         git_branch = package.get(env_config.Key.git_tag.name, None)
     if not git_branch:
         git_branch = env_config_data.get(env_config.Key.git_tag_for_env.name, None)
 
-    print(captured.out)
-
-    assert "Clone cmd:  git clone" in captured.out
+    assert "Clone cmd: git clone" in caplog.text
     if git_branch:
-        assert "Checkout branch/tag command:  git checkout {}".format(git_branch) in captured.out
+        assert "Checkout branch/tag command: git checkout {}".format(git_branch) in caplog.text
 
 def test_clone_repo_failure(mocker):
     '''

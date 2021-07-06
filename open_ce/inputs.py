@@ -21,7 +21,7 @@ import os
 import argparse
 from enum import Enum, unique
 from open_ce import utils
-from open_ce.errors import Error, show_warning
+from open_ce.errors import Error, show_warning, log
 from open_ce import __version__ as open_ce_version
 
 class OpenCEFormatter(argparse.ArgumentDefaultsHelpFormatter):
@@ -337,7 +337,7 @@ def _create_env_config_paths(args):
                 new_url = "https://raw.githubusercontent.com/{}/{}/{}/envs/{}".format(
                                                   organization, utils.DEFAULT_ENVS_REPO, branch, file_name)
 
-                print("INFO: Unable to find " + config_file + " locally. Attempting to use " + new_url)
+                log.info("Unable to find '%s' locally. Attempting to use '%s'.", config_file, new_url)
                 args.env_config_file[index] = new_url
 
 def parse_args(parser, arg_strings=None):

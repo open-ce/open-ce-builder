@@ -30,7 +30,8 @@ This example will:
 1. Create a new conda environment that will be active throughout the running of the tests.
 1. Run the bash instructions specified by `command` in "First Test" within a new bash shell that activates the conda environment from step 1.
 1. If running within a CUDA environment, run the bash instructions specified by `command` in "CUDA Test" within a new bash shell that activates the conda environment from step 1.
-1. Removes the conda environment created in step 1.
+1. Remove the conda environment created in step 1.
+1. Write the test results as a `junit-xml` file to `test_results.xml`.
 
 #### Open-CE Test File Environment Variables
 
@@ -56,7 +57,7 @@ tests:
 
 ## Running Tests After a Build
 
-Tests can be run immediately after a build has completed by passing the `--run_tests` argument to `open-ce build env`. Tests will be run for every package that was built (but not until every package has been built). Tests will be run for every combination of build variants that were specified by the build command. For example, if `python_versions` is set to `3.6,3.7`, tests will be run for the python 3.6 packages and python 3.7 packages. For more information on the `open-ce build env` command, see [doc/README.open_ce_build.md] (README.open_ce_build.md).
+Tests can be run immediately after a build has completed by passing the `--run_tests` argument to `open-ce build env`. Tests will be run for every package that was built (but not until every package has been built). Tests will be run for every combination of build variants that were specified by the build command. For example, if `python_versions` is set to `3.6,3.7`, tests will be run for the python 3.6 packages and python 3.7 packages. For more information on the `open-ce build env` command, see [doc/README.open_ce_build.md](README.open_ce_build.md). When run as part of a build, the `test_results.xml` file will be located in the output folder.
 
 ## `open-ce test env` sub command
 
