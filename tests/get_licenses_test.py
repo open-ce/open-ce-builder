@@ -62,7 +62,6 @@ def test_get_licenses(mocker, capfd):
 
     print(template_contents)
     assert "libopus" in template_contents or "tzdata" in template_contents
-
     shutil.rmtree(output_folder)
 
 def test_get_licenses_failed_conda_create(mocker):
