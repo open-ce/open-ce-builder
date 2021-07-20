@@ -19,7 +19,7 @@
 
 import sys
 from open_ce import inputs
-from open_ce.errors import OpenCEError
+from open_ce.errors import OpenCEError, log
 from open_ce import build_env
 from open_ce import build_feedstock
 from open_ce import test_feedstock
@@ -136,7 +136,6 @@ if __name__ == '__main__':
     try:
         _main()
     except OpenCEError as err:
-        print(err.msg, file=sys.stderr)
+        log.error(err.msg)
         sys.exit(1)
-
     sys.exit(0)

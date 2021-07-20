@@ -50,7 +50,7 @@ class PackageBuildTracker(object):
             for condition in conditions:
                 assert condition(build_command)
 
-def test_build_env(mocker, capsys):
+def test_build_env(mocker, caplog):
     '''
     This is a complete test of `build_env`.
     It uses `test-env2.yaml` which has a dependency on `test-env1.yaml`, and specifies a chain of package dependencies.
@@ -170,11 +170,10 @@ def test_build_env(mocker, capsys):
         'open_ce.build_tree.BuildCommand.all_outputs_exist',
         return_value=True)
 
-    captured = capsys.readouterr()
+    caplog.clear()
     opence._main(["build", build_env.COMMAND, env_file])
     validate_and_remove_conda_env_files()
-    captured = capsys.readouterr()
-    assert "Skipping build of" in captured.out
+    assert "Skipping build of" in caplog.text
     mocker.patch(
         'open_ce.build_tree.BuildCommand.all_outputs_exist',
         return_value=False)
@@ -259,11 +258,10 @@ def test_build_env(mocker, capsys):
     )
 
     env_file = os.path.join(test_dir, 'test-env2.yaml')
-    captured = capsys.readouterr()
+    caplog.clear()
     opence._main(["build", build_env.COMMAND, env_file, "--python_versions", py_version, "--packages", "package14,package35"])
     validate_and_remove_conda_env_files(py_version)
-    captured = capsys.readouterr()
-    assert "No recipes were found for package35" in captured.out
+    assert "No recipes were found for 'package35'" in caplog.text
 
     #---The eighth test makes sure that relative URL paths work.
     package_deps = {"package11": ["package15"],
@@ -478,7 +476,7 @@ def test_run_tests(mocker):
 
     # Note: All of the tests should fail, since there isn't a real conda environment to activate
     with pytest.raises(OpenCEError) as exc:
-        build_env._run_tests(mock_build_tree, [], conda_env_files)
+        build_env._run_tests(mock_build_tree, [], conda_env_files, "./")
     assert "There were 4 test failures" in str(exc.value)
 
 def test_build_env_url(mocker):

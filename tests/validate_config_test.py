@@ -118,7 +118,7 @@ def test_validate_config(mocker):
                     "package15": [],
                     "package16": ["package15"],
                     "package21": ["package13"],
-                    "package22": ["package21"]}
+                    "package22": ["package21", "__virtual_pack"]}
     mocker.patch(
         'conda_build.api.render',
         side_effect=(lambda path, *args, **kwargs: helpers.mock_renderer(os.getcwd(), package_deps))
