@@ -36,20 +36,16 @@ def test_validate_env():
     env_file = os.path.join(test_dir, 'test-env2.yaml')
     opence._main(["validate", validate_env.COMMAND, env_file])
 
-def test_validate_env_negative(mocker, capsys):
+def test_validate_env_negative(caplog):
     '''
     Negative test for validate_env.
     '''
-    from sys import stderr
-    # Apparently the `file` default was being set before capsys mocked sys.stderr. This mocks the default for the function.
-    mocker.patch('open_ce.errors.show_warning.__kwdefaults__', {'file': stderr})
     env_file = os.path.join(test_dir, 'test-env-invalid1.yaml')
     with pytest.raises(OpenCEError) as exc:
         opence._main(["validate", validate_env.COMMAND, env_file])
     assert "Unexpected key chnnels was found in " in str(exc.value)
-    captured = capsys.readouterr()
-    assert "OPEN-CE-WARNING" in captured.err
-    assert "test-env-invalid1.yaml' does not provide 'builder_version'. Possible schema mismatch." in captured.err
+    assert "WARNING" in caplog.text
+    assert "test-env-invalid1.yaml' does not provide 'builder_version'. Possible schema mismatch." in caplog.text
 
 def test_validate_env_wrong_external_deps(mocker,):
     '''

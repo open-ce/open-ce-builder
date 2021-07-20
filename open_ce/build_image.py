@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 # *****************************************************************
 # (C) Copyright IBM Corp. 2020, 2021. All Rights Reserved.
@@ -22,7 +21,7 @@ import shutil
 from open_ce import utils
 from open_ce import __version__ as open_ce_version
 from open_ce.inputs import Argument, parse_arg_list
-from open_ce.errors import OpenCEError, Error, show_warning
+from open_ce.errors import OpenCEError, Error, show_warning, log
 
 COMMAND = 'image'
 DESCRIPTION = 'Run Open-CE tools within a container'
@@ -67,7 +66,7 @@ def build_image(local_conda_channel, conda_env_file, container_tool, image_versi
     build_cmd += container_build_args + " "
     build_cmd += local_conda_channel
 
-    print("Container build command: ", build_cmd)
+    log.info("Container build command: %s", build_cmd)
     if os.system(build_cmd):
         raise OpenCEError(Error.BUILD_IMAGE, image_name)
 
@@ -83,12 +82,13 @@ def _get_runtime_image_file(container_tool):
         return image_file
 
     tool_ver = tool_ver.replace(".", "")
+    tool_ver = tool_ver.replace("-dev", "")
     if (container_tool == "docker" and int(tool_ver) >= 1709) or \
        (container_tool == "podman" and int(tool_ver) >= 200):
         # Use the newer docker/podman supported Dockerfile
         image_file = os.path.join(RUNTIME_IMAGE_PATH, "podman/Dockerfile")
 
-    print("INFO: Dockerfile being used: ", image_file)
+    log.info("Dockerfile being used: %s", image_file)
     return image_file
 
 def build_runtime_container_image(args):
@@ -121,7 +121,7 @@ def build_runtime_container_image(args):
         image_version = utils.get_open_ce_version(conda_env_file)
         image_name = build_image(args.local_conda_channel, os.path.basename(conda_env_runtime_file),
                                  args.container_tool, image_version, args.container_build_args)
-        print("Docker image with name {} is built successfully.".format(image_name))
+        log.info("Docker image with name %s is built successfully.", image_name)
 
     cleanup(local_conda_channel)
 
@@ -132,7 +132,7 @@ def create_copy(src_file, dest_file):
     try:
         shutil.copy(src_file, dest_file)
     except shutil.SameFileError:
-        print("INFO: File ", src_file, "already in local conda channel.")
+        log.info("File '%s' already in local conda channel.", src_file)
 
 def cleanup(local_conda_channel):
     '''
@@ -141,7 +141,7 @@ def cleanup(local_conda_channel):
     try:
         shutil.rmtree(os.path.join(local_conda_channel, TEMP_FILES))
     except OSError:
-        print("INFO: Error removing temporary files created during build image.")
+        show_warning(Error.TEMP_BUILD_IMAGE_FILES)
 
 
 ENTRY_FUNCTION = build_runtime_container_image

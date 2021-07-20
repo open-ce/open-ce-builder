@@ -29,7 +29,7 @@ spec.loader.exec_module(opence)
 import open_ce.get_graph as get_graph
 import open_ce.utils as utils
 
-def test_get_graph(capsys):
+def test_get_graph(caplog):
     '''
     This is a complete test of `get_graph`.
     '''
@@ -41,8 +41,7 @@ def test_get_graph(capsys):
                   "--build_types", "cuda,cpu",
                   "--repository_folder", os.path.join(tmp_test.name, "repos")])
 
-    captured = capsys.readouterr()
-    assert "Build graph successfully output" in captured.out
+    assert "Build graph successfully output" in caplog.text
 
     output_file = os.path.join(output_folder, utils.DEFAULT_GRAPH_FILE)
     assert os.path.exists(output_file)

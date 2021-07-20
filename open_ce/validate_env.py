@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """
 # *****************************************************************
 # (C) Copyright IBM Corp. 2020, 2021. All Rights Reserved.

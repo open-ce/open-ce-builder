@@ -11,6 +11,7 @@
 [![Builder Unit Tests](https://github.com/open-ce/open-ce/workflows/Open-CE%20Builder%20Unit%20Tests/badge.svg)](https://github.com/open-ce/open-ce-builder/actions?query=workflow%3A%22Open-CE+Builder+Unit+Tests%22+branch%3Amain)
 [![Builder Unit Test Coverage](https://codecov.io/gh/open-ce/open-ce-builder/branch/main/graph/badge.svg)](https://codecov.io/gh/open-ce/open-ce-builder)
 [![GitHub Licence](https://img.shields.io/github/license/open-ce/open-ce.svg)](LICENSE)
+[![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/open-ce/open-ce-builder)
 ---
 
 # Open-CE Builder
@@ -29,6 +30,7 @@ The `open-ce` tool allows a user to build collections of conda recipes described
   * Once `conda` is installed, `conda-build` can be installed with the command: `conda install conda-build`
 * `networkx` >= 2.5
 * `python` >= 3.6
+* `junit-xml` >= 1.9
 * `docker` >= 1.13 or `podman` >= 2.0.5
   * docker or podman required only when building within a container (see below).
 * `matplotlib` >= 3.3
