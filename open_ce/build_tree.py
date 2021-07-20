@@ -278,7 +278,8 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         # Find all conda_build_configs listed in environment files
         conda_build_configs = []
         for env_config_data in env_config_data_list:
-            conda_build_configs += [utils.expanded_path(config,
+            conda_build_configs += [ utils.download_file(config) if utils.is_url(config) else
+                                        utils.expanded_path(config,
                                         relative_to=env_config_data[env_config.Key.opence_env_file_path.name])
                                             for config in env_config_data.get(env_config.Key.conda_build_configs.name,
                                                                               [])]
