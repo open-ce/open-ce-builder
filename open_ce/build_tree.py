@@ -278,8 +278,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         # Find all conda_build_configs listed in environment files
         conda_build_configs = []
         for env_config_data in env_config_data_list:
-            conda_build_configs += [ utils.download_file(config) if utils.is_url(config) else
-                                        utils.expanded_path(config,
+            conda_build_configs += [config if utils.is_url(config) else utils.expanded_path(config,
                                         relative_to=env_config_data[env_config.Key.opence_env_file_path.name])
                                             for config in env_config_data.get(env_config.Key.conda_build_configs.name,
                                                                               [])]
@@ -328,7 +327,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
                                   runtime_package,
                                   feedstock.get(env_config.Key.recipe_path.name),
                                   feedstock.get(env_config.Key.recipes.name),
-                                  [os.path.abspath(config) for config in conda_build_configs],
+                                  [config if utils.is_url(config) else os.path.abspath(config) for config in conda_build_configs],
                                   variants,
                                   channels)
         return retval
@@ -535,8 +534,8 @@ def _create_commands(repository, runtime_package, recipe_path,
     os.chdir(repository)
 
     config_data, _ = build_feedstock.load_package_config(variants=variants, recipe_path=recipe_path)
-    combined_config_files = variant_config_files
-
+    combined_config_files = [utils.download_file(config) if utils.is_url(config) else config
+                                 for config in variant_config_files]
     feedstock_conda_build_config_file = build_feedstock.get_conda_build_config()
     if feedstock_conda_build_config_file:
         combined_config_files.append(feedstock_conda_build_config_file)
