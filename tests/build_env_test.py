@@ -20,6 +20,8 @@ import pytest
 from importlib.util import spec_from_loader, module_from_spec
 from importlib.machinery import SourceFileLoader
 
+import yaml
+
 test_dir = pathlib.Path(__file__).parent.absolute()
 
 spec = spec_from_loader("opence", SourceFileLoader("opence", os.path.join(test_dir, '..', 'open_ce', 'open-ce-builder')))
@@ -125,7 +127,7 @@ def test_build_env(mocker, caplog):
 
     env_file = os.path.join(test_dir, 'test-env2.yaml')
     opence._main(["build", build_env.COMMAND, env_file, "--python_versions", py_version, "--run_tests"])
-    validate_and_remove_conda_env_files(py_version)
+    validate_and_remove_conda_env_files(py_version, channels=["https://anaconda.org/anaconda"])
 
     #---The second test specifies a python version that is supported in the env file by package21.
     py_version = "2.1"
@@ -293,16 +295,24 @@ def test_build_env(mocker, caplog):
 def validate_and_remove_conda_env_files(py_versions=utils.DEFAULT_PYTHON_VERS,
                                         build_types=utils.DEFAULT_BUILD_TYPES,
                                         mpi_types=utils.DEFAULT_MPI_TYPES,
-                                        cuda_versions=utils.DEFAULT_CUDA_VERS):
+                                        cuda_versions=utils.DEFAULT_CUDA_VERS,
+                                        channels=None):
     # Check if conda env files are created for given python versions and build variants
     variants = utils.make_variants(py_versions, build_types, mpi_types, cuda_versions)
     for variant in variants:
-        cuda_env_file = os.path.join(os.getcwd(), utils.DEFAULT_OUTPUT_FOLDER,
+        conda_env_file = os.path.join(os.getcwd(), utils.DEFAULT_OUTPUT_FOLDER,
                                      "{}{}.yaml".format(utils.CONDA_ENV_FILENAME_PREFIX,
                                      utils.variant_string(variant.get('python'), variant.get('build_type'), variant.get('mpi_type'), variant.get('cudatoolkit'))))
-        assert os.path.exists(cuda_env_file)
+        assert os.path.exists(conda_env_file)
+        if channels:
+            with open(conda_env_file, 'r') as file_handle:
+                env_info = yaml.safe_load(file_handle)
+
+            env_channels = env_info['channels']
+            assert(all([channel in env_channels for channel in channels]))
+
         # Remove the file once it's existence is verified
-        os.remove(cuda_env_file)
+        os.remove(conda_env_file)
 
 def test_env_validate(mocker):
     '''

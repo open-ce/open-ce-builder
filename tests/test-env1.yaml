@@ -34,3 +34,4 @@ external_dependencies:
 
 conda_build_configs:
     - conda_build_config2.yaml
+    - https://raw.githubusercontent.com/open-ce/open-ce-builder/main/tests/conda_build_config.yaml

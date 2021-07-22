@@ -82,6 +82,7 @@ def _get_runtime_image_file(container_tool):
         return image_file
 
     tool_ver = tool_ver.replace(".", "")
+    tool_ver = tool_ver.replace("-dev", "")
     if (container_tool == "docker" and int(tool_ver) >= 1709) or \
        (container_tool == "podman" and int(tool_ver) >= 200):
         # Use the newer docker/podman supported Dockerfile
