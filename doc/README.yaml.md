@@ -266,11 +266,12 @@ be used to build the environment. These files will be passed to `conda-build` af
 values provided by the `--conda_build_configs` argument, as well as after the default
 locations for conda_build_config files. This will give conda_build_config files
 specified within an Open-CE file higher priority than those passed in through arguments
-and through default locations.
+and through default locations. Using URLs for `conda_build_configs` is also supported.
 
 ```yaml
 conda_build_configs:
   - my_conda_build_config.yaml
+  - https://my.url.org/my_conda_config.yaml
 ```
 
 ### git_tag_for_env
