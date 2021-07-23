@@ -88,6 +88,17 @@ def get_variant_string(conda_env_file):
 
     return None
 
+def get_channels(conda_env_file):
+    """
+    Returns a list of the channels specified in the conda environment file.
+    """
+    #pylint: disable=import-outside-toplevel
+    import open_ce.yaml_utils
+
+    with open(conda_env_file, 'r') as file_handle:
+        env_info = open_ce.yaml_utils.load(file_handle)
+
+    return env_info.get('channels')
 
 def _create_channels(channels, output_folder):
     result = []

@@ -84,16 +84,23 @@ class TestCommand():
                                   This is only needed when create_env is True.
         """
         output = ""
+        output += "CONDA_BIN=$(dirname $(which conda))\n"
+        output += "source ${CONDA_BIN}/../etc/profile.d/conda.sh\n"
+
         if self.create_env:
+            channels = conda_env_file_generator.get_channels(conda_env_file)
             output += "conda env create -f " + conda_env_file + " -n " + self.conda_env + "\n"
+            if channels:
+                # Add the first channel from the environment file to the newly created conda environment.
+                # This will allow tests to install other packages from the local conda channel.
+                output += "conda activate " + self.conda_env + "\n"
+                output += "conda config --env --add channels " + channels[0] + "\n"
             return output
 
         if self.clean_env:
             output += "conda env remove -y -n " + self.conda_env + "\n"
             return output
 
-        output += "CONDA_BIN=$(dirname $(which conda))\n"
-        output += "source ${CONDA_BIN}/../etc/profile.d/conda.sh\n"
         output += "conda activate " + self.conda_env + "\n"
         output += "export FEEDSTOCK_DIR=" + self.feedstock_dir + "\n"
         output += self.bash_command + "\n"
