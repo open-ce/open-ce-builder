@@ -327,7 +327,8 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
                                   runtime_package,
                                   feedstock.get(env_config.Key.recipe_path.name),
                                   feedstock.get(env_config.Key.recipes.name),
-                                  [config if utils.is_url(config) else os.path.abspath(config) for config in conda_build_configs],
+                                  [config if utils.is_url(config) else os.path.abspath(config)
+                                      for config in conda_build_configs],
                                   variants,
                                   channels)
         return retval
