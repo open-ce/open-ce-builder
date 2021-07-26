@@ -17,6 +17,7 @@
 """
 
 import os
+import shutil
 
 import networkx
 
@@ -405,10 +406,14 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
                         # Look for patch relative to where the Open-CE environment file is
                         patch_file = os.path.join(os.path.dirname(env_config_data.get(
                                                   env_config.Key.opence_env_file_path.name)), patch)
+                        if utils.is_url(patch_file):
+                            patch_file = utils.download_file(patch_file)
                     patch_apply_cmd = "git apply {}".format(patch_file)
                     log.info("Patch apply command: %s", patch_apply_cmd)
                     patch_apply_res = os.system(patch_apply_cmd)
                     if patch_apply_res != 0:
+                        os.chdir(cur_dir)
+                        shutil.rmtree(repo_dir)
                         raise OpenCEError(Error.PATCH_APPLICATION, patch, package[env_config.Key.feedstock.name])
                 os.chdir(cur_dir)
 
