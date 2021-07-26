@@ -101,8 +101,10 @@ class TestCommand():
             output += "conda env remove -y -n " + self.conda_env + "\n"
             return output
 
+        output += "set -e\n"
         output += "conda activate " + self.conda_env + "\n"
         output += "export FEEDSTOCK_DIR=" + self.feedstock_dir + "\n"
+        output += "set -x\n"
         output += self.bash_command + "\n"
 
         return output
@@ -123,7 +125,6 @@ class TestCommand():
         # Create file containing bash commands
         os.makedirs(self.working_dir, exist_ok=True)
         with tempfile.NamedTemporaryFile(mode='w+t', dir=self.working_dir, delete=False) as temp:
-            temp.write("set -ex\n")
             temp.write(self.get_test_command(conda_env_file))
             temp_file_name = temp.name
 
@@ -136,10 +137,10 @@ class TestCommand():
 
         result = TestResult(conda_env_file, retval,
                             name=self.name,
-                            category=self.feedstock_dir,
+                            category=os.path.basename(self.feedstock_dir) + ":" + os.path.basename(conda_env_file),
                             file=self.test_file,
-                            stdout=stdout,
-                            stderr=stderr,
+                            stdout=stdout if not retval else None,
+                            stderr=stderr if not retval else None,
                             timestamp=start_time,
                             elapsed_sec = time.time() - start_time)
 
@@ -161,10 +162,10 @@ class TestResult(TestCase):
         TestCase.__init__(self, *args, **kwargs)
         self.conda_env_file = conda_env_file
         if not self.classname:
-            self.classname = self.conda_env_file
+            self.classname = self.category
         if not return_code:
             self.add_failure_info(message="Failed test: " + self.name,
-                                  output="stderr:\n{}\n\nstdout:\n{}\n".format(self.stderr, self.stdout))
+                                  output="See stderr and stdout for output.")
 
     def display_failed(self):
         """
