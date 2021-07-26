@@ -320,6 +320,10 @@ def test_get_repo_for_nonexisting_patch(mocker):
         'os.system',
         side_effect=(lambda x: helpers.validate_cli(x, expect=["git apply"], ignore=["git clone", "git checkout"], retval=1))
     )
+    mocker.patch(
+        'shutil.rmtree',
+        return_value=None
+    )
 
     possible_variants = utils.make_variants("3.6", "cpu", "openmpi", "10.2")
     for variant in possible_variants:
