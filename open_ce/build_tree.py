@@ -17,6 +17,7 @@
 """
 
 import os
+import shutil
 
 import networkx
 
@@ -28,7 +29,7 @@ from open_ce import graph
 from open_ce import env_config
 from open_ce import validate_config
 from open_ce import build_feedstock
-from open_ce.errors import OpenCEError, Error
+from open_ce.errors import OpenCEError, Error, log
 from open_ce.conda_env_file_generator import CondaEnvFileGenerator
 from open_ce.build_command import BuildCommand
 from open_ce import inputs
@@ -198,7 +199,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         validate_args = []
         for variant in self._possible_variants:
             try:
-                variant_tree, external_deps = self._create_nodes(variant)
+                variant_tree, external_deps, channels = self._create_nodes(variant)
                 variant_tree = _create_edges(variant_tree)
                 variant_tree = self._create_remote_deps(variant_tree)
                 self._tree = networkx.compose(self._tree, variant_tree)
@@ -217,7 +218,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
             if packages:
                 for package in packages:
                     if not {n for n in traverse_build_commands(variant_tree, return_node=True) if package in n.packages}:
-                        print("INFO: No recipes were found for " + package + " for variant " + variant_string)
+                        log.info("No recipes were found for '%s' for variant '%s'", package, variant_string)
                 variant_start_nodes = {n for n in traverse_build_commands(variant_tree, return_node=True)
                                             if n.packages.intersection(packages)}
 
@@ -225,10 +226,13 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
 
             validate_args.append((variant_tree, external_deps, variant_start_nodes))
 
-            self._conda_env_files[variant_string] = get_conda_file_packages(variant_tree, external_deps, variant_start_nodes)
-            self._test_feedstocks[variant_string] = []
+            self._conda_env_files[variant_string] = get_conda_file_packages(variant_tree,
+                                                                            external_deps,
+                                                                            self._channels + channels,
+                                                                            variant_start_nodes)
+            self._test_feedstocks[variant_string] = set()
             for build_command in traverse_build_commands(variant_tree, variant_start_nodes):
-                self._test_feedstocks[variant_string].append(build_command.repository)
+                self._test_feedstocks[variant_string].add(build_command.repository)
 
         # Execute validate_build_tree in parallel
         utils.run_in_parallel(validate_config.validate_build_tree, validate_args)
@@ -268,13 +272,14 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         env_config_data_list = env_config.load_env_config_files(self._env_config_files, variants)
         feedstocks_seen = set()
         external_deps = []
+        channels_in_env_files = set()
         retval = graph.OpenCEGraph()
         create_commands_args = []
 
         # Find all conda_build_configs listed in environment files
         conda_build_configs = []
         for env_config_data in env_config_data_list:
-            conda_build_configs += [utils.expanded_path(config,
+            conda_build_configs += [config if utils.is_url(config) else utils.expanded_path(config,
                                         relative_to=env_config_data[env_config.Key.opence_env_file_path.name])
                                             for config in env_config_data.get(env_config.Key.conda_build_configs.name,
                                                                               [])]
@@ -282,7 +287,9 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
 
         # Create recipe dictionaries for each repository in the environment file
         for env_config_data in env_config_data_list:
-            channels = self._channels + env_config_data.get(env_config.Key.channels.name, [])
+            new_channels = env_config_data.get(env_config.Key.channels.name, [])
+            channels = self._channels + new_channels
+            channels_in_env_files.update(new_channels)
             feedstocks = env_config_data.get(env_config.Key.packages.name, [])
             if not feedstocks:
                 feedstocks = []
@@ -310,7 +317,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         for command in commands:
             retval = networkx.compose(retval, command)
 
-        return retval, external_deps
+        return retval, external_deps, list(channels_in_env_files)
 
     def _create_commands_helper(self, variants, env_config_data, env_conda_build_configs, feedstock):
         channels = self._channels + env_config_data.get(env_config.Key.channels.name, [])
@@ -321,7 +328,8 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
                                   runtime_package,
                                   feedstock.get(env_config.Key.recipe_path.name),
                                   feedstock.get(env_config.Key.recipes.name),
-                                  [os.path.abspath(config) for config in conda_build_configs],
+                                  [config if utils.is_url(config) else os.path.abspath(config)
+                                      for config in conda_build_configs],
                                   variants,
                                   channels)
         return retval
@@ -347,6 +355,10 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
                     # Pass in channels ordered by priority.
                     package_info = conda_utils.get_latest_package_info(node.channels + ancestor_channels + self._channels,
                                                                        package)
+                    # package_info is empty for a virtual package.
+                    # As of now, this is just one case of package_info being empty.
+                    if package_info == "":
+                        continue
                     dep_graph.add_node(DependencyNode({package}))
                     for dep in package_info['dependencies']:
                         dep_name = utils.remove_version(dep)
@@ -394,10 +406,14 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
                         # Look for patch relative to where the Open-CE environment file is
                         patch_file = os.path.join(os.path.dirname(env_config_data.get(
                                                   env_config.Key.opence_env_file_path.name)), patch)
+                        if utils.is_url(patch_file):
+                            patch_file = utils.download_file(patch_file)
                     patch_apply_cmd = "git apply {}".format(patch_file)
-                    print("Patch apply command: ", patch_apply_cmd)
+                    log.info("Patch apply command: %s", patch_apply_cmd)
                     patch_apply_res = os.system(patch_apply_cmd)
                     if patch_apply_res != 0:
+                        os.chdir(cur_dir)
+                        shutil.rmtree(repo_dir)
                         raise OpenCEError(Error.PATCH_APPLICATION, patch, package[env_config.Key.feedstock.name])
                 os.chdir(cur_dir)
 
@@ -438,7 +454,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         """
         conda_env_files = dict()
         for variant, conda_env_file in self._conda_env_files.items():
-            conda_env_files[variant] = conda_env_file.write_conda_env_file(variant, self._channels,
+            conda_env_files[variant] = conda_env_file.write_conda_env_file(variant,
                                                                    output_folder, env_file_prefix,
                                                                    path, self._git_tag_for_env)
 
@@ -524,8 +540,8 @@ def _create_commands(repository, runtime_package, recipe_path,
     os.chdir(repository)
 
     config_data, _ = build_feedstock.load_package_config(variants=variants, recipe_path=recipe_path)
-    combined_config_files = variant_config_files
-
+    combined_config_files = [utils.download_file(config) if utils.is_url(config) else config
+                                 for config in variant_config_files]
     feedstock_conda_build_config_file = build_feedstock.get_conda_build_config()
     if feedstock_conda_build_config_file:
         combined_config_files.append(feedstock_conda_build_config_file)
@@ -637,11 +653,11 @@ def get_installable_packages(build_commands, external_deps, starting_nodes=None,
             retval = check_and_add({dep}, retval)
     return sorted(retval, key=len)
 
-def get_conda_file_packages(build_commands, external_deps, starting_nodes=None):
+def get_conda_file_packages(build_commands, external_deps, channels, starting_nodes=None):
     '''
     This function makes the conda env file generator for the installable packages.
     '''
-    return CondaEnvFileGenerator(get_installable_packages(build_commands, external_deps, starting_nodes))
+    return CondaEnvFileGenerator(get_installable_packages(build_commands, external_deps, starting_nodes), channels)
 
 def construct_build_tree(args):
     '''

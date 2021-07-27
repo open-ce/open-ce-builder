@@ -93,7 +93,7 @@ def tag_all_repos(github_org, tag, tag_msg, branch, repo_dir, pat, skipped_repos
             git_utils.checkout(repo_path, branch)
         elif prev_tag:
             repo_branch = git_utils.get_tag_branch(repo_path, prev_tag)
-            if git_utils.branch_exists(repo_path, repo_branch):
+            if git_utils.branch_exists(repo_path, os.path.basename(repo_branch)):
                 print("--->Checking out branch '{}' which contains tag '{}'.".format(repo_branch, prev_tag))
                 git_utils.checkout(repo_path, repo_branch)
 

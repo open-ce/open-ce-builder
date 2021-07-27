@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 # *****************************************************************
 # (C) Copyright IBM Corp. 2020, 2021. All Rights Reserved.
@@ -26,7 +25,7 @@ from open_ce import utils
 from open_ce import inputs
 from open_ce.inputs import Argument, ENV_BUILD_ARGS
 from open_ce import test_feedstock
-from open_ce.errors import OpenCEError, Error
+from open_ce.errors import OpenCEError, Error, log
 
 COMMAND = "env"
 
@@ -41,7 +40,7 @@ ARGUMENTS = ENV_BUILD_ARGS + \
              Argument.CONTAINER_TOOL,
              Argument.CONDA_PKG_FORMAT]
 
-def _run_tests(build_tree, test_labels, conda_env_files):
+def _run_tests(build_tree, test_labels, conda_env_files, output_folder):
     """
     Run through all of the tests within a build tree for the given conda environment files.
 
@@ -50,21 +49,22 @@ def _run_tests(build_tree, test_labels, conda_env_files):
         conda_env_files (dict): A dictionary where the key is a variant string and the value
                                 is the name of a conda environment file.
     """
-    failed_tests = []
+    test_results = {}
     # Run test commands for each conda environment that was generated
     for variant_string, conda_env_file in conda_env_files.items():
         test_feedstocks = build_tree.get_test_feedstocks(variant_string)
         if test_feedstocks:
-            print("\n*** Running tests within the " + os.path.basename(conda_env_file) + " conda environment ***\n")
+            log.info("\n*** Running tests within the %s conda environment ***\n", os.path.basename(conda_env_file))
         for feedstock in test_feedstocks:
-            print("Running tests for " + feedstock)
-            failed_tests += test_feedstock.test_feedstock(conda_env_file,
-                                                          test_labels=test_labels,
-                                                          working_directory=feedstock)
-
-    test_feedstock.display_failed_tests(failed_tests)
-    if failed_tests:
-        raise OpenCEError(Error.FAILED_TESTS, len(failed_tests))
+            log.info("Running tests for %s", feedstock)
+            test_result = test_feedstock.test_feedstock(conda_env_file,
+                                                        test_labels=test_labels,
+                                                        working_directory=feedstock)
+            if feedstock not in test_results.keys():
+                test_results[feedstock] = test_result
+            else:
+                test_results[feedstock] += test_result
+    test_feedstock.process_test_results(test_results, output_folder, test_labels)
 
 def build_env(args):
     '''Entry Function'''
@@ -84,8 +84,8 @@ def build_env(args):
     # Generate conda environment files
     conda_env_files = build_tree.write_conda_env_files(output_folder=os.path.abspath(args.output_folder),
                                                        path=os.path.abspath(args.output_folder))
-    print("Generated conda environment files from the selected build arguments:", conda_env_files.values())
-    print("INFO: One can use these environment files to create a conda" \
+    log.info("Generated conda environment files from the selected build arguments: %s", conda_env_files.values())
+    log.info("One can use these environment files to create a conda" \
           " environment using \"conda env create -f <conda_env_file_name>.\"")
 
     if not args.skip_build_packages:
@@ -93,16 +93,16 @@ def build_env(args):
         for build_command in build_tree:
             if not build_command.all_outputs_exist(args.output_folder):
                 try:
-                    print("Building " + build_command.recipe)
+                    log.info("Building %s", build_command.recipe)
                     build_feedstock.build_feedstock_from_command(build_command,
                                                             output_folder=os.path.abspath(args.output_folder),
                                                             pkg_format=args.conda_pkg_format)
                 except OpenCEError as exc:
                     raise OpenCEError(Error.BUILD_RECIPE, build_command.repository, exc.msg) from exc
             else:
-                print("Skipping build of " + build_command.recipe + " because it already exists")
+                log.info("Skipping build of %s because it already exists.", build_command.recipe)
 
     if args.run_tests:
-        _run_tests(build_tree, inputs.parse_arg_list(args.test_labels), conda_env_files)
+        _run_tests(build_tree, inputs.parse_arg_list(args.test_labels), conda_env_files, os.path.abspath(args.output_folder))
 
 ENTRY_FUNCTION = build_env

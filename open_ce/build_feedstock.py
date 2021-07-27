@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 # *****************************************************************
 # (C) Copyright IBM Corp. 2020, 2021. All Rights Reserved.
@@ -23,7 +22,7 @@ import traceback
 from open_ce import utils
 from open_ce import inputs
 from open_ce.inputs import Argument
-from open_ce.errors import OpenCEError, Error
+from open_ce.errors import OpenCEError, Error, log
 
 COMMAND = 'feedstock'
 
@@ -121,7 +120,7 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
         # Build each recipe
         if build_config_data['recipes'] is None:
             build_config_data['recipes'] = []
-            print("INFO: No recipe to build for given configuration.")
+            log.info("No recipe to build for given configuration.")
         for recipe in build_config_data['recipes']:
             if recipes_to_build and recipe['name'] not in recipes_to_build:
                 continue
@@ -130,7 +129,10 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
             config.skip_existing = False
             config.prefix_length = 225
             config.output_folder = output_folder
-            config.variant_config_files = [config for config in command.conda_build_configs if os.path.exists(config)]
+            conda_build_configs = [utils.download_file(conda_build_config) if utils.is_url(conda_build_config)
+                                       else conda_build_config
+                                           for conda_build_config in command.conda_build_configs]
+            config.variant_config_files = [config for config in conda_build_configs if os.path.exists(config)]
 
             if pkg_format == "conda":
                 config.conda_pkg_format = "2"     # set to .conda format

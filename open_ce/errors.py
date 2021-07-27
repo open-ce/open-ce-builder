@@ -17,7 +17,26 @@
 """
 
 import sys
+import logging
 from enum import Enum, unique
+
+log = logging.getLogger("OPEN-CE")
+log.setLevel(logging.DEBUG)
+formatter = logging.Formatter('[%(name)s-%(levelname)s]%(message)s')
+log_out_handler = logging.StreamHandler(sys.stdout)
+log_out_handler.setLevel(logging.DEBUG)
+log_out_handler.addFilter(lambda record: record.levelno < logging.WARNING)
+log_out_handler.setFormatter(formatter)
+log_warn_handler = logging.StreamHandler(sys.stderr)
+log_warn_handler.setLevel(logging.WARNING)
+log_warn_handler.addFilter(lambda record: record.levelno < logging.ERROR)
+log_warn_handler.setFormatter(formatter)
+log_err_handler = logging.StreamHandler(sys.stderr)
+log_err_handler.setLevel(logging.ERROR)
+log.addHandler(log_out_handler)
+log.addHandler(log_warn_handler)
+log.addHandler(log_err_handler)
+
 
 @unique
 class Error(Enum):
@@ -49,7 +68,7 @@ class Error(Enum):
     INCOMPAT_CUDA = (18, "Driver level \"{}\" is not new enough to support cuda \"{}\"")
     UNSUPPORTED_CUDA = (19, "Cannot build using container image for cuda \"{}\" no Dockerfile currently exists")
     TOO_MANY_CUDA = (20, "Only one cuda version allowed to be built with container build at a time")
-    FAILED_TESTS = (21, "There were {} test failures")
+    FAILED_TESTS = (21, "There were {} test failures. The following tests failed: {}")
     CONDA_ENV_FILE_REQUIRED = (22, "The '--conda_env_file' argument is required.")
     PATCH_APPLICATION = (23, "Failed to apply patch {} on feedstock {}")
     GET_LICENSES = (24, "Error generating licenses file.\nCommand:\n{}\nOUTPUT:\n{}Error:\n{}")
@@ -67,6 +86,9 @@ class Error(Enum):
                                     "But this version is '{}'.")
     PACKAGE_NOT_FOUND = (36, "Cannot find `{}`, please see https://github.com/open-ce/open-ce-builder#requirements" +
                              " for a list of requirements.")
+    TEMP_BUILD_IMAGE_FILES = (37, "Error removing temporary files created during build image.")
+    UNABLE_DOWNLOAD_SOURCE = (38, "Unable to download source for '{}'.")
+    UNABLE_CLONE_SOURCE = (39, "Unable to clone source for '{}'.")
 
 class OpenCEError(Exception):
     """
@@ -77,13 +99,13 @@ class OpenCEError(Exception):
         if isinstance(error, str):
             msg = error
         else:
-            msg = "[OPEN-CE-ERROR-{}] {}".format(error.value[0], error.value[1].format(*additional_args))
+            msg = "[OPEN-CE-ERROR]-{} {}".format(error.value[0], error.value[1].format(*additional_args))
         super().__init__(msg, **kwargs)
         self.msg = msg
 
-def show_warning(warning, *additional_args, file=sys.stderr, **kwargs):
+def show_warning(warning, *additional_args, **kwargs):
     """
     Prints an Open-CE Warning.
     """
-    msg = "[OPEN-CE-WARNING-{}] {}".format(warning.value[0], warning.value[1].format(*additional_args))
-    print(msg, file=file, **kwargs)
+    msg = "-{} {}".format(warning.value[0], warning.value[1].format(*additional_args))
+    log.warning(msg, **kwargs)
