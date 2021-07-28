@@ -34,5 +34,5 @@ third_party_packages:
   license: NO_LICENSE
   url:
     - not_a_url.tar.gz
-  version: 1.2.3
+  version: 123
   copyright_string: "Not a real copy right"

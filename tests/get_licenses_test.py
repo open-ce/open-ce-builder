@@ -122,7 +122,7 @@ def test_add_licenses_from_info_file(mocker, capfd):
 
     print(license_contents)
     assert "DefinitelyTyped.google.analytics\tebc69904eb78f94030d5d517b42db20867f679c0\thttps://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/ebc69904eb78f94030d5d517b42db20867f679c0/chai/chai.d.ts\tMIT\tCopyright Jed Mao <https://github.com/jedmao/>,, Copyright Bart van der Schoor <https://github.com/Bartvds>,, Copyright Andrew Brown <https://github.com/AGBrown>,, Copyright Olivier Chevet <https://github.com/olivr70>" in license_contents
-    assert "bad_url\t1.2.3\tnot_a_url.tar.gz\tNO_LICENSE\tNot a real copy right" in license_contents
+    assert "bad_url\t123\tnot_a_url.tar.gz\tNO_LICENSE\tNot a real copy right" in license_contents
     assert "google-test\t1.7.0\thttps://github.com/google/googletest/archive/release-1.7.0.zip\tBSD-equivalent\tCopyright 2008, Google Inc. All rights reserved." in license_contents
     assert "kissfft\t36dbc057604f00aacfc0288ddad57e3b21cfc1b8\thttps://github.com/mborgerding/kissfft/archive/36dbc057604f00aacfc0288ddad57e3b21cfc1b8.tar.gz\tBSD-equivalent\tCopyright (c) 2003-2010 Mark Borgerding . All rights reserved." in license_contents
 
