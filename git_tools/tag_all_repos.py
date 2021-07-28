@@ -81,6 +81,18 @@ def tag_all_repos(github_org, tag, tag_msg, branch, repo_dir, pat, skipped_repos
     skipped_repos = inputs.parse_arg_list(skipped_repos)
     repos = git_utils.get_all_repos(github_org, pat)
     repos = [repo for repo in repos if repo["name"] in skipped_repos ]
+
+    clone_repos(repos, branch, repo_dir, prev_tag)
+
+    tag_repos(repos, tag, tag_msg, repo_dir)
+
+    push = git_utils.ask_for_input("Would you like to push all tags to remote?")
+    if not push.startswith("y"):
+        return
+
+    push_repos(repos, tag, repo_dir)
+
+def clone_repos(repos, branch, repo_dir, prev_tag):
     print("---------------------------Cloning all Repos")
     for repo in repos:
         repo_path = os.path.abspath(os.path.join(repo_dir, repo["name"]))
@@ -98,16 +110,14 @@ def tag_all_repos(github_org, tag, tag_msg, branch, repo_dir, pat, skipped_repos
                 print("--->Checking out branch '{}' which contains tag '{}'.".format(repo_branch, prev_tag))
                 git_utils.checkout(repo_path, repo_branch)
 
+def tag_repos(repos, tag, tag_msg, repo_dir):
     print("---------------------------Tagging all Repos")
     for repo in repos:
         repo_path = os.path.abspath(os.path.join(repo_dir, repo["name"]))
         print("--->Tagging {}".format(repo["name"]))
         git_utils.create_tag(repo_path, tag, tag_msg)
 
-    push = git_utils.ask_for_input("Would you like to push all tags to remote?")
-    if not push.startswith("y"):
-        return
-
+def push_repos(repos, tag, repo_dir, continue_query=True):
     print("---------------------------Pushing all Repos")
     for repo in repos:
         try:
@@ -117,10 +127,13 @@ def tag_all_repos(github_org, tag, tag_msg, branch, repo_dir, pat, skipped_repos
         except Exception as exc:# pylint: disable=broad-except
             print("Error encountered when trying to push {}".format(repo["name"]))
             print(exc)
+            if not continue_query:
+                continue
             cont_tag = git_utils.ask_for_input("Would you like to continue tagging other repos?")
             if cont_tag.startswith("y"):
                 continue
             raise
+
 
 def _main(arg_strings=None):
     parser = _make_parser()

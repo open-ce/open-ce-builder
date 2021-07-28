@@ -81,8 +81,8 @@ class Argument(Enum):
                             default="",
                             help="""Comma delimitted list of <key>:<val> param pairs."""))
 
-    DRY_RUN = (lambda parser: parser.add_argument(
-                             '--dry_run',
+    NOT_DRY_RUN = (lambda parser: parser.add_argument(
+                             '--not_dry_run',
                              action='store_true',
                              required=False,
                              help="""Perform all steps locally, but don't push any changes."""))
