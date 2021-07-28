@@ -80,7 +80,7 @@ def tag_all_repos(github_org, tag, tag_msg, branch, repo_dir, pat, skipped_repos
     '''
     skipped_repos = inputs.parse_arg_list(skipped_repos)
     repos = git_utils.get_all_repos(github_org, pat)
-    repos = [repo for repo in repos if repo["name"] not in skipped_repos ]
+    repos = [repo for repo in repos if repo["name"] in skipped_repos ]
     print("---------------------------Cloning all Repos")
     for repo in repos:
         repo_path = os.path.abspath(os.path.join(repo_dir, repo["name"]))
@@ -93,6 +93,7 @@ def tag_all_repos(github_org, tag, tag_msg, branch, repo_dir, pat, skipped_repos
             git_utils.checkout(repo_path, branch)
         elif prev_tag:
             repo_branch = git_utils.get_tag_branch(repo_path, prev_tag)
+            print("-->Repo branch is: {}".format(repo_branch))
             if git_utils.branch_exists(repo_path, os.path.basename(repo_branch)):
                 print("--->Checking out branch '{}' which contains tag '{}'.".format(repo_branch, prev_tag))
                 git_utils.checkout(repo_path, repo_branch)

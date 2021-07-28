@@ -31,6 +31,7 @@ import tag_all_repos
 
 sys.path.append(os.path.join(pathlib.Path(__file__).parent.absolute(), '..'))
 from open_ce import inputs # pylint: disable=wrong-import-position
+from open_ce.conda_utils import render_yaml
 
 def _make_parser():
     ''' Parser input arguments '''
@@ -116,6 +117,30 @@ def _main(arg_strings=None):
     if release.startswith("y"):
         print("--->Creating Draft Release.")
         git_utils.create_release(args.github_org, args.primary_repo, args.pat, version_name, release_name, version_msg, True)
+
+def _get_git_tag_from_env_file(env_file):
+    rendered_env_file = render_yaml(env_file, permit_undefined_jinja=True)
+    if "git_tag_for_env" in rendered_env_file:
+        return rendered_env_file["git_tag_for_env"]
+    return None
+
+def _has_git_tag_changed(repo_path, env_file):
+    current_commit = git_utils.get_current_branch(repo_path)
+
+    git_utils.checkout(repo_path, "HEAD~")
+    previous_tag = _get_git_tag_from_env_file(env_file)
+
+    git_utils.checkout(repo_path, current_commit)
+    current_tag = _get_git_tag_from_env_file(env_file)
+
+    return previous_tag == current_tag
+
+def _get_all_feedstocks(env_file, github_org, pat, skipped_repos):
+    org_repos = git_utils.get_all_repos(github_org, pat)
+    org_repos = [repo for repo in org_repos if repo["name"] not in skipped_repos]
+
+    
+
 
 def _update_env_files(open_ce_path, new_git_tag):
     for env_file in glob.glob(os.path.join(open_ce_path, "envs", "*.yaml")):
