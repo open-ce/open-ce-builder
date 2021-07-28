@@ -66,7 +66,7 @@ class Key(Enum):
 
 _THIRD_PARTY_PACKAGE_SCHEMA ={
     Key.name.name: utils.make_schema_type(str, True),
-    Key.version.name: utils.make_schema_type(str, True),
+    Key.version.name: utils.make_schema_type((str, int, float), True),
     Key.license.name: utils.make_schema_type(str, True),
     Key.url.name: utils.make_schema_type([str], True),
     Key.license_url.name: utils.make_schema_type(str),
@@ -90,7 +90,7 @@ class LicenseGenerator():
         #pylint: disable=too-many-arguments
         def __init__(self, name, version, url=None, license_type=None, copyrights=None, license_files=None):
             self.name = name
-            self.version = version
+            self.version = str(version)
             self.url = url if isinstance(url, list) else [url]
             self.license_type = _clean_license_type(license_type) if license_type else license_type
             self.license_files = license_files if license_files else []
