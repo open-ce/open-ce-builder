@@ -92,6 +92,7 @@ def _main(arg_strings=None):
     if not _has_git_tag_changed(primary_repo_path, open_ce_env_file):
         print("--->No release is needed.")
         return
+    previous_tag = _get_previous_git_tag_from_env_file(repo_path, open_ce_env_file)
 
     version_name = _get_git_tag_from_env_file(open_ce_env_file)
     version = _git_tag_to_version(version_name)
@@ -127,7 +128,7 @@ def _main(arg_strings=None):
     tag_all_repos.clone_repos(repos=repos,
                               branch=args.branch,
                               repo_dir=args.repo_dir,
-                              prev_tag=None)
+                              prev_tag=previous_tag)
     tag_all_repos.tag_repos(repos=repos,
                             tag=version_name,
                             tag_msg=version_msg,
@@ -151,6 +152,16 @@ def _get_git_tag_from_env_file(env_file):
     if "git_tag_for_env" in rendered_env_file:
         return rendered_env_file["git_tag_for_env"]
     return None
+
+def _get_previous_git_tag_from_env_file(repo_path, env_file):
+    current_commit = git_utils.get_current_branch(repo_path)
+
+    git_utils.checkout(repo_path, "HEAD~")
+    previous_tag = _get_git_tag_from_env_file(env_file)
+
+    git_utils.checkout(repo_path, current_commit)
+
+    return previous_tag
 
 def _has_git_tag_changed(repo_path, env_file):
     current_commit = git_utils.get_current_branch(repo_path)
