@@ -54,12 +54,6 @@ def _make_parser():
         help="""Primary open-ce repo.""")
 
     parser.add_argument(
-        '--version',
-        type=str,
-        required=True,
-        help="""Release version to cut.""")
-
-    parser.add_argument(
         '--code-name',
         type=str,
         default=None,
@@ -71,19 +65,19 @@ def _main(arg_strings=None):
     parser = _make_parser()
     args = parser.parse_args(arg_strings)
 
-    primary_repo_url = "git@github.com:{}/{}.git".format(args.github_org, args.primary_repo)
+    #primary_repo_url = "git@github.com:{}/{}.git".format(args.github_org, args.primary_repo)
 
-    primary_repo_path = os.path.abspath(os.path.join(args.repo_dir, args.primary_repo))
-    print("--->Making clone location: " + primary_repo_path)
-    os.makedirs(primary_repo_path, exist_ok=True)
-    print("--->Cloning {}".format(primary_repo_url))
-    git_utils.clone_repo(primary_repo_url, primary_repo_path, args.branch)
+    primary_repo_path = "./" #os.path.abspath(os.path.join(args.repo_dir, args.primary_repo))
+    #print("--->Making clone location: " + primary_repo_path)
+    #os.makedirs(primary_repo_path, exist_ok=True)
+    #print("--->Cloning {}".format(primary_repo_url))
+    #git_utils.clone_repo(primary_repo_url, primary_repo_path, args.branch)
 
-    open_ce_env_file = os.path.join(primary_repo_path, "envs", "open-ce-env.yaml")
+    open_ce_env_file = os.path.abspath(os.path.join(primary_repo_path, "envs", "opence-env.yaml"))
     if not _has_git_tag_changed(primary_repo_path, open_ce_env_file):
         print("--->No release is needed.")
         return
-    previous_tag = _get_previous_git_tag_from_env_file(repo_path, open_ce_env_file)
+    previous_tag = _get_previous_git_tag_from_env_file(primary_repo_path, open_ce_env_file)
 
     version_name = _get_git_tag_from_env_file(open_ce_env_file)
     version = _git_tag_to_version(version_name)
@@ -157,7 +151,7 @@ def _has_git_tag_changed(repo_path, env_file):
     git_utils.checkout(repo_path, current_commit)
     current_tag = _get_git_tag_from_env_file(env_file)
 
-    return previous_tag == current_tag
+    return (current_tag is not None) and previous_tag == current_tag
 
 def _git_tag_to_version(git_tag):
     version_regex = re.compile("open-ce-v(.+)")
@@ -171,9 +165,9 @@ def _get_all_feedstocks(env_file, github_org, pat, skipped_repos):
     return org_repos
 
 if __name__ == '__main__':
-    try:
-        _main()
-        sys.exit(0)
-    except Exception as exc:# pylint: disable=broad-except
-        print("Error: ", exc)
-        sys.exit(1)
+    #try:
+    _main()
+    sys.exit(0)
+    #except Exception as exc:# pylint: disable=broad-except
+    #    print("Error: ", exc)
+    #    sys.exit(1)
