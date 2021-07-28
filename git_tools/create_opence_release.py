@@ -71,16 +71,7 @@ def _main(arg_strings=None):
     parser = _make_parser()
     args = parser.parse_args(arg_strings)
 
-    #version_name = "open-ce-v{}".format(args.version)
-    #release_number = ".".join(args.version.split(".")[:-1])
-    #branch_name = "open-ce-r{}".format(release_number)
     primary_repo_url = "git@github.com:{}/{}.git".format(args.github_org, args.primary_repo)
-
-    #version_msg = "Open-CE Version {}".format(args.version)
-    #release_name = "v{}".format(args.version)
-    #if args.code_name:
-    #    version_msg = "{} Code-named {}".format(version_msg, args.code_name)
-    #    release_name = "{} ({})".format(release_name, args.code_name)
 
     primary_repo_path = os.path.abspath(os.path.join(args.repo_dir, args.primary_repo))
     print("--->Making clone location: " + primary_repo_path)
@@ -103,12 +94,6 @@ def _main(arg_strings=None):
 
     print("--->Creating {} branch in {}".format(version_name, args.primary_repo))
     git_utils.create_branch(primary_repo_path, branch_name)
-
-    #print("--->Updating env files.")
-    #_update_env_files(primary_repo_path, version_name)
-
-    #print("--->Committing env files.")
-    #git_utils.commit_changes(primary_repo_path, "Updates for {}".format(release_number))
 
     print("--->Tag Primary Branch")
     git_utils.create_tag(primary_repo_path, version_name, version_msg)
@@ -184,19 +169,6 @@ def _get_all_feedstocks(env_file, github_org, pat, skipped_repos):
     org_repos = [repo for repo in org_repos if repo["name"] not in skipped_repos]
 
     return org_repos
-
-def _update_env_files(open_ce_path, new_git_tag):
-    for env_file in glob.glob(os.path.join(open_ce_path, "envs", "*.yaml")):
-        print("--->Updating {}".format(env_file))
-        with open(env_file, 'r') as content_file:
-            env_file_contents = content_file.read()
-        if not "git_tag_for_env" in env_file_contents:
-            env_file_contents = """{}
-git_tag_for_env: {}
-""".format(env_file_contents, new_git_tag)
-
-        with open(env_file, 'w') as content_file:
-            content_file.write(env_file_contents)
 
 if __name__ == '__main__':
     try:
