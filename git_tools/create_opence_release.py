@@ -121,11 +121,19 @@ def _main(arg_strings=None):
     else:
         print("--->Skipping release creation for dry run.")
 
+counter = 0
+
 def _get_git_tag_from_env_file(env_file):
     print("Env File: ", env_file)
     print("Env File Contents:")
     with open(env_file, mode='r') as file:
-        print(file.read())
+        file_contents = file.read()
+        print(file_contents)
+    global counter
+    env_file = env_file + counter
+    counter += 1
+    with open(env_file, mode='w') as file:
+        file.write(file_contents)
     rendered_env_file = render_yaml(env_file, permit_undefined_jinja=True)
     print("Rendered Env File: ")
     print(rendered_env_file)
