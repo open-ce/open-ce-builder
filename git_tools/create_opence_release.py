@@ -65,16 +65,11 @@ def _main(arg_strings=None):
     parser = _make_parser()
     args = parser.parse_args(arg_strings)
 
-    #primary_repo_url = "git@github.com:{}/{}.git".format(args.github_org, args.primary_repo)
-
-    primary_repo_path = "./" #os.path.abspath(os.path.join(args.repo_dir, args.primary_repo))
-    #print("--->Making clone location: " + primary_repo_path)
-    #os.makedirs(primary_repo_path, exist_ok=True)
-    #print("--->Cloning {}".format(primary_repo_url))
-    #git_utils.clone_repo(primary_repo_url, primary_repo_path, args.branch)
+    primary_repo_path = "./"
 
     open_ce_env_file = os.path.abspath(os.path.join(primary_repo_path, "envs", "opence-env.yaml"))
     if not _has_git_tag_changed(primary_repo_path, open_ce_env_file):
+        print("--->The opence-env git_tag has not changed.")
         print("--->No release is needed.")
         return
     previous_tag = _get_previous_git_tag_from_env_file(primary_repo_path, open_ce_env_file)
@@ -98,7 +93,7 @@ def _main(arg_strings=None):
         print("--->Pushing tag.")
         git_utils.push_branch(primary_repo_path, version_name)
     else:
-        print("--->Skipping pushing for dry run.")
+        print("--->Skipping pushing branch and tag for dry run.")
 
     repos = _get_all_feedstocks(env_file=open_ce_env_file,
                                 github_org=args.github_org,
@@ -118,13 +113,13 @@ def _main(arg_strings=None):
                                 repo_dir=args.repo_dir,
                                 continue_query=False)
     else:
-        print("--->Skipping pushing feedstocks.")
+        print("--->Skipping pushing feedstocks for dry run.")
 
     if args.not_dry_run:
         print("--->Creating Draft Release.")
         git_utils.create_release(args.github_org, args.primary_repo, args.pat, version_name, release_name, version_msg, True)
     else:
-        print("--->Skipping release creation.")
+        print("--->Skipping release creation for dry run.")
 
 def _get_git_tag_from_env_file(env_file):
     rendered_env_file = render_yaml(env_file, permit_undefined_jinja=True)
