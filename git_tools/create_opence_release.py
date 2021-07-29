@@ -128,7 +128,7 @@ def _get_git_tag_from_env_file(env_file):
     return None
 
 def _get_previous_git_tag_from_env_file(repo_path, previous_branch, env_file):
-    current_commit = git_utils.get_current_branch(repo_path)
+    current_commit = git_utils.get_current_commit(repo_path)
 
     git_utils.checkout(repo_path, previous_branch)
     previous_tag = _get_git_tag_from_env_file(env_file)
@@ -138,7 +138,7 @@ def _get_previous_git_tag_from_env_file(repo_path, previous_branch, env_file):
     return previous_tag
 
 def _has_git_tag_changed(repo_path, previous_branch, env_file):
-    current_commit = git_utils.get_current_branch(repo_path)
+    current_commit = git_utils.get_current_commit(repo_path)
 
     git_utils.checkout(repo_path, previous_branch)
     previous_tag = _get_git_tag_from_env_file(env_file)
