@@ -155,7 +155,7 @@ def _has_git_tag_changed(repo_path, previous_branch, env_file):
     print("Current Tag:  ", current_tag)
 
     print("OpenceEnvFile:")
-    with open(open_ce_env_file, mode='r') as file:
+    with open(env_file, mode='r') as file:
         print(file.read())
     return (current_tag is not None) and previous_tag == current_tag
 
