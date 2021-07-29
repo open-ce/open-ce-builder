@@ -68,9 +68,6 @@ def _main(arg_strings=None):
     primary_repo_path = "./"
 
     open_ce_env_file = os.path.abspath(os.path.join(primary_repo_path, "envs", "opence-env.yaml"))
-    print("OpenceEnvFile:")
-    with open(open_ce_env_file, mode='r') as file:
-        print(file.read())
     if not _has_git_tag_changed(primary_repo_path, args.branch, open_ce_env_file):
         print("--->The opence-env git_tag has not changed.")
         print("--->No release is needed.")
@@ -126,6 +123,9 @@ def _main(arg_strings=None):
 
 def _get_git_tag_from_env_file(env_file):
     print("Env File: ", env_file)
+    print("Env File Contents:")
+    with open(env_file, mode='r') as file:
+        print(file.read())
     rendered_env_file = render_yaml(env_file, permit_undefined_jinja=True)
     print("Rendered Env File: ")
     print(rendered_env_file)
@@ -153,10 +153,6 @@ def _has_git_tag_changed(repo_path, previous_branch, env_file):
     current_tag = _get_git_tag_from_env_file(env_file)
     print("Previous Tag: ", previous_tag)
     print("Current Tag:  ", current_tag)
-
-    print("OpenceEnvFile:")
-    with open(env_file, mode='r') as file:
-        print(file.read())
     return (current_tag is not None) and previous_tag == current_tag
 
 def _git_tag_to_version(git_tag):
