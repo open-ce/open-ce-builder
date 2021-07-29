@@ -130,7 +130,7 @@ def _get_git_tag_from_env_file(env_file):
         file_contents = file.read()
         print(file_contents)
     global counter
-    env_file = env_file + counter
+    env_file = env_file + str(counter)
     counter += 1
     with open(env_file, mode='w') as file:
         file.write(file_contents)
