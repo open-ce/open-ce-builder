@@ -220,7 +220,7 @@ def push_branch(repo_path, branch_name, remote="origin"):
 
 def checkout(repo_path, commit):
     '''Checkout a commit of a given repo.'''
-    _execute_git_command(repo_path, "git checkout {}".format(commit))
+    print(_execute_git_command(repo_path, "git checkout {}".format(commit)))
 
 def ask_for_input(message, acceptable=None):
     '''Repeatedly ask for user input until an acceptable response is given.'''
