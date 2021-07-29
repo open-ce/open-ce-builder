@@ -122,7 +122,10 @@ def _main(arg_strings=None):
         print("--->Skipping release creation for dry run.")
 
 def _get_git_tag_from_env_file(env_file):
+    print("Env File: ", env_file)
     rendered_env_file = render_yaml(env_file, permit_undefined_jinja=True)
+    print("Rendered Env File: ")
+    print(rendered_env_file)
     if "git_tag_for_env" in rendered_env_file:
         return rendered_env_file["git_tag_for_env"]
     return None
@@ -145,8 +148,8 @@ def _has_git_tag_changed(repo_path, previous_branch, env_file):
 
     git_utils.checkout(repo_path, current_commit)
     current_tag = _get_git_tag_from_env_file(env_file)
-    print("Previous Tag: {}", previous_tag)
-    print("Current Tag:  {}", current_tag)
+    print("Previous Tag: ", previous_tag)
+    print("Current Tag:  ", current_tag)
     return (current_tag is not None) and previous_tag == current_tag
 
 def _git_tag_to_version(git_tag):
