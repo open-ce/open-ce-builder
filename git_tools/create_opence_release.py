@@ -68,6 +68,9 @@ def _main(arg_strings=None):
     primary_repo_path = "./"
 
     open_ce_env_file = os.path.abspath(os.path.join(primary_repo_path, "envs", "opence-env.yaml"))
+    print("OpenceEnvFile:")
+    with open(open_ce_env_file, mode='r') as file:
+        print(file.read())
     if not _has_git_tag_changed(primary_repo_path, args.branch, open_ce_env_file):
         print("--->The opence-env git_tag has not changed.")
         print("--->No release is needed.")
