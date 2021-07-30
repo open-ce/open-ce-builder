@@ -30,7 +30,7 @@ from open_ce import inputs
 
 
 DEFAULT_BUILD_TYPES = "cpu,cuda"
-DEFAULT_PYTHON_VERS = "3.7"
+DEFAULT_PYTHON_VERS = "3.8"
 DEFAULT_MPI_TYPES = "openmpi"
 DEFAULT_CUDA_VERS = "10.2"
 CONDA_BUILD_CONFIG_FILE = "conda_build_config.yaml"
