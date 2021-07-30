@@ -8,7 +8,7 @@ the builds are taking place. This can be accomplished in two ways (see below).
 directory where CUDA has been installed.**
 
 The standard CUDA installation location is in `/usr/local/cuda` which is typically 
-a symbolic link to either `/usr/local/cuda-10.2` or `/usr/local/cuda-11.0`. Most of 
+a symbolic link to either `/usr/local/cuda-10.2` or `/usr/local/cuda-11.2`. Most of
 the code bases that are built in Open-CE are flexible enough to tolerate CUDA
 installations in non-standard locations, but not all of them. The reference table below
 includes the recipes that will not work when CUDA is installed elsewhere.
@@ -27,6 +27,8 @@ is a reference table below.
 |-----------------|--------------|
 | 1.0 (marmotini) | 10.2         |
 | 1.1 (meerkat)   | 10.2 \| 11.0  |
+| 1.2 (prariedog) | 10.2 \| 11.0  |
+| 1.3 (chipmunk) | 10.2 \| 11.2  |
 
 It's important to install CUDA correctly. This procedure is dependent on the system
 type and CUDA version. It's advised to follow NVIDIA's [official installation documentation](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html)
@@ -100,7 +102,7 @@ The tag can also be used per line shown in this example for the xgboost [meta.ya
 The `--cuda_versions` flag can be passed to `open-ce` to specify which version of CUDA to build conda packages for.
 
 ```shell
-open-ce build env --build_types cuda --cuda_versions 11.0 envs/opence-env.yaml
+open-ce build env --build_types cuda --cuda_versions 11.2 envs/opence-env.yaml
 ```
 
 Only one CUDA version can be specified at a time. To build for both on the same system, the build must be run twice in one of the following ways:
@@ -128,6 +130,9 @@ Open-CE includes a build recipe for a cuDNN package and will automatically fetch
 for which the package being built.
 
 ## NVIDIA TensorRT
+
+NOTE: TensorRT has been disabled within Open-CE 1.3, so it is no longer necessary to install it when building
+Open-CE 1.3.
 
 NVIDIA TensorRT is an SDK for high-performance deep learning inference. It includes a deep learning inference
 optimizer and runtime that delivers low latency and high-throughput for deep learning inference applications.

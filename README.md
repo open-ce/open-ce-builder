@@ -38,7 +38,7 @@ The `open-ce` tool allows a user to build collections of conda recipes described
 
 ### CUDA Requirements
 
-Currently CUDA 10.2 and 11.0 are supported by the recipes in Open-CE. Please see [`doc/README.cuda_support.md`](doc/README.cuda_support.md) for details on setting
+Currently CUDA 10.2 and 11.2 are supported by the recipes in Open-CE. Please see [`doc/README.cuda_support.md`](doc/README.cuda_support.md) for details on setting
 up a proper build enviornment for CUDA support.
 
 Open-CE expects the `CUDA_HOME` environment variable to be set to the location of the CUDA installation. Note that not all recipes work when `CUDA_HOME` references a non-standard CUDA installation location. Reference the [cuda README](doc/README.cuda_support.md) for more information.
