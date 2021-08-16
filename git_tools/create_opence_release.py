@@ -175,7 +175,7 @@ def _has_git_tag_changed(repo_path, previous_branch, env_file):
 def _git_tag_to_version(git_tag):
     version_regex = re.compile("open-ce-v(.+)")
     match = version_regex.match(git_tag)
-    return match.groups()[1]
+    return match.groups()[0]
 
 def _get_all_feedstocks(env_file, github_org, pat, skipped_repos):
     org_repos = git_utils.get_all_repos(github_org, pat)
