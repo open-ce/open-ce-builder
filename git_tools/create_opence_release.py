@@ -72,6 +72,7 @@ def _main(arg_strings=None):
         print("--->The opence-env git_tag has not changed.")
         print("--->No release is needed.")
         return
+    print("--->The opence-env git_tag has changed!")
     previous_tag = _get_previous_git_tag_from_env_file(primary_repo_path, args.branch, open_ce_env_file)
     print("previous_tag: ", previous_tag)
     version_name = _get_git_tag_from_env_file(open_ce_env_file)
