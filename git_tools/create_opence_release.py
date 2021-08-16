@@ -73,14 +73,21 @@ def _main(arg_strings=None):
         print("--->No release is needed.")
         return
     previous_tag = _get_previous_git_tag_from_env_file(primary_repo_path, args.branch, open_ce_env_file)
-
+    print("previous_tag: ", previous_tag)
     version_name = _get_git_tag_from_env_file(open_ce_env_file)
+    print("version_name: ", version_name)
     version = _git_tag_to_version(version_name)
+    print("version: ", version)
     release_number = ".".join(version.split(".")[:-1])
+    print("release_number: ", release_number)
     branch_name = "open-ce-r{}".format(release_number)
+    print("branch_name: ", branch_name)
     version_msg = "Open-CE Version {}".format(version)
+    print("version_msg: ", version_msg)
     release_name = "v{}".format(version)
+    print("release_name: ", release_name)
 
+    #Need if branch doesn't exist
     print("--->Creating {} branch in {}".format(version_name, args.primary_repo))
     git_utils.create_branch(primary_repo_path, branch_name)
 
@@ -135,6 +142,7 @@ def _get_git_tag_from_env_file(env_file):
     with open(env_file, mode='w') as file:
         file.write(file_contents)
     rendered_env_file = render_yaml(env_file, permit_undefined_jinja=True)
+    os.remove(env_file)
     print("Rendered Env File: ")
     print(rendered_env_file)
     if "git_tag_for_env" in rendered_env_file:
