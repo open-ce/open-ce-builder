@@ -106,7 +106,7 @@ def get_all_repos(github_org, token):
         retval += yaml_result
         page_index += 1
 
-def get_all_public_repos(github_org, token):
+def get_all_public_repos(github_org):
     '''
     Use the github API to get all repos for an org.
     https://docs.github.com/en/free-pro-team@latest/rest/reference/repos#list-organization-repositories
