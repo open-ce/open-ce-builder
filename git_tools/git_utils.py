@@ -37,7 +37,7 @@ class Argument(Enum):
     PUBLIC_ACCESS_TOKEN = (lambda parser: parser.add_argument(
                                           '--pat',
                                           type=str,
-                                          required=True,
+                                          required=False,
                                           help="""Github public access token."""))
 
     REPO_DIR = (lambda parser: parser.add_argument(
@@ -98,6 +98,24 @@ def get_all_repos(github_org, token):
         options = "sort=full_name&order=asc&page={}&per_page=100".format(page_index)
         result = requests.get("{}/orgs/{}/repos?{}".format(GITHUB_API, github_org, options),
                               headers={'Authorization' : 'token {}'.format(token)})
+        if result.status_code != 200:
+            raise Exception("Error loading repos.")
+        yaml_result = yaml.safe_load(result.content)
+        if not yaml_result:
+            return retval
+        retval += yaml_result
+        page_index += 1
+
+def get_all_public_repos(github_org, token):
+    '''
+    Use the github API to get all repos for an org.
+    https://docs.github.com/en/free-pro-team@latest/rest/reference/repos#list-organization-repositories
+    '''
+    retval = []
+    page_index = 1
+    while True:
+        options = "sort=full_name&order=asc&page={}&per_page=100".format(page_index)
+        result = requests.get("{}/orgs/{}/repos?{}".format(GITHUB_API, github_org, options))
         if result.status_code != 200:
             raise Exception("Error loading repos.")
         yaml_result = yaml.safe_load(result.content)
