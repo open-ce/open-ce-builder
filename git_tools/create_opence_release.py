@@ -178,7 +178,7 @@ def _git_tag_to_version(git_tag):
     return match.groups()[0]
 
 def _get_all_feedstocks(env_file, github_org, pat, skipped_repos):
-    org_repos = git_utils.get_all_repos(github_org, pat)
+    org_repos = git_utils.get_all_public_repos(github_org)
     org_repos = [repo for repo in org_repos if repo["name"] not in skipped_repos]
 
     return org_repos
