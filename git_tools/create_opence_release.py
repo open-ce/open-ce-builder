@@ -113,6 +113,7 @@ def _main(arg_strings=None):
                                 pat=args.pat,
                                 skipped_repos=[args.primary_repo, ".github"] + inputs.parse_arg_list(args.skipped_repos),
                                 variants=variants)
+
     tag_all_repos.clone_repos(repos=repos,
                               branch=None,
                               repo_dir=args.repo_dir,
@@ -186,12 +187,12 @@ def _git_tag_to_version(git_tag):
 def _get_all_feedstocks(env_file, github_org, pat, skipped_repos, variants):
     env_files = _load_env_config_files(env_file, variants)
     org_repos = []
-    for env_file in env_files:
-        for package in env_file.get(env_config.Key.packages.name, []):
-            feedstock = env_file.get(env_config.Key.feedstock.name, "")
+    for env in env_files:
+        for package in env.get(env_config.Key.packages.name, []):
+            feedstock = package.get(env_config.Key.feedstock.name, "")
             if not utils.is_url(feedstock):
                 org_repos += [{"name": feedstock,
-                               "clone_url": "https://github.com/{}/{}.git".format(github_org, feedstock)}]
+                               "ssh_url": "https://github.com/{}/{}-feedstock.git".format(github_org, feedstock)}]
     org_repos = [repo for repo in org_repos if repo["name"] not in skipped_repos]
 
     return org_repos
