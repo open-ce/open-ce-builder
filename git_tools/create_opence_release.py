@@ -79,19 +79,12 @@ def _main(arg_strings=None):
         return
     print("--->The opence-env git_tag has changed!")
     previous_tag = _get_previous_git_tag_from_env_file(primary_repo_path, args.branch, open_ce_env_file)
-    print("previous_tag: ", previous_tag)
     version_name = _get_git_tag_from_env_file(open_ce_env_file)
-    print("version_name: ", version_name)
     version = _git_tag_to_version(version_name)
-    print("version: ", version)
     release_number = ".".join(version.split(".")[:-1])
-    print("release_number: ", release_number)
     branch_name = "open-ce-r{}".format(release_number)
-    print("branch_name: ", branch_name)
     version_msg = "Open-CE Version {}".format(version)
-    print("version_msg: ", version_msg)
     release_name = "v{}".format(version)
-    print("release_name: ", release_name)
 
     #Need if branch doesn't exist
     print("--->Creating {} branch in {}".format(version_name, args.primary_repo))
@@ -139,11 +132,8 @@ def _main(arg_strings=None):
 counter = 0
 
 def _get_git_tag_from_env_file(env_file):
-    print("Env File: ", env_file)
-    print("Env File Contents:")
     with open(env_file, mode='r') as file:
         file_contents = file.read()
-        print(file_contents)
     global counter
     env_file = env_file + str(counter)
     counter += 1
@@ -151,8 +141,6 @@ def _get_git_tag_from_env_file(env_file):
         file.write(file_contents)
     rendered_env_file = render_yaml(env_file, permit_undefined_jinja=True)
     os.remove(env_file)
-    print("Rendered Env File: ")
-    print(rendered_env_file)
     if "git_tag_for_env" in rendered_env_file:
         return rendered_env_file["git_tag_for_env"]
     return None
@@ -175,8 +163,6 @@ def _has_git_tag_changed(repo_path, previous_branch, env_file):
 
     git_utils.checkout(repo_path, current_commit)
     current_tag = _get_git_tag_from_env_file(env_file)
-    print("Previous Tag: ", previous_tag)
-    print("Current Tag:  ", current_tag)
     return (current_tag is not None) and previous_tag != current_tag
 
 def _git_tag_to_version(git_tag):
@@ -184,7 +170,7 @@ def _git_tag_to_version(git_tag):
     match = version_regex.match(git_tag)
     return match.groups()[0]
 
-def _get_all_feedstocks(env_file, github_org, pat, skipped_repos, variants):
+def _get_all_feedstocks(env_file, github_org, skipped_repos, variants, pat=None):
     env_files = _load_env_config_files(env_file, variants)
     feedstocks = set()
     for env in env_files:
@@ -193,8 +179,10 @@ def _get_all_feedstocks(env_file, github_org, pat, skipped_repos, variants):
             if not utils.is_url(feedstock):
                 feedstocks.add(feedstock)
 
-    org_repos = [{"name": feedstock,
-                  "ssh_url": "https://github.com/{}/{}-feedstock.git".format(github_org, feedstock)}
+    org_repos = [{"name": "{}-feedstock".format(feedstock),
+                  "ssh_url": "https://{}github.com/{}/{}-feedstock.git".format(pat + "@" if pat else "",
+                                                                               github_org,
+                                                                               feedstock)}
                         for feedstock in feedstocks]
 
     org_repos = [repo for repo in org_repos if repo["name"] not in skipped_repos]
@@ -237,9 +225,4 @@ def _load_env_config_files(config_file, variants):
     return env_config_data_list
 
 if __name__ == '__main__':
-    #try:
     _main()
-    sys.exit(0)
-    #except Exception as exc:# pylint: disable=broad-except
-    #    print("Error: ", exc)
-    #    sys.exit(1)
