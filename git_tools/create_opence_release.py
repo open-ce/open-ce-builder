@@ -40,7 +40,7 @@ def _make_parser():
     ''' Parser input arguments '''
     parser = inputs.make_parser([git_utils.Argument.PUBLIC_ACCESS_TOKEN, git_utils.Argument.REPO_DIR,
                                     git_utils.Argument.BRANCH, git_utils.Argument.SKIPPED_REPOS,
-                                    git_utils.Argument.NOT_DRY_RUN],
+                                    git_utils.Argument.NOT_DRY_RUN] + inputs.VARIANT_ARGS,
                                     description = 'A script that can be used to cut an open-ce release.')
 
     parser.add_argument(
@@ -66,6 +66,9 @@ def _make_parser():
 def _main(arg_strings=None):
     parser = _make_parser()
     args = parser.parse_args(arg_strings)
+
+    variants = utils.make_variants(args.python_versions, args.build_types,
+                                   args.mpi_types, args.cuda_versions)
 
     primary_repo_path = "./"
 
@@ -108,7 +111,8 @@ def _main(arg_strings=None):
     repos = _get_all_feedstocks(env_file=open_ce_env_file,
                                 github_org=args.github_org,
                                 pat=args.pat,
-                                skipped_repos=[args.primary_repo, ".github"] + inputs.parse_arg_list(args.skipped_repos))
+                                skipped_repos=[args.primary_repo, ".github"] + inputs.parse_arg_list(args.skipped_repos),
+                                variants=variants)
     tag_all_repos.clone_repos(repos=repos,
                               branch=None,
                               repo_dir=args.repo_dir,
@@ -179,12 +183,12 @@ def _git_tag_to_version(git_tag):
     match = version_regex.match(git_tag)
     return match.groups()[0]
 
-def _get_all_feedstocks(env_file, github_org, pat, skipped_repos):
-    env_files = _load_env_config_files(env_file)
+def _get_all_feedstocks(env_file, github_org, pat, skipped_repos, variants):
+    env_files = _load_env_config_files(env_file, variants)
     org_repos = []
     for env_file in env_files:
         for package in env_file.get(env_config.Key.packages.name, []):
-            feedstock = env_file.get(env_config.Key.feedstock.name, [])
+            feedstock = env_file.get(env_config.Key.feedstock.name, "")
             if not utils.is_url(feedstock):
                 org_repos += [{"name": feedstock,
                                "clone_url": "https://github.com/{}/{}.git".format(github_org, feedstock)}]
@@ -192,7 +196,7 @@ def _get_all_feedstocks(env_file, github_org, pat, skipped_repos):
 
     return org_repos
 
-def _load_env_config_files(config_file):
+def _load_env_config_files(config_file, variants):
     '''
     Load all of the environment config files, plus any that come from "imported_envs"
     within an environment config file.
@@ -201,21 +205,21 @@ def _load_env_config_files(config_file):
     env_config_data_list = []
     loaded_files = []
     while env_config_files:
-        # Load the environment config files using conda-build's API. This will allow for the
-        # filtering of text using selectors and jinja2 functions
-        env = render_yaml(env_config_files[0], permit_undefined_jinja=True)
+        for variant in variants:
+            # Load the environment config files using conda-build's API. This will allow for the
+            # filtering of text using selectors and jinja2 functions
+            env = render_yaml(env_config_files[0], variants=variant, permit_undefined_jinja=True)
 
-        # Examine all of the imported_envs items and determine if they still need to be loaded.
-        new_config_files = []
-        imported_envs = env.get(env_config.Key.imported_envs.name, [])
-        if not imported_envs:
-            imported_envs = []
-        for imported_env in imported_envs:
-            if not utils.is_url(imported_env):
-                imported_env = utils.expanded_path(imported_env, relative_to=env_config_files[0])
-                if not imported_env in env_config_files and not imported_env in loaded_files:
-                    new_config_files += [imported_env]
-
+            # Examine all of the imported_envs items and determine if they still need to be loaded.
+            new_config_files = []
+            imported_envs = env.get(env_config.Key.imported_envs.name, [])
+            if not imported_envs:
+                imported_envs = []
+            for imported_env in imported_envs:
+                if not utils.is_url(imported_env):
+                    imported_env = utils.expanded_path(imported_env, relative_to=env_config_files[0])
+                    if not imported_env in env_config_files and not imported_env in loaded_files:
+                        new_config_files += [imported_env]
         # If there are new files to load, add them to the env_conf_files list.
         # Otherwise, remove the current file from the env_conf_files list and
         # add its data to the env_config_data_list.
