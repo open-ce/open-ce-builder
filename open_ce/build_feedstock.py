@@ -33,7 +33,11 @@ ARGUMENTS = inputs.PRIMARY_BUILD_ARGS + \
              Argument.RECIPES,
              Argument.WORKING_DIRECTORY,
              Argument.LOCAL_SRC_DIR,
-             Argument.CONDA_PKG_FORMAT]
+             Argument.CONDA_PKG_FORMAT,
+             Argument.DEBUG,
+             Argument.DEBUG_OUTPUT_ID
+#             Argument.ACTIVATE_STRING_ONLY
+]
 
 def get_conda_build_config():
     '''
@@ -97,7 +101,11 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
                                  recipe_config_file=None,
                                  output_folder=utils.DEFAULT_OUTPUT_FOLDER,
                                  local_src_dir=None,
-                                 pkg_format=utils.DEFAULT_PKG_FORMAT):
+                                 pkg_format=utils.DEFAULT_PKG_FORMAT,
+                                 debug=None,
+                                 debug_output_id=None
+                        #         activate_string_only=None
+):
     '''
     Build a feedstock from a build_command object.
     '''
@@ -116,8 +124,7 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
 
     for variant in utils.make_variants(command.python, command.build_type, command.mpi_type, command.cudatoolkit):
         build_config_data, recipe_config_file  = load_package_config(recipe_config_file, variant, command.recipe_path)
-
-        # Build each recipe
+	# Build each recipe
         if build_config_data['recipes'] is None:
             build_config_data['recipes'] = []
             log.info("No recipe to build for given configuration.")
@@ -147,7 +154,17 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
 
             _set_local_src_dir(local_src_dir, recipe, recipe_config_file)
             try:
-                conda_build.api.build(os.path.join(os.getcwd(), recipe['path']),
+                if debug:
+                    activation_string=conda_build.api.debug(os.path.join(os.getcwd(),recipe['path'])
+                                                             ,output_id=debug_output_id,config=config)
+                    print("activation_string",activation_string)
+                    if activation_string:
+                        print("#" * 80)
+                        print("Build and/or host environments created for debugging.  To enter a debugging environment:\n")
+                        print(activation_string)
+                        print("#" * 80)
+                    else:
+                        conda_build.api.build(os.path.join(os.getcwd(), recipe['path']),
                                config=config)
             except Exception as exc: # pylint: disable=broad-except
                 traceback.print_exc()
@@ -177,6 +194,10 @@ def build_feedstock(args):
                                  recipe_config_file=args.recipe_config_file,
                                  output_folder=args.output_folder,
                                  local_src_dir=args.local_src_dir,
-                                 pkg_format=args.conda_pkg_format)
+                                 pkg_format=args.conda_pkg_format,
+                                 debug=args.debug,
+                                 debug_output_id=args.debug_output_id
+                               #  activate_string_only=args.activate_string_only
+)
 
 ENTRY_FUNCTION = build_feedstock
