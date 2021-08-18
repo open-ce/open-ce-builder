@@ -32,6 +32,8 @@ import tag_all_repos
 
 sys.path.append(os.path.join(pathlib.Path(__file__).parent.absolute(), '..'))
 from open_ce import inputs # pylint: disable=wrong-import-position
+from open_ce import env_config # pylint: disable=wrong-import-position
+from open_ce import utils # pylint: disable=wrong-import-position
 from open_ce.conda_utils import render_yaml
 
 def _make_parser():
@@ -178,10 +180,52 @@ def _git_tag_to_version(git_tag):
     return match.groups()[0]
 
 def _get_all_feedstocks(env_file, github_org, pat, skipped_repos):
-    org_repos = git_utils.get_all_public_repos(github_org)
+    env_files = _load_env_config_files(env_file)
+    org_repos = []
+    for env_file in env_files:
+        for package in env_file.get(env_config.Key.packages.name, []):
+            feedstock = env_file.get(env_config.Key.feedstock.name, [])
+            if not utils.is_url(feedstock):
+                org_repos += [{"name": feedstock,
+                               "clone_url": "https://github.com/{}/{}.git".format(github_org, feedstock)}]
     org_repos = [repo for repo in org_repos if repo["name"] not in skipped_repos]
 
     return org_repos
+
+def _load_env_config_files(config_file):
+    '''
+    Load all of the environment config files, plus any that come from "imported_envs"
+    within an environment config file.
+    '''
+    env_config_files = [config_file]
+    env_config_data_list = []
+    loaded_files = []
+    while env_config_files:
+        # Load the environment config files using conda-build's API. This will allow for the
+        # filtering of text using selectors and jinja2 functions
+        env = render_yaml(env_config_files[0], permit_undefined_jinja=True)
+
+        # Examine all of the imported_envs items and determine if they still need to be loaded.
+        new_config_files = []
+        imported_envs = env.get(env_config.Key.imported_envs.name, [])
+        if not imported_envs:
+            imported_envs = []
+        for imported_env in imported_envs:
+            if not utils.is_url(imported_env):
+                imported_env = utils.expanded_path(imported_env, relative_to=env_config_files[0])
+                if not imported_env in env_config_files and not imported_env in loaded_files:
+                    new_config_files += [imported_env]
+
+        # If there are new files to load, add them to the env_conf_files list.
+        # Otherwise, remove the current file from the env_conf_files list and
+        # add its data to the env_config_data_list.
+        if new_config_files:
+            env_config_files = new_config_files + env_config_files
+        else:
+            env_config_data_list += [env]
+            loaded_files += [env_config_files.pop(0)]
+
+    return env_config_data_list
 
 if __name__ == '__main__':
     #try:
