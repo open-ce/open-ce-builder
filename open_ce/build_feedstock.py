@@ -103,9 +103,7 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
                                  local_src_dir=None,
                                  pkg_format=utils.DEFAULT_PKG_FORMAT,
                                  debug=None,
-                                 debug_output_id=None
-                        #         activate_string_only=None
-):
+                                 debug_output_id=None):
     '''
     Build a feedstock from a build_command object.
     '''
@@ -157,7 +155,6 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
                 if debug:
                     activation_string=conda_build.api.debug(os.path.join(os.getcwd(),recipe['path'])
                                                              ,output_id=debug_output_id,config=config)
-                    print("activation_string",activation_string)
                     if activation_string:
                         print("#" * 80)
                         print("Build and/or host environments created for debugging.  To enter a debugging environment:\n")
