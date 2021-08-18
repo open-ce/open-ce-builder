@@ -186,13 +186,13 @@ def _git_tag_to_version(git_tag):
 
 def _get_all_feedstocks(env_file, github_org, pat, skipped_repos, variants):
     env_files = _load_env_config_files(env_file, variants)
-    org_repos = []
+    org_repos = set()
     for env in env_files:
         for package in env.get(env_config.Key.packages.name, []):
             feedstock = package.get(env_config.Key.feedstock.name, "")
             if not utils.is_url(feedstock):
-                org_repos += [{"name": feedstock,
-                               "ssh_url": "https://github.com/{}/{}-feedstock.git".format(github_org, feedstock)}]
+                org_repos.add({"name": feedstock,
+                               "ssh_url": "https://github.com/{}/{}-feedstock.git".format(github_org, feedstock)})
     org_repos = [repo for repo in org_repos if repo["name"] not in skipped_repos]
 
     return org_repos
