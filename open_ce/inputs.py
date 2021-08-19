@@ -128,7 +128,7 @@ https://github.com/open-ce/open-ce/blob/main/doc/README.yaml.md"""))
                                         '--debug',
                                         action='store_true',
                                         help="create environments for you and provide you with a single command line that"
-                                              "you can copy/paste to enter a debugging environment..")) 
+                                              "you can copy/paste to enter a debugging environment."))
     SKIP_BUILD_PACKAGES = (lambda parser: parser.add_argument(
                                         '--skip_build_packages',
                                         action='store_true',
