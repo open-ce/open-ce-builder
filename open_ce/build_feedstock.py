@@ -35,9 +35,7 @@ ARGUMENTS = inputs.PRIMARY_BUILD_ARGS + \
              Argument.LOCAL_SRC_DIR,
              Argument.CONDA_PKG_FORMAT,
              Argument.DEBUG,
-             Argument.DEBUG_OUTPUT_ID
-#             Argument.ACTIVATE_STRING_ONLY
-]
+             Argument.DEBUG_OUTPUT_ID]
 
 def get_conda_build_config():
     '''
@@ -122,6 +120,7 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
 
     for variant in utils.make_variants(command.python, command.build_type, command.mpi_type, command.cudatoolkit):
         build_config_data, recipe_config_file  = load_package_config(recipe_config_file, variant, command.recipe_path)
+
 	# Build each recipe
         if build_config_data['recipes'] is None:
             build_config_data['recipes'] = []
@@ -193,8 +192,6 @@ def build_feedstock(args):
                                  local_src_dir=args.local_src_dir,
                                  pkg_format=args.conda_pkg_format,
                                  debug=args.debug,
-                                 debug_output_id=args.debug_output_id
-                               #  activate_string_only=args.activate_string_only
-)
+                                 debug_output_id=args.debug_output_id)
 
 ENTRY_FUNCTION = build_feedstock

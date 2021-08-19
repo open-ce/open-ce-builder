@@ -102,6 +102,7 @@ https://github.com/open-ce/open-ce/blob/main/doc/README.yaml.md"""))
                                         type=str,
                                         default=utils.DEFAULT_BUILD_TYPES,
                                         help='Comma delimited list of build types, such as "cpu" or "cuda".'))
+
     MPI_TYPES = (lambda parser: parser.add_argument(
                                         '--mpi_types',
                                         type=str,
@@ -124,23 +125,28 @@ https://github.com/open-ce/open-ce/blob/main/doc/README.yaml.md"""))
                                              "should be relative to the directory containing root level open-ce "
                                              "directory. Only files within the root level open-ce directory and "
                                              "local_files will be visible at build time."))
+
     DEBUG = (lambda parser: parser.add_argument(
                                         '--debug',
                                         action='store_true',
                                         help="create environments for you and provide you with a single command line that"
                                               "you can copy/paste to enter a debugging environment."))
+
     SKIP_BUILD_PACKAGES = (lambda parser: parser.add_argument(
                                         '--skip_build_packages',
                                         action='store_true',
                                         help="Do not perform builds of packages."))
+
     RUN_TESTS = (lambda parser: parser.add_argument(
                                         '--run_tests',
                                         action='store_true',
                                         help="Run Open-CE tests for each potential conda environment"))
+
     CONDA_ENV_FILE = (lambda parser: parser.add_argument(
                                         '--conda_env_files',
                                         type=str,
                                         help='Comma delimited list of paths to conda environment files.'))
+
     LOCAL_CONDA_CHANNEL = (lambda parser: parser.add_argument(
                                         '--local_conda_channel',
                                         type=str,
