@@ -577,6 +577,7 @@ def _create_commands(repository, runtime_package, recipe_path,
                                     build_dependencies=build_deps,
                                     test_dependencies=test_deps,
                                     channels=channels,
+                                    resources=recipe.get('resources'),
                                     conda_build_configs=variant_config_files)
         package_node = DependencyNode(set(packages), build_command)
         retval.add_node(package_node)
