@@ -155,12 +155,12 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
                     activation_string=conda_build.api.debug(os.path.join(os.getcwd(),recipe['path'])
                                                              ,output_id=debug_output_id,config=config)
                     if activation_string:
-                        print("#" * 80)
-                        print("Build and/or host environments created for debugging.  To enter a debugging environment:\n")
-                        print(activation_string)
-                        print("#" * 80)
-                    else:
-                        conda_build.api.build(os.path.join(os.getcwd(), recipe['path']),
+                        log.info("#" * 80)
+                        log.info("Build and/or host environments created for debug. To enter a debugging environment:\n")
+                        log.info(activation_string)
+                        log.info("#" * 80)
+                else:
+                    conda_build.api.build(os.path.join(os.getcwd(), recipe['path']),
                                config=config)
             except Exception as exc: # pylint: disable=broad-except
                 traceback.print_exc()

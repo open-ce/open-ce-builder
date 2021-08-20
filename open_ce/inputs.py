@@ -145,7 +145,7 @@ https://github.com/open-ce/open-ce/blob/main/doc/README.yaml.md"""))
     CONDA_ENV_FILE = (lambda parser: parser.add_argument(
                                         '--conda_env_files',
                                         type=str,
-                                        help='Comma delimited list of paths to conda environment files.'))
+                                        help='Comma delimited list of paths to conda environment files.' ))
 
     LOCAL_CONDA_CHANNEL = (lambda parser: parser.add_argument(
                                         '--local_conda_channel',
