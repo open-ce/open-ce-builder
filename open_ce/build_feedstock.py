@@ -167,7 +167,6 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
 
     recipes_to_build = inputs.parse_arg_list(command.recipe)
 
-    log.info("build_feedstock_from_command %s", hw_cap_config_file)
     set_hw_cap_config(hw_cap_config_file)
 
     for variant in utils.make_variants(command.python, command.build_type, command.mpi_type, command.cudatoolkit):
