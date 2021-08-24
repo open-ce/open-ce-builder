@@ -86,9 +86,11 @@ def _main(arg_strings=None):
     version_msg = "Open-CE Version {}".format(version)
     release_name = "v{}".format(version)
 
-    #Need if branch doesn't exist
-    print("--->Creating {} branch in {}".format(version_name, args.primary_repo))
-    git_utils.create_branch(primary_repo_path, branch_name)
+    if not git_utils.branch_exists(primary_repo_path, branch_name):
+        print("--->Creating {} branch in {}".format(version_name, args.primary_repo))
+        git_utils.create_branch(primary_repo_path, branch_name)
+    else:
+        print("--->Branch {} already exists in {}. Not creating it.".format(version_name, args.primary_repo))
 
     print("--->Tag Primary Branch")
     git_utils.create_tag(primary_repo_path, version_name, version_msg)
