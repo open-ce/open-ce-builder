@@ -25,8 +25,8 @@ A script that can be used to cut an open-ce release.
 import sys
 import pathlib
 import os
-import glob
 import re
+import tempfile
 import git_utils
 import tag_all_repos
 
@@ -34,7 +34,7 @@ sys.path.append(os.path.join(pathlib.Path(__file__).parent.absolute(), '..'))
 from open_ce import inputs # pylint: disable=wrong-import-position
 from open_ce import env_config # pylint: disable=wrong-import-position
 from open_ce import utils # pylint: disable=wrong-import-position
-from open_ce.conda_utils import render_yaml
+from open_ce.conda_utils import render_yaml # pylint: disable=wrong-import-position
 
 def _make_parser():
     ''' Parser input arguments '''
@@ -131,18 +131,12 @@ def _main(arg_strings=None):
     else:
         print("--->Skipping release creation for dry run.")
 
-counter = 0
-
 def _get_git_tag_from_env_file(env_file):
     with open(env_file, mode='r') as file:
         file_contents = file.read()
-    global counter
-    env_file = env_file + str(counter)
-    counter += 1
-    with open(env_file, mode='w') as file:
-        file.write(file_contents)
-    rendered_env_file = render_yaml(env_file, permit_undefined_jinja=True)
-    os.remove(env_file)
+    with tempfile.NamedTemporaryFile(suffix=env_file, delete=True) as tmpfile:
+        tmpfile.write(file_contents)
+        rendered_env_file = render_yaml(tmpfile.name, permit_undefined_jinja=True)
     if "git_tag_for_env" in rendered_env_file:
         return rendered_env_file["git_tag_for_env"]
     return None
