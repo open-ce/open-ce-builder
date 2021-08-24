@@ -152,8 +152,12 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
             _set_local_src_dir(local_src_dir, recipe, recipe_config_file)
             try:
                 if debug:
+                    print("In debug")
+                    print("recipe['path']",recipe['path'])
+                    print("output_id",debug_output_id)
                     activation_string=conda_build.api.debug(os.path.join(os.getcwd(),recipe['path'])
                                                              ,output_id=debug_output_id,config=config)
+                    print("activation_string",activation_string)
                     if activation_string:
                         log.info("#" * 80)
                         log.info("Build and/or host environments created for debug. To enter a debugging environment:\n")

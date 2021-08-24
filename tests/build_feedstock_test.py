@@ -263,3 +263,41 @@ def test_build_feedstock_conda_pkg_format(mocker):
 
     pkg_format = "conda"
     opence._main(["build", build_feedstock.COMMAND, "--conda_pkg_format", pkg_format])
+
+def test_build_feedstock_default_debug(mocker):
+   '''
+   Tests that the default arguments for 'build_feedstock' generate the correct 'conda_build.api.debug' input args.
+   '''
+   mocker.patch(
+          'os.getcwd',
+          return_value="/test/test_recipe")
+   mocker.patch(
+          'os.path.exists',
+          return_value=False)
+   expect_recipe = os.path.join(os.getcwd(),'recipe')
+   expect_config = {'variant_config_files' : [],
+                   'output_folder' : utils.DEFAULT_OUTPUT_FOLDER}
+   mocker.patch('conda_build.api.debug',
+                 side_effect=(lambda x, **kwargs: helpers.validate_conda_build_args(x, expect_recipe=expect_recipe, expect_config=expect_config, **kwargs))
+               )
+   opence._main(["build", build_feedstock.COMMAND,"--debug"])
+   
+def test_build_feedstock_default_debug_output_id(mocker):
+   '''
+   Tests that the default arguments for 'build_feedstock' generate the correct 'conda_build.api.debug --debug output id' input args.
+   '''
+   mocker.patch(
+          'os.getcwd',
+          return_value="/test/test_recipe")
+   mocker.patch(
+          'os.path.exists',
+          return_value=False)
+   expect_recipe = os.path.join(os.getcwd(),'recipe')
+   expect_config = {'variant_config_files' : [],
+                   'output_folder' : utils.DEFAULT_OUTPUT_FOLDER}
+   mocker.patch('conda_build.api.debug',
+                 side_effect=(lambda x, **kwargs: helpers.validate_conda_build_args(x, expect_recipe=expect_recipe, expect_config=expect_config, **kwargs))
+               )
+   opence._main(["build", build_feedstock.COMMAND,"--debug","--debug_output_id","output_id_1"])
+   assert False
+
