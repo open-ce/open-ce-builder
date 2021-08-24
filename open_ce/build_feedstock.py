@@ -57,7 +57,6 @@ def set_hw_cap_config(hw_cap_config_file=None):
     '''
     Sets env vars for hw_cap_config uses
     '''
-    log.info("set_hw_cap_config %s", hw_cap_config_file)
     # check for local hw_cap_config.yaml to override specified config
     recipe_hw_cap_config_file = get_local_hw_cap_config()
     hw_cap_config_data = None
@@ -68,10 +67,6 @@ def set_hw_cap_config(hw_cap_config_file=None):
 
     if hw_cap_config_data:
         # collect settings
-        log.info("set_hw_cap_config: set it %s", hw_cap_config_data)
-        #march = hw_cap_config_data.get(hw_cap_config.Key.cpu_arch.name, "nocona")
-        #mtune = hw_cap_config_data.get(hw_cap_config.Key.cpu_tune.name, "nocona")
-        #vector_settings = hw_cap_config_data.get(hw_cap_config.Key.vector_settings.name, [])
         march = hw_cap_config_data.get('cpu_capabilities', {}).get('cpu_arch', None)
         mtune = hw_cap_config_data.get('cpu_capabilities', {}).get('cpu_tune', None)
         vector_settings = hw_cap_config_data.get('cpu_capabilities', {}).get('vector_settings', [])
