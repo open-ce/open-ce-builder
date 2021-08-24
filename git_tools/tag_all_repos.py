@@ -93,6 +93,9 @@ def tag_all_repos(github_org, tag, tag_msg, branch, repo_dir, pat, skipped_repos
     push_repos(repos, tag, repo_dir)
 
 def clone_repos(repos, branch, repo_dir, prev_tag):
+    '''
+    Clones a list of repos.
+    '''
     print("---------------------------Cloning all Repos")
     for repo in repos:
         repo_path = os.path.abspath(os.path.join(repo_dir, repo["name"]))
@@ -111,6 +114,9 @@ def clone_repos(repos, branch, repo_dir, prev_tag):
                 git_utils.checkout(repo_path, repo_branch)
 
 def tag_repos(repos, tag, tag_msg, repo_dir):
+    '''
+    Tags a list of repos.
+    '''
     print("---------------------------Tagging all Repos")
     for repo in repos:
         repo_path = os.path.abspath(os.path.join(repo_dir, repo["name"]))
@@ -118,6 +124,9 @@ def tag_repos(repos, tag, tag_msg, repo_dir):
         git_utils.create_tag(repo_path, tag, tag_msg)
 
 def push_repos(repos, tag, repo_dir, continue_query=True):
+    '''
+    Pushes a list of repos.
+    '''
     print("---------------------------Pushing all Repos")
     for repo in repos:
         try:
