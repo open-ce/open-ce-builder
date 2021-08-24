@@ -106,24 +106,6 @@ def get_all_repos(github_org, token):
         retval += yaml_result
         page_index += 1
 
-def get_all_public_repos(github_org):
-    '''
-    Use the github API to get all repos for an org.
-    https://docs.github.com/en/free-pro-team@latest/rest/reference/repos#list-organization-repositories
-    '''
-    retval = []
-    page_index = 1
-    while True:
-        options = "sort=full_name&order=asc&page={}&per_page=100".format(page_index)
-        result = requests.get("{}/orgs/{}/repos?{}".format(GITHUB_API, github_org, options))
-        if result.status_code != 200:
-            raise Exception("Error loading repos.")
-        yaml_result = yaml.safe_load(result.content)
-        if not yaml_result:
-            return retval
-        retval += yaml_result
-        page_index += 1
-
 def create_release(github_org, repo, token, tag_name, name, body, draft):# pylint: disable=too-many-arguments
     '''
     Use the github API to create an actual release on github.
@@ -238,7 +220,7 @@ def push_branch(repo_path, branch_name, remote="origin"):
 
 def checkout(repo_path, commit):
     '''Checkout a commit of a given repo.'''
-    print(_execute_git_command(repo_path, "git checkout {}".format(commit)))
+    _execute_git_command(repo_path, "git checkout {}".format(commit))
 
 def ask_for_input(message, acceptable=None):
     '''Repeatedly ask for user input until an acceptable response is given.'''

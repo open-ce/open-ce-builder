@@ -143,7 +143,6 @@ def push_repos(repos, tag, repo_dir, continue_query=True):
                 continue
             raise
 
-
 def _main(arg_strings=None):
     parser = _make_parser()
     args = parser.parse_args(arg_strings)
