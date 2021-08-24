@@ -131,7 +131,7 @@ optional arguments:
                         current working directory. (default: )
   --python_versions PYTHON_VERSIONS
                         Comma delimited list of python versions to build for ,
-                        such as "3.6" or "3.7". (default: 3.7)
+                        such as "3.7" or "3.8". (default: 3.8)
   --build_types BUILD_TYPES
                         Comma delimited list of build types, such as "cpu" or
                         "cuda". (default: cpu,cuda)
@@ -139,7 +139,7 @@ optional arguments:
                         Comma delimited list of mpi types, such as "openmpi"
                         or "system". (default: openmpi)
   --cuda_versions CUDA_VERSIONS
-                        CUDA version to build for , such as "10.2" or "11.0".
+                        CUDA version to build for , such as "10.2" or "11.2".
                         (default: 10.2)
   --skip_build_packages
                         Do not perform builds of packages. (default: False)
@@ -179,30 +179,30 @@ optional arguments:
 
 `open-ce build env` also generates conda environment files based on the configuration
  selected for a build. For e.g. if `open-ce build env` is run for `tensorflow-env.yaml` and
- for python_versions `3.7`, build_type `cuda` and mpi_type being `openmpi`, then a
- conda environment file with name `open-ce-conda-env-py3.7-cuda-openmpi.yaml` gets
+ for python_versions `3.8`, build_type `cuda` and mpi_type being `openmpi`, then a
+ conda environment file with name `open-ce-conda-env-py3.8-cuda-openmpi.yaml` gets
  generated. This environment file can be used to create a conda environment with
  the packages listed in `tensorflow-env.yaml` installed in it.
 
 ```shell
-    open-ce build env --python_versions=3.7 --build_type=cuda --mpi_type=openmpi
+    open-ce build env --python_versions=3.8 --build_type=cuda --mpi_type=openmpi
     tensorflow-env.yaml
 ```
 
- The above command will output `open-ce-conda-env-py3.7-cuda-openmpi.yaml` in the specified
+ The above command will output `open-ce-conda-env-py3.8-cuda-openmpi.yaml` in the specified
  output folder (or by default `./condabuild` directory).
 
  The following command can be used to create a conda environment using the generated conda
  environment file -
 
 ```shell
-    conda env create -f open-ce-conda-env-py3.7-cuda-openmpi.yaml
+    conda env create -f open-ce-conda-env-py3.8-cuda-openmpi.yaml
 ```
 
 There could be one or more conda environment files generated for each variant based on inputs
 given to `open-ce build env`. For example, if `open-ce build env` is run without any `build_type` and python_versions
-`3.7` and mpi_type as `openmpi`, then two files will be generated namely -
-`open-ce-conda-env-py3.7-cuda-openmpi.yaml`, `open-ce-conda-env-py3.7-cpu-openmpi.yaml`.
+`3.8` and mpi_type as `openmpi`, then two files will be generated namely -
+`open-ce-conda-env-py3.8-cuda-openmpi.yaml`, `open-ce-conda-env-py3.8-cpu-openmpi.yaml`.
 
 `open-ce build env` can generate these target conda environment files for a given Open-CE environment file
 and provided build configuration even without performing an actual build.
@@ -255,7 +255,7 @@ optional arguments:
                         Conda channels to be used. (default: [])
   --python_versions PYTHON_VERSIONS
                         Comma delimited list of python versions to build for ,
-                        such as "3.6" or "3.7". (default: 3.7)
+                        such as "3.7" or "3.8". (default: 3.8)
   --build_types BUILD_TYPES
                         Comma delimited list of build types, such as "cpu" or
                         "cuda". (default: cpu,cuda)
@@ -264,7 +264,7 @@ optional arguments:
                         or "system". (default: openmpi)
   --cuda_versions CUDA_VERSIONS
                         CUDA version to build for ,
-                        such as "10.2" or "11.0". (default: 10.2)
+                        such as "10.2" or "11.2". (default: 10.2)
   --recipe-config-file RECIPE_CONFIG_FILE
                         Path to the recipe configuration YAML file. The configuration
                         file lists paths to recipes to be built within a feedstock.
@@ -320,7 +320,7 @@ For example,
 
 ```shell
     open-ce build image --local_conda_channel=./condabuild
-           --conda_env_file=open-ce-conda-env-py3.7-cuda-openmpi.yaml
+           --conda_env_file=open-ce-conda-env-py3.8-cuda-openmpi.yaml
            --container_tool podman --container_build_args="--build-arg ENV1=test1 --cpuset-cpus 0,1"
 ```
 
