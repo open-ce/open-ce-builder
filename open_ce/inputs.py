@@ -69,8 +69,8 @@ file describes the package environment you wish to build.
 
 A collection of files exist at https://github.com/open-ce/open-ce.
 
-This argument can be a URL, in which case imported_envs and the conda_build_config
-will be automatically discovered in the same remote directory. E.g.:
+This argument can be a URL, in which case imported_envs, the conda_build_config and
+the hw_cap_config files will be automatically discovered in the same remote directory. E.g.:
 >$ open-ce build env https://raw.githubusercontent.com/open-ce/open-ce/main/envs/opence-env.yaml
 
 If the provided file doesn't exist locally, a URL will be generated to pull down from
@@ -174,6 +174,28 @@ If no path is given, the default value is build-config.yaml.
 If build-config.yaml does not exist, and no value is provided,
 it will be assumed there is a single recipe with the
 path of \"recipe\"."""))
+
+    HW_CAP_CONFIG_FILE = (lambda parser: parser.add_argument(
+                                        '--hw-cap-configs',
+                                        type=str,
+                                        default=None,
+                                        help="""R|Location of hw-cap-config.yaml file.
+
+Example:
+cpu_capabilities:
+    cpu_arch: sandybridge
+    cpu_tune: haswell
+    vector_settings:
+      - mavx
+      - msse4.1
+      - msse4.2
+cuda_capabilities:
+    sm_levels:
+      - 37   
+
+If no path is given, the default value is hw-cap-config.yaml.
+If hw-cap-config.yaml does not exist, and no value is provided,
+no hw-cap-config.yaml will be used during builds."""))
 
     RECIPES = (lambda parser: parser.add_argument(
                                         '--recipes',
@@ -286,7 +308,8 @@ PRIMARY_BUILD_ARGS = [Argument.CONDA_BUILD_CONFIG,
 ENV_BUILD_ARGS = PRIMARY_BUILD_ARGS + \
                  GIT_ARGS + \
                  [Argument.ENV_FILE,
-                  Argument.PACKAGES]
+                  Argument.PACKAGES,
+                  Argument.HW_CAP_CONFIG_FILE]
 
 def make_parser(arguments, *args, formatter_class=OpenCEFormatter, **kwargs):
     '''

@@ -21,6 +21,7 @@ import traceback
 
 from open_ce import utils
 from open_ce import inputs
+from open_ce import hw_cap_config
 from open_ce.inputs import Argument
 from open_ce.errors import OpenCEError, Error, log
 
@@ -33,7 +34,8 @@ ARGUMENTS = inputs.PRIMARY_BUILD_ARGS + \
              Argument.RECIPES,
              Argument.WORKING_DIRECTORY,
              Argument.LOCAL_SRC_DIR,
-             Argument.CONDA_PKG_FORMAT]
+             Argument.CONDA_PKG_FORMAT,
+             Argument.HW_CAP_CONFIG_FILE]
 
 def get_conda_build_config():
     '''
@@ -43,6 +45,61 @@ def get_conda_build_config():
     recipe_conda_build_config = os.path.join(os.getcwd(), "config", "conda_build_config.yaml")
     return recipe_conda_build_config if os.path.exists(recipe_conda_build_config) else None
 
+def get_local_hw_cap_config():
+    '''
+    Checks for a hw_cap_config file inside the config dir of the feedstock.
+    Returns it if it exists.
+    '''
+    recipe_hw_cap_config = os.path.join(os.getcwd(), "config", "hw_cap_config.yaml")
+    return recipe_hw_cap_config if os.path.exists(recipe_hw_cap_config) else None
+
+def set_hw_cap_config(hw_cap_config_file=None):
+    '''
+    Sets env vars for hw_cap_config uses
+    '''
+    log.info("set_hw_cap_config %s", hw_cap_config_file)
+    # check for local hw_cap_config.yaml to override specified config
+    recipe_hw_cap_config_file = get_local_hw_cap_config()
+    hw_cap_config_data = None
+    if recipe_hw_cap_config_file:
+        hw_cap_config_data = hw_cap_config.load_hw_cap_config_file(recipe_hw_cap_config_file)
+    elif hw_cap_config_file:
+        hw_cap_config_data = hw_cap_config.load_hw_cap_config_file(hw_cap_config_file)
+
+    if hw_cap_config_data:
+        # collect settings
+        log.info("set_hw_cap_config: set it %s", hw_cap_config_data)
+        #march = hw_cap_config_data.get(hw_cap_config.Key.cpu_arch.name, "nocona")
+        #mtune = hw_cap_config_data.get(hw_cap_config.Key.cpu_tune.name, "nocona")
+        #vector_settings = hw_cap_config_data.get(hw_cap_config.Key.vector_settings.name, [])
+        march = hw_cap_config_data.get('cpu_capabilities', {}).get('cpu_arch', None)
+        mtune = hw_cap_config_data.get('cpu_capabilities', {}).get('cpu_tune', None)
+        vector_settings = hw_cap_config_data.get('cpu_capabilities', {}).get('vector_settings', [])
+
+        sm_levels = hw_cap_config_data.get('cuda_capabilities', {}).get('sm_levels', [])
+        compute_levels = hw_cap_config_data.get('cuda_capabilities', {}).get('compute_levels', [])
+        
+        log.info("CPU Capabilities")
+        log.info("  cpu_arch: %s", march)
+        log.info("  cpu_tune: %s", mtune)
+        log.info("  vector_settings: %s", vector_settings)
+        log.info("CUDA Capabilities")
+        log.info("  sm_levels: %s", sm_levels)
+        log.info("  compute_levels: %s", compute_levels)
+
+        # register settings in the environment
+        os.environ["MARCH"] = str(march)
+        os.environ["MTUNE"] = str(mtune)
+        os.environ["VEC_OPTIONS"] = str(len(vector_settings))
+        for idx,vector_setting in enumerate(vector_settings, start=1):
+            os.environ["VEC_OPTION_"+str(idx)] = str(vector_setting)
+        os.environ["CUDA_SM_LEVELS"] = str(len(sm_levels))
+        for idx,vector_setting in enumerate(vector_settings, start=1):
+            os.environ["CUDA_SM_LEVEL_"+str(idx)] = str(sm_levels)
+        os.environ["CUDA_COMPUTE_LEVELS"] = str(len(compute_levels))
+        for idx,vector_setting in enumerate(compute_levels, start=1):
+            os.environ["CUDA_SM_LEVEL_"+str(idx)] = str(compute_levels)
+        
 def load_package_config(config_file=None, variants=None, recipe_path=None):
     '''
     Check for a config file. If the user does not provide a recipe config
@@ -95,6 +152,7 @@ def _set_local_src_dir(local_src_dir_arg, recipe, recipe_config_file):
 
 def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, too-many-locals
                                  recipe_config_file=None,
+                                 hw_cap_config_file=None,
                                  output_folder=utils.DEFAULT_OUTPUT_FOLDER,
                                  local_src_dir=None,
                                  pkg_format=utils.DEFAULT_PKG_FORMAT):
@@ -113,6 +171,9 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
         os.chdir(os.path.abspath(command.repository))
 
     recipes_to_build = inputs.parse_arg_list(command.recipe)
+
+    log.info("build_feedstock_from_command %s", hw_cap_config_file)
+    set_hw_cap_config(hw_cap_config_file)
 
     for variant in utils.make_variants(command.python, command.build_type, command.mpi_type, command.cudatoolkit):
         build_config_data, recipe_config_file  = load_package_config(recipe_config_file, variant, command.recipe_path)
@@ -157,6 +218,7 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
 
     if saved_working_directory:
         os.chdir(saved_working_directory)
+    #clear_hw_cap_config()
 
 def build_feedstock(args):
     '''Entry Function'''
@@ -175,6 +237,7 @@ def build_feedstock(args):
 
     build_feedstock_from_command(command,
                                  recipe_config_file=args.recipe_config_file,
+                                 hw_cap_config_file=args.hw_cap_config_file,
                                  output_folder=args.output_folder,
                                  local_src_dir=args.local_src_dir,
                                  pkg_format=args.conda_pkg_format)
