@@ -134,8 +134,9 @@ def _main(arg_strings=None):
 def _get_git_tag_from_env_file(env_file):
     with open(env_file, mode='r') as file:
         file_contents = file.read()
-    with tempfile.NamedTemporaryFile(suffix=os.path.basename(env_file), delete=True) as renamed_env_file:
+    with tempfile.NamedTemporaryFile(suffix=os.path.basename(env_file), delete=True, mode='w') as renamed_env_file:
         renamed_env_file.write(file_contents)
+        renamed_env_file.flush()
         rendered_env_file = render_yaml(renamed_env_file.name, permit_undefined_jinja=True)
     if "git_tag_for_env" in rendered_env_file:
         return rendered_env_file["git_tag_for_env"]
