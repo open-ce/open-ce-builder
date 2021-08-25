@@ -63,7 +63,7 @@ def _make_parser():
 
     return parser
 
-def _main(arg_strings=None):
+def _main(arg_strings=None): # pylint: disable=too-many-locals
     parser = _make_parser()
     args = parser.parse_args(arg_strings)
 
@@ -108,7 +108,10 @@ def _main(arg_strings=None):
     for env_file_content in env_file_contents:
         env_file_tag = env_file_content.get(env_config.Key.git_tag_for_env.name, None)
         if env_file_tag != current_tag:
-            raise Exception("Incorrect git_tag '{}' found in the following env_file:\n{}".format(env_file_tag, env_file_content))
+            message = "Incorrect {} '{}' found in the following env_file:\n{}".format(env_config.Key.git_tag_for_env.name,
+                                                                                      env_file_tag,
+                                                                                      env_file_content)
+            raise Exception(message)
 
     repos = _get_all_feedstocks(env_files=env_file_contents,
                                 github_org=args.github_org,
