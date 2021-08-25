@@ -78,6 +78,7 @@ def _main(arg_strings=None):
         print("--->No release is needed.")
         return
     print("--->The opence-env git_tag has changed!")
+    current_tag = _get_git_tag_from_env_file(open_ce_env_file)
     previous_tag = _get_previous_git_tag_from_env_file(primary_repo_path, args.branch, open_ce_env_file)
     version_name = _get_git_tag_from_env_file(open_ce_env_file)
     version = _git_tag_to_version(version_name)
@@ -103,11 +104,16 @@ def _main(arg_strings=None):
     else:
         print("--->Skipping pushing branch and tag for dry run.")
 
-    repos = _get_all_feedstocks(env_file=open_ce_env_file,
+    env_file_contents = _load_env_config_files(open_ce_env_file, variants)
+    for env_file_content in env_file_contents:
+        env_file_tag = env_file_content.get(env_config.Key.git_tag_for_env.name, None)
+        if env_file_tag != current_tag:
+            raise Exception("Incorrect git_tag '{}' found in the following env_file:\n{}".format(env_file_tag, env_file_content))
+
+    repos = _get_all_feedstocks(env_files=env_file_contents,
                                 github_org=args.github_org,
                                 pat=args.pat,
-                                skipped_repos=[args.primary_repo, ".github"] + inputs.parse_arg_list(args.skipped_repos),
-                                variants=variants)
+                                skipped_repos=[args.primary_repo, ".github"] + inputs.parse_arg_list(args.skipped_repos))
 
     tag_all_repos.clone_repos(repos=repos,
                               branch=None,
@@ -138,9 +144,7 @@ def _get_git_tag_from_env_file(env_file):
         renamed_env_file.write(file_contents)
         renamed_env_file.flush()
         rendered_env_file = render_yaml(renamed_env_file.name, permit_undefined_jinja=True)
-    if "git_tag_for_env" in rendered_env_file:
-        return rendered_env_file["git_tag_for_env"]
-    return None
+    return rendered_env_file.get(env_config.Key.git_tag_for_env.name, None)
 
 def _get_previous_git_tag_from_env_file(repo_path, previous_branch, env_file):
     current_commit = git_utils.get_current_commit(repo_path)
@@ -167,8 +171,7 @@ def _git_tag_to_version(git_tag):
     match = version_regex.match(git_tag)
     return match.groups()[0]
 
-def _get_all_feedstocks(env_file, github_org, skipped_repos, variants, pat=None):
-    env_files = _load_env_config_files(env_file, variants)
+def _get_all_feedstocks(env_files, github_org, skipped_repos, pat=None):
     feedstocks = set()
     for env in env_files:
         for package in env.get(env_config.Key.packages.name, []):
