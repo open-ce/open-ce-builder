@@ -119,8 +119,8 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
     recipes_to_build = inputs.parse_arg_list(command.recipe)
 
     for variant in utils.make_variants(command.python, command.build_type, command.mpi_type, command.cudatoolkit):
-        build_config_data, recipe_config_file = load_package_config(recipe_config_file, variant, command.recipe_path)
-	
+        build_config_data, recipe_config_file  = load_package_config(recipe_config_file, variant, command.recipe_path)
+
         # Build each recipe
         if build_config_data['recipes'] is None:
             build_config_data['recipes'] = []
@@ -130,7 +130,7 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
                 continue
 
             config = get_or_merge_config(None, variant=variant)
-            config.skip_existing = False
+            config.skip_existing = True
             config.prefix_length = 225
             config.output_folder = output_folder
             conda_build_configs = [utils.download_file(conda_build_config) if utils.is_url(conda_build_config)
