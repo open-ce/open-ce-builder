@@ -241,7 +241,8 @@ usage: open-ce build feedstock [-h] [--conda_build_configs CONDA_BUILD_CONFIG]
                                [--working_directory WORKING_DIRECTORY]
                                [--local_src_dir LOCAL_SRC_DIR]
                                [--conda_pkg_format CONDA_PKG_FORMAT]
-
+                               [--debug DEBUG]
+                               [--debug_output_id DEBUG_OUTPUT_ID] 
 optional arguments:
   -h, --help            show this help message and exit
   --conda_build_configs CONDA_BUILD_CONFIGS
@@ -294,6 +295,10 @@ optional arguments:
   --conda_pkg_format CONDA_PKG_FORMAT
                         Conda package format to be used, such as "tarball" or
                         "conda". (default: tarball)
+  --debug DEBUG        
+                        Setup debug environment using `conda debug`
+  --debug_output_id DEBUG_OUTPUT_ID
+                       If running debug, specify the output to setup.
 ==============================================================================
 ```
 

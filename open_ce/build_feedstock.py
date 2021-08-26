@@ -56,6 +56,7 @@ def load_package_config(config_file=None, variants=None, recipe_path=None):
 
     if recipe_path:
         recipe_name = os.path.basename(os.getcwd())
+        print("recipe_name,recipe_path",recipe_name,recipe_path)
         build_config_data = {'recipes':[{'name':recipe_name, 'path':recipe_path}]}
     elif not config_file and not os.path.exists(utils.DEFAULT_RECIPE_CONFIG_FILE):
         recipe_name = os.path.basename(os.getcwd())
@@ -120,7 +121,7 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
 
     for variant in utils.make_variants(command.python, command.build_type, command.mpi_type, command.cudatoolkit):
         build_config_data, recipe_config_file  = load_package_config(recipe_config_file, variant, command.recipe_path)
-
+      
 	# Build each recipe
         if build_config_data['recipes'] is None:
             build_config_data['recipes'] = []
@@ -148,7 +149,7 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
             config.channel_urls = [os.path.abspath(output_folder)]
             config.channel_urls += command.channels
             config.channel_urls += build_config_data.get('channels', [])
-
+     
             _set_local_src_dir(local_src_dir, recipe, recipe_config_file)
             try:
                 if debug:
