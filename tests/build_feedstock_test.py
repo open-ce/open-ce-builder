@@ -265,34 +265,40 @@ def test_build_feedstock_conda_pkg_format(mocker):
     opence._main(["build", build_feedstock.COMMAND, "--conda_pkg_format", pkg_format])
 
 def test_build_feedstock_default_debug(mocker):
-   '''
-   Tests that the default arguments for 'build_feedstock' generate the correct 'conda_build.api.debug' input args.
-   '''
-   mocker.patch(
+    '''
+    Tests that the default arguments for 'build_feedstock' generate the correct 'conda_build.api.debug' input args.
+    '''
+    mocker.patch(
           'os.getcwd',
           return_value="/test/test_recipe")
-   mocker.patch(
+    mocker.patch(
           'os.path.exists',
           return_value=False)
-   expect_recipe = os.path.join(os.getcwd(),'recipe')
-   expect_config = {'variant_config_files' : [],
-                   'output_folder' : utils.DEFAULT_OUTPUT_FOLDER}
-   mocker.patch('conda_build.api.debug',
-                 side_effect=(lambda x, **kwargs: helpers.validate_conda_build_args(x, expect_recipe=expect_recipe, expect_config=expect_config, **kwargs))
-               )
-   opence._main(["build", build_feedstock.COMMAND,"--debug"])
-   
-def test_build_feedstock_default_debug_output_id(mocker):
+    activation_str = '''
+      ################################################################################
+      Build and/or host environments created for debug. To enter a debugging environment:
+      cd /mnt/pai/home/npanpa23/anaconda3/conda-bld/debug_1629976689969/work && source /mnt/pai/home/npanpa23/anaconda3/conda-bld/debug_1629976689969/work/build_env_setup.sh
+      ################################################################################
    '''
-   Tests that the default arguments for 'build_feedstock' generate the correct 'conda_build.api.debug --debug output id' input args.
-   '''
-   mocker.patch('os.getcwd',return_value="/test/test_recipe")
-   mocker.patch('os.path.exists',return_value=False)
-   expect_recipe = os.path.join(os.getcwd(),'recipe')
-   expect_config = {'variant_config_files' : [],
-                  'output_folder' : utils.DEFAULT_OUTPUT_FOLDER}
-   mocker.patch('conda_build.api.debug',side_effect=(lambda x, **kwargs: helpers.validate_conda_build_args(x, expect_recipe=expect_recipe, 
-                expect_config="/mnt/pai/home/ritud/open-ce/envs/conda_build_config.yaml", **kwargs)))
-   opence._main(["build", build_feedstock.COMMAND,"--debug","--debug_output_id","libopencv"])
-   assert False
 
+    mocker.patch('conda_build.api.debug',
+                 side_effect=(lambda x, **kwargs: helpers.validate_conda_debug_args(x, expect_activation_string=activation_str, **kwargs)))
+    opence._main(["build", build_feedstock.COMMAND,"--debug"])
+
+def test_build_feedstock_default_debug_output_id(mocker):
+    '''
+    Tests that the default arguments for 'build_feedstock' generate the correct 'conda_build.api.debug --debug output id' input args.
+    '''
+    mocker.patch('os.path.exists',return_value=True)
+    recipe_path = os.path.join(test_dir, "test_recipe")
+    test_recipe_config = {'recipes' : [{'name' : 'debug_output_id', 'path' :recipe_path}]}
+    mocker.patch('open_ce.conda_utils.render_yaml', return_value=test_recipe_config)
+    activation_str = '''
+      ################################################################################
+      Build and/or host environments created for debug output id {}. To enter a debugging environment:
+      cd /mnt/pai/home/npanpa23/anaconda3/conda-bld/debug_1629976689969/work && source /mnt/pai/home/npanpa23/anaconda3/conda-bld/debug_1629976689969/work/build_env_setup.sh
+      ################################################################################
+   '''.format('output_1')
+    mocker.patch('conda_build.api.debug',
+                 side_effect=(lambda x, **kwargs: helpers.validate_conda_debug_args(x, debug_output_id='output_1', expect_activation_string=activation_str, **kwargs)))
+    opence._main(["build", build_feedstock.COMMAND, "--debug", "--debug_output_id", "output_1"])
