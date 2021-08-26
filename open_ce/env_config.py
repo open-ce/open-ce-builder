@@ -116,6 +116,8 @@ def load_env_config_files(config_files, variants, ignore_urls=False):
             if not imported_envs:
                 imported_envs = []
             for imported_env in imported_envs:
+                if ignore_urls and utils.is_url(imported_env):
+                    continue
                 if not utils.is_url(imported_env):
                     imported_env = utils.expanded_path(imported_env, relative_to=env_config_files[0])
                 if not imported_env in env_config_files and not imported_env in loaded_files:

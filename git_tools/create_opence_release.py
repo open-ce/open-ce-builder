@@ -86,7 +86,7 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals
     version_msg = "Open-CE Version {}".format(version)
     release_name = "v{}".format(version)
 
-    env_file_contents = env_config.load_env_config_files([open_ce_env_file], variants, ignore_url=True)
+    env_file_contents = env_config.load_env_config_files([open_ce_env_file], variants, ignore_urls=True)
     for env_file_content in env_file_contents:
         env_file_tag = env_file_content.get(env_config.Key.git_tag_for_env.name, None)
         if env_file_tag != current_tag:
