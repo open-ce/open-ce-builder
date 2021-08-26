@@ -269,7 +269,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         '''
         Create a recipe dictionary for each recipe needed for a given environment file.
         '''
-        env_config_data_list = env_config.load_env_config_files(self._env_config_files, variants)
+        env_config_data_list = env_config.load_env_config_files(self._env_config_files, [variants])
         feedstocks_seen = set()
         external_deps = []
         channels_in_env_files = set()

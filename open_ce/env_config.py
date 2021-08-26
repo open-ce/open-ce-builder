@@ -94,29 +94,32 @@ def _validate_config_file(env_file, variants):
     except (Exception, SystemExit) as exc: #pylint: disable=broad-except
         raise OpenCEError(Error.ERROR, "Error in {}:\n  {}".format(original_env_file, str(exc))) from exc
 
-def load_env_config_files(config_files, variants):
+def load_env_config_files(config_files, variants, ignore_urls=False):
     '''
     Load all of the environment config files, plus any that come from "imported_envs"
     within an environment config file.
     '''
+    if ignore_urls:
+        env_config_files = [e for e in config_files if not utils.is_url(e)]
     env_config_files = [os.path.abspath(e) if not utils.is_url(e) else e for e in config_files]
     env_config_data_list = []
     loaded_files = []
     while env_config_files:
-        # Load the environment config files using conda-build's API. This will allow for the
-        # filtering of text using selectors and jinja2 functions
-        env = _validate_config_file(env_config_files[0], variants)
+        for variant in variants:
+            # Load the environment config files using conda-build's API. This will allow for the
+            # filtering of text using selectors and jinja2 functions
+            env = _validate_config_file(env_config_files[0], variant)
 
-        # Examine all of the imported_envs items and determine if they still need to be loaded.
-        new_config_files = []
-        imported_envs = env.get(Key.imported_envs.name, [])
-        if not imported_envs:
-            imported_envs = []
-        for imported_env in imported_envs:
-            if not utils.is_url(imported_env):
-                imported_env = utils.expanded_path(imported_env, relative_to=env_config_files[0])
-            if not imported_env in env_config_files and not imported_env in loaded_files:
-                new_config_files += [imported_env]
+            # Examine all of the imported_envs items and determine if they still need to be loaded.
+            new_config_files = []
+            imported_envs = env.get(Key.imported_envs.name, [])
+            if not imported_envs:
+                imported_envs = []
+            for imported_env in imported_envs:
+                if not utils.is_url(imported_env):
+                    imported_env = utils.expanded_path(imported_env, relative_to=env_config_files[0])
+                if not imported_env in env_config_files and not imported_env in loaded_files:
+                    new_config_files += [imported_env]
 
         # If there are new files to load, add them to the env_conf_files list.
         # Otherwise, remove the current file from the env_conf_files list and
