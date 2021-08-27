@@ -130,7 +130,7 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
                 continue
 
             config = get_or_merge_config(None, variant=variant)
-            config.skip_existing = True
+            config.skip_existing = False
             config.prefix_length = 225
             config.output_folder = output_folder
             conda_build_configs = [utils.download_file(conda_build_config) if utils.is_url(conda_build_config)
@@ -156,7 +156,8 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
                                                              ,output_id=debug_output_id,config=config)
                     if activation_string:
                         log.info("#" * 80)
-                        log.info("Build and/or host environments created for debug output id {}. To enter a debugging environment:\n".format(debug_output_id)
+                        log.info("Build and/or host environments created for debug output id {}. 
+                                  To enter a debugging environment:\n".format(debug_output_id))
                         log.info(activation_string)
                         log.info("#" * 80)
                 else:
