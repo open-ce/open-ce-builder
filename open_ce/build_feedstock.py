@@ -156,7 +156,7 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
                                                              ,output_id=debug_output_id,config=config)
                     if activation_string:
                         log.info("#" * 80)
-                        log.info("Build and/or host environments created for debug. To enter a debugging environment:\n")
+                        log.info("Build and/or host environments created for debug output id {}. To enter a debugging environment:\n".format(debug_output_id)
                         log.info(activation_string)
                         log.info("#" * 80)
                 else:
