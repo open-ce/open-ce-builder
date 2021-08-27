@@ -282,7 +282,7 @@ def test_build_feedstock_default_debug(mocker):
    '''
 
     mocker.patch('conda_build.api.debug',
-                 side_effect=(lambda x, **kwargs: helpers.validate_conda_debug_args(x, expect_activation_string=activation_str, **kwargs)))
+                 side_effect=(lambda x,**kwargs:helpers.validate_conda_debug_args(x,expect_activation_string=activation_str)))
     opence._main(["build", build_feedstock.COMMAND,"--debug"])
 
 def test_build_feedstock_default_debug_output_id(mocker):
@@ -300,5 +300,5 @@ def test_build_feedstock_default_debug_output_id(mocker):
       ################################################################################
    '''.format('output_1')
     mocker.patch('conda_build.api.debug',
-                 side_effect=(lambda x, **kwargs: helpers.validate_conda_debug_args(x, debug_output_id='output_1', expect_activation_string=activation_str, **kwargs)))
+                 side_effect=(lambda x,**kwargs: helpers.validate_conda_debug_args(x,debug_output_id='output_1', expect_activation_string=activation_str)))
     opence._main(["build", build_feedstock.COMMAND, "--debug", "--debug_output_id", "output_1"])
