@@ -134,8 +134,10 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals
         print("--->Skipping pushing feedstocks for dry run.")
 
     if args.not_dry_run:
+        print("--->Generating Release Notes.")
+        release_notes = _create_release_notes(env_file_contents, version, current_tag, previous_tag)
         print("--->Creating Draft Release.")
-        git_utils.create_release(args.github_org, args.primary_repo, args.pat, current_tag, release_name, version_msg, True)
+        git_utils.create_release(args.github_org, args.primary_repo, args.pat, current_tag, release_name, release_notes, True)
     else:
         print("--->Skipping release creation for dry run.")
 
@@ -196,6 +198,41 @@ def _get_all_feedstocks(env_files, github_org, skipped_repos, pat=None):
     org_repos = [repo for repo in org_repos if repo["name"] not in skipped_repos]
 
     return org_repos
+
+def _create_release_notes(env_files, version, current_tag, previous_tag):
+    retval = "# Open-CE Version {}\n".format(version)
+    retval += "\n"
+    retval += "Release Description\n"
+    retval += "\n"
+    if previous_tag:
+        retval += "## Bug Fix Changes\n"
+        try:
+            retval += _get_bug_fix_changes()
+        except Exception as exc:# pylint: disable=broad-except
+            print("Error trying to find bug fix changes: ", exc)
+        retval += "\n"
+    retval += "## Package Versions\n"
+    retval += "\n"
+    retval += "A release of Open-CE consists of the environment files within the `open-ce` repository and a collection of feedstock repositories. The feedstock repositories contain recipes for various python packages. The following packages (among others) are part of this release:\n"
+    retval += "\n"
+    retval += "| Package          | Version |\n"
+    retval += "| :--------------- | :-------- |\n"
+    try:
+        retval += _get_package_versions()
+    except Exception as exc:# pylint: disable=broad-except
+        print("Error trying to get package versions: ", exc)
+    retval += "\n"
+    retval += "This release of Open-CE supports NVIDIA's CUDA version 10.2 and 11.2 as well as Python 3.7, 3.8 and 3.9.\n"
+    retval += "\n"
+    retval += "## Getting Started"
+    retval += "\n"
+    retval += "To get started with this release, see [the main readme](https://github.com/open-ce/open-ce/blob/{}}/README.md)\n".format(current_tag)
+
+def _get_bug_fix_changes():
+    return ""
+
+def _get_package_versions():
+    return ""
 
 if __name__ == '__main__':
     _main()
