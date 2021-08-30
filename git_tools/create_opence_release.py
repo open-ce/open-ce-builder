@@ -140,6 +140,12 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals
         print("--->Skipping release creation for dry run.")
 
 def _get_git_tag_from_env_file(env_file):
+    '''
+    The way this function copies the env_file to a new location before it reads the env file
+    is to get around an issue with the python jinja library used by conda build which seems
+    to cache the file the first time it is read, even if the file is changed by checking out
+    a new git commit.
+    '''
     with open(env_file, mode='r') as file:
         file_contents = file.read()
     with tempfile.NamedTemporaryFile(suffix=os.path.basename(env_file), delete=True, mode='w') as renamed_env_file:
