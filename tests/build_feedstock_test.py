@@ -290,6 +290,7 @@ def test_build_feedstock_default_debug_output_id(mocker):
     '''
     Tests that the default arguments for 'build_feedstock' generate the correct 'conda_build.api.debug --debug output id' input args.
     '''
+    output_id_var="output_1"
     mocker.patch('os.path.exists',return_value=True)
     recipe_path = os.path.join(test_dir, "test_recipe")
     test_recipe_config = {'recipes' : [{'name' : 'debug_output_id', 'path' :recipe_path}]}
@@ -300,7 +301,7 @@ def test_build_feedstock_default_debug_output_id(mocker):
       cd /Users/UserName/miniconda3/conda-bld/debug_1542385789430/work && 
       source /Users/UserName/miniconda3/conda-bld/debug_1542385789430/work/build_env_setup.sh
       ################################################################################
-   '''.format('output_1')
+    '''.format(output_id_var)
     mocker.patch('conda_build.api.debug',
-                 side_effect=(lambda x,**kwargs: helpers.validate_conda_debug_args(x,debug_output_id='output_1', expect_activation_string=activation_str)))
+                 side_effect=(lambda x,**kwargs: helpers.validate_conda_debug_args(x,debug_output_id=output_id_var, expect_activation_string=activation_str)))
     opence._main(["build", build_feedstock.COMMAND, "--debug", "--debug_output_id", "output_1"])
