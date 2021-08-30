@@ -137,7 +137,12 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals
         print("--->Generating Release Notes.")
         release_notes = _create_release_notes(env_file_contents, version, current_tag, previous_tag)
         print("--->Creating Draft Release.")
-        git_utils.create_release(args.github_org, args.primary_repo, args.pat, current_tag, release_name, release_notes, True)
+        git_utils.create_release(args.github_org,
+                                 args.primary_repo,
+                                 args.pat, current_tag,
+                                 release_name,
+                                 release_notes,
+                                 True)
     else:
         print("--->Skipping release creation for dry run.")
 
@@ -213,7 +218,9 @@ def _create_release_notes(env_files, version, current_tag, previous_tag):
         retval += "\n"
     retval += "## Package Versions\n"
     retval += "\n"
-    retval += "A release of Open-CE consists of the environment files within the `open-ce` repository and a collection of feedstock repositories. The feedstock repositories contain recipes for various python packages. The following packages (among others) are part of this release:\n"
+    retval += "A release of Open-CE consists of the environment files within the `open-ce` repository and a collection of "
+    retval += "feedstock repositories. The feedstock repositories contain recipes for various python packages. The "
+    retval += "following packages (among others) are part of this release:\n"
     retval += "\n"
     retval += "| Package          | Version |\n"
     retval += "| :--------------- | :-------- |\n"
@@ -226,7 +233,9 @@ def _create_release_notes(env_files, version, current_tag, previous_tag):
     retval += "\n"
     retval += "## Getting Started"
     retval += "\n"
-    retval += "To get started with this release, see [the main readme](https://github.com/open-ce/open-ce/blob/{}}/README.md)\n".format(current_tag)
+    retval += "To get started with this release, see [the main readme]"
+    retval += "(https://github.com/open-ce/open-ce/blob/{}/README.md)\n".format(current_tag)
+    return retval
 
 def _get_bug_fix_changes():
     return ""
