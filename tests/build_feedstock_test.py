@@ -277,7 +277,8 @@ def test_build_feedstock_default_debug(mocker):
     activation_str = '''
       ################################################################################
       Build and/or host environments created for debug. To enter a debugging environment:
-      cd /mnt/pai/home/npanpa23/anaconda3/conda-bld/debug_1629976689969/work && source /mnt/pai/home/npanpa23/anaconda3/conda-bld/debug_1629976689969/work/build_env_setup.sh
+      cd /Users/UserName/miniconda3/conda-bld/debug_1542385789430/work && 
+      source /Users/UserName/miniconda3/conda-bld/debug_1542385789430/work/build_env_setup.sh
       ################################################################################
    '''
 
@@ -296,7 +297,8 @@ def test_build_feedstock_default_debug_output_id(mocker):
     activation_str = '''
       ################################################################################
       Build and/or host environments created for debug output id {}. To enter a debugging environment:
-      cd /mnt/pai/home/npanpa23/anaconda3/conda-bld/debug_1629976689969/work && source /mnt/pai/home/npanpa23/anaconda3/conda-bld/debug_1629976689969/work/build_env_setup.sh
+      cd /Users/UserName/miniconda3/conda-bld/debug_1542385789430/work && 
+      source /Users/UserName/miniconda3/conda-bld/debug_1542385789430/work/build_env_setup.sh
       ################################################################################
    '''.format('output_1')
     mocker.patch('conda_build.api.debug',
