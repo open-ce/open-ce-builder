@@ -37,7 +37,7 @@ def validate_env(args):
 
     for variant in variants:
         try:
-            env_config.load_env_config_files(args.env_config_file, variant)
+            env_config.load_env_config_files(args.env_config_file, [variant])
         except OpenCEError as exc:
             raise OpenCEError(Error.VALIDATE_ENV, args.env_config_file, str(variant), exc.msg) from exc
 

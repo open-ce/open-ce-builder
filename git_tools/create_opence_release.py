@@ -25,17 +25,22 @@ A script that can be used to cut an open-ce release.
 import sys
 import pathlib
 import os
-import glob
+import re
+import tempfile
 import git_utils
 import tag_all_repos
 
 sys.path.append(os.path.join(pathlib.Path(__file__).parent.absolute(), '..'))
 from open_ce import inputs # pylint: disable=wrong-import-position
+from open_ce import env_config # pylint: disable=wrong-import-position
+from open_ce import utils # pylint: disable=wrong-import-position
+from open_ce.conda_utils import render_yaml # pylint: disable=wrong-import-position
 
 def _make_parser():
     ''' Parser input arguments '''
     parser = inputs.make_parser([git_utils.Argument.PUBLIC_ACCESS_TOKEN, git_utils.Argument.REPO_DIR,
-                                    git_utils.Argument.BRANCH, git_utils.Argument.SKIPPED_REPOS],
+                                    git_utils.Argument.BRANCH, git_utils.Argument.SKIPPED_REPOS,
+                                    git_utils.Argument.NOT_DRY_RUN] + inputs.VARIANT_ARGS,
                                     description = 'A script that can be used to cut an open-ce release.')
 
     parser.add_argument(
@@ -51,12 +56,6 @@ def _make_parser():
         help="""Primary open-ce repo.""")
 
     parser.add_argument(
-        '--version',
-        type=str,
-        required=True,
-        help="""Release version to cut.""")
-
-    parser.add_argument(
         '--code-name',
         type=str,
         default=None,
@@ -64,76 +63,139 @@ def _make_parser():
 
     return parser
 
-def _main(arg_strings=None):
+def _main(arg_strings=None): # pylint: disable=too-many-locals
     parser = _make_parser()
     args = parser.parse_args(arg_strings)
-    version_name = "open-ce-v{}".format(args.version)
-    release_number = ".".join(args.version.split(".")[:-1])
+
+    variants = utils.make_variants(args.python_versions, args.build_types,
+                                   args.mpi_types, args.cuda_versions)
+
+    primary_repo_path = "./"
+
+    open_ce_env_file = os.path.abspath(os.path.join(primary_repo_path, "envs", "opence-env.yaml"))
+    if not _has_git_tag_changed(primary_repo_path, args.branch, open_ce_env_file):
+        print("--->The opence-env git_tag has not changed.")
+        print("--->No release is needed.")
+        return
+    print("--->The opence-env git_tag has changed!")
+    current_tag = _get_git_tag_from_env_file(open_ce_env_file)
+    previous_tag = _get_previous_git_tag_from_env_file(primary_repo_path, args.branch, open_ce_env_file)
+    version = _git_tag_to_version(current_tag)
+    release_number = ".".join(version.split(".")[:-1])
     branch_name = "open-ce-r{}".format(release_number)
-    primary_repo_url = "git@github.com:{}/{}.git".format(args.github_org, args.primary_repo)
+    version_msg = "Open-CE Version {}".format(version)
+    release_name = "v{}".format(version)
 
-    version_msg = "Open-CE Version {}".format(args.version)
-    release_name = "v{}".format(args.version)
-    if args.code_name:
-        version_msg = "{} Code-named {}".format(version_msg, args.code_name)
-        release_name = "{} ({})".format(release_name, args.code_name)
+    env_file_contents = env_config.load_env_config_files([open_ce_env_file], variants, ignore_urls=True)
+    for env_file_content in env_file_contents:
+        env_file_tag = env_file_content.get(env_config.Key.git_tag_for_env.name, None)
+        if env_file_tag != current_tag:
+            message = "Incorrect {} '{}' found in the following env_file:\n{}".format(env_config.Key.git_tag_for_env.name,
+                                                                                      env_file_tag,
+                                                                                      env_file_content)
+            raise Exception(message)
 
-    primary_repo_path = os.path.abspath(os.path.join(args.repo_dir, args.primary_repo))
-    print("--->Making clone location: " + primary_repo_path)
-    os.makedirs(primary_repo_path, exist_ok=True)
-    print("--->Cloning {}".format(primary_repo_url))
-    git_utils.clone_repo(primary_repo_url, primary_repo_path, args.branch)
-
-    print("--->Creating {} branch in {}".format(version_name, args.primary_repo))
-    git_utils.create_branch(primary_repo_path, branch_name)
-
-    print("--->Updating env files.")
-    _update_env_files(primary_repo_path, version_name)
-
-    print("--->Committing env files.")
-    git_utils.commit_changes(primary_repo_path, "Updates for {}".format(release_number))
+    if not git_utils.branch_exists(primary_repo_path, branch_name):
+        print("--->Creating {} branch in {}".format(current_tag, args.primary_repo))
+        git_utils.create_branch(primary_repo_path, branch_name)
+    else:
+        print("--->Branch {} already exists in {}. Not creating it.".format(current_tag, args.primary_repo))
 
     print("--->Tag Primary Branch")
-    git_utils.create_tag(primary_repo_path, version_name, version_msg)
+    git_utils.create_tag(primary_repo_path, current_tag, version_msg)
 
-    push = git_utils.ask_for_input("Would you like to push changes to primary repo?")
-    if push.startswith("y"):
+    if args.not_dry_run:
         print("--->Pushing branch.")
         git_utils.push_branch(primary_repo_path, branch_name)
         print("--->Pushing tag.")
-        git_utils.push_branch(primary_repo_path, version_name)
+        git_utils.push_branch(primary_repo_path, current_tag)
+    else:
+        print("--->Skipping pushing branch and tag for dry run.")
 
-    tag_all_repos.tag_all_repos(github_org=args.github_org,
-                                tag=version_name,
-                                tag_msg=version_msg,
-                                branch=args.branch,
-                                repo_dir=args.repo_dir,
+    repos = _get_all_feedstocks(env_files=env_file_contents,
+                                github_org=args.github_org,
                                 pat=args.pat,
-                                skipped_repos=[args.primary_repo, ".github"] + inputs.parse_arg_list(args.skipped_repos),
-                                prev_tag=None)
+                                skipped_repos=[args.primary_repo, ".github"] + inputs.parse_arg_list(args.skipped_repos))
 
-    release = git_utils.ask_for_input("Would you like to create a github release?")
-    if release.startswith("y"):
+    tag_all_repos.clone_repos(repos=repos,
+                              branch=None,
+                              repo_dir=args.repo_dir,
+                              prev_tag=previous_tag)
+    tag_all_repos.tag_repos(repos=repos,
+                            tag=current_tag,
+                            tag_msg=version_msg,
+                            repo_dir=args.repo_dir)
+    if args.not_dry_run:
+        tag_all_repos.push_repos(repos=repos,
+                                tag=current_tag,
+                                repo_dir=args.repo_dir,
+                                continue_query=False)
+    else:
+        print("--->Skipping pushing feedstocks for dry run.")
+
+    if args.not_dry_run:
         print("--->Creating Draft Release.")
-        git_utils.create_release(args.github_org, args.primary_repo, args.pat, version_name, release_name, version_msg, True)
+        git_utils.create_release(args.github_org, args.primary_repo, args.pat, current_tag, release_name, version_msg, True)
+    else:
+        print("--->Skipping release creation for dry run.")
 
-def _update_env_files(open_ce_path, new_git_tag):
-    for env_file in glob.glob(os.path.join(open_ce_path, "envs", "*.yaml")):
-        print("--->Updating {}".format(env_file))
-        with open(env_file, 'r') as content_file:
-            env_file_contents = content_file.read()
-        if not "git_tag_for_env" in env_file_contents:
-            env_file_contents = """{}
-git_tag_for_env: {}
-""".format(env_file_contents, new_git_tag)
+def _get_git_tag_from_env_file(env_file):
+    '''
+    The way this function copies the env_file to a new location before it reads the env file
+    is to get around an issue with the python jinja library used by conda build which seems
+    to cache the file the first time it is read, even if the file is changed by checking out
+    a new git commit.
+    '''
+    with open(env_file, mode='r') as file:
+        file_contents = file.read()
+    with tempfile.NamedTemporaryFile(suffix=os.path.basename(env_file), delete=True, mode='w') as renamed_env_file:
+        renamed_env_file.write(file_contents)
+        renamed_env_file.flush()
+        rendered_env_file = render_yaml(renamed_env_file.name, permit_undefined_jinja=True)
+    return rendered_env_file.get(env_config.Key.git_tag_for_env.name, None)
 
-        with open(env_file, 'w') as content_file:
-            content_file.write(env_file_contents)
+def _get_previous_git_tag_from_env_file(repo_path, previous_branch, env_file):
+    current_commit = git_utils.get_current_commit(repo_path)
+
+    git_utils.checkout(repo_path, previous_branch)
+    previous_tag = _get_git_tag_from_env_file(env_file)
+
+    git_utils.checkout(repo_path, current_commit)
+
+    return previous_tag
+
+def _has_git_tag_changed(repo_path, previous_branch, env_file):
+    current_commit = git_utils.get_current_commit(repo_path)
+
+    git_utils.checkout(repo_path, previous_branch)
+    previous_tag = _get_git_tag_from_env_file(env_file)
+
+    git_utils.checkout(repo_path, current_commit)
+    current_tag = _get_git_tag_from_env_file(env_file)
+    return (current_tag is not None) and previous_tag != current_tag
+
+def _git_tag_to_version(git_tag):
+    version_regex = re.compile("open-ce-v(.+)")
+    match = version_regex.match(git_tag)
+    return match.groups()[0]
+
+def _get_all_feedstocks(env_files, github_org, skipped_repos, pat=None):
+    feedstocks = set()
+    for env in env_files:
+        for package in env.get(env_config.Key.packages.name, []):
+            feedstock = package.get(env_config.Key.feedstock.name, "")
+            if not utils.is_url(feedstock):
+                feedstocks.add(feedstock)
+
+    org_repos = [{"name": "{}-feedstock".format(feedstock),
+                  "ssh_url": "https://{}github.com/{}/{}-feedstock.git".format(pat + "@" if pat else "",
+                                                                               github_org,
+                                                                               feedstock)}
+                        for feedstock in feedstocks]
+
+    org_repos = [repo for repo in org_repos if repo["name"] not in skipped_repos]
+
+    return org_repos
 
 if __name__ == '__main__':
-    try:
-        _main()
-        sys.exit(0)
-    except Exception as exc:# pylint: disable=broad-except
-        print("Error: ", exc)
-        sys.exit(1)
+    _main()
