@@ -231,7 +231,7 @@ def test_get_repo_git_tag_options(mocker, caplog):
     for variant in possible_variants:
 
         # test-env1.yaml has defined "git_tag" and "git_tag_for_env".
-        env_config_data_list = env_config.load_env_config_files([env_file1], variant)
+        env_config_data_list = env_config.load_env_config_files([env_file1], [variant])
         for env_config_data in env_config_data_list:
             packages = env_config_data.get(env_config.Key.packages.name, [])
             for package in packages:
@@ -240,7 +240,7 @@ def test_get_repo_git_tag_options(mocker, caplog):
 
         # Setting git_tag_for_env in BuildTree should override whatever is in the config file
         mock_build_tree._git_tag_for_env = "test_tag_for_all"
-        env_config_data_list = env_config.load_env_config_files([env_file1], variant)
+        env_config_data_list = env_config.load_env_config_files([env_file1], [variant])
         for env_config_data in env_config_data_list:
             packages = env_config_data.get(env_config.Key.packages.name, [])
             for package in packages:
@@ -257,7 +257,7 @@ def test_get_repo_git_tag_options(mocker, caplog):
 
         mock_build_tree._git_tag_for_env = None
         env_file2 = os.path.join(test_dir, 'test-env3.yaml')
-        env_config_data_list = env_config.load_env_config_files([env_file2], variant)
+        env_config_data_list = env_config.load_env_config_files([env_file2], [variant])
         for env_config_data in env_config_data_list:
             packages = env_config_data.get(env_config.Key.packages.name, [])
             for package in packages:
@@ -290,7 +290,7 @@ def test_get_repo_with_patches(mocker, caplog):
     possible_variants = utils.make_variants("3.6", "cpu", "openmpi", "10.2")
     for variant in possible_variants:
         # test-env3.yaml has specified "patches".
-        env_config_data_list = env_config.load_env_config_files([env_file], variant)
+        env_config_data_list = env_config.load_env_config_files([env_file], [variant])
         for env_config_data in env_config_data_list:
             packages = env_config_data.get(env_config.Key.packages.name, [])
             for package in packages:
@@ -328,7 +328,7 @@ def test_get_repo_for_nonexisting_patch(mocker):
     possible_variants = utils.make_variants("3.6", "cpu", "openmpi", "10.2")
     for variant in possible_variants:
         # test-env3.yaml has defined "patches".
-        env_config_data_list = env_config.load_env_config_files([env_file], variant)
+        env_config_data_list = env_config.load_env_config_files([env_file], [variant])
         for env_config_data in env_config_data_list:
             packages = env_config_data.get(env_config.Key.packages.name, [])
             for package in packages:
@@ -380,7 +380,7 @@ def test_check_runtime_package_field():
     for variant in possible_variants:
 
         # test-env3.yaml has defined "runtime_package" for "package222".
-        env_config_data_list = env_config.load_env_config_files([env_file], variant)
+        env_config_data_list = env_config.load_env_config_files([env_file], [variant])
         for env_config_data in env_config_data_list:
             packages = env_config_data.get(env_config.Key.packages.name, [])
             for package in packages:
@@ -397,7 +397,7 @@ def test_check_recipe_path_package_field():
     for variant in possible_variants:
 
         # test-env1.yaml has defined "recipe_path" as "package11_recipe_path" for "package11".
-        env_config_data_list = env_config.load_env_config_files([env_file], variant)
+        env_config_data_list = env_config.load_env_config_files([env_file], [variant])
         for env_config_data in env_config_data_list:
             packages = env_config_data.get(env_config.Key.packages.name, [])
             for package in packages:

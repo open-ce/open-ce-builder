@@ -37,7 +37,7 @@ class Argument(Enum):
     PUBLIC_ACCESS_TOKEN = (lambda parser: parser.add_argument(
                                           '--pat',
                                           type=str,
-                                          required=True,
+                                          required=False,
                                           help="""Github public access token."""))
 
     REPO_DIR = (lambda parser: parser.add_argument(
@@ -80,6 +80,12 @@ class Argument(Enum):
                             type=str,
                             default="",
                             help="""Comma delimitted list of <key>:<val> param pairs."""))
+
+    NOT_DRY_RUN = (lambda parser: parser.add_argument(
+                             '--not_dry_run',
+                             action='store_true',
+                             required=False,
+                             help="""Perform all steps locally, but don't push any changes."""))
 
 def get_all_repos(github_org, token):
     '''
@@ -230,6 +236,10 @@ def ask_for_input(message, acceptable=None):
 def get_current_branch(repo_path):
     '''Retrieve the active branch of the given repo.'''
     return _execute_git_command(repo_path, "git rev-parse --abbrev-ref HEAD").strip()
+
+def get_current_commit(repo_path):
+    '''Retrieve the active branch of the given repo.'''
+    return _execute_git_command(repo_path, "git rev-parse HEAD").strip()
 
 def apply_patch(repo_path, patch_path):
     '''Apply a patch to the given repo.'''
