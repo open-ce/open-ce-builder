@@ -310,6 +310,25 @@ For example,
     open-ce build feedstock --output_folder=/home/builder/condabuild
 ```
 
+The `open-ce build feedstock --debug` command can be used to debug a feedstock. what debug does is to create environments for you and provide you with a single command line that you can copy/paste to enter a debugging environment.When complete, conda debug prints something like this:
+
+```shell
+   ################################################################################
+   Build and/or host environments created for debugging.  To enter a debugging environment:
+
+   cd /Users/UserName/miniconda3/conda-bld/debug_1542385789430/work && source /Users/UserName/miniconda3/conda-bld/debug_1542385789430/work/build_env_setup.sh
+
+  ################################################################################
+```
+
+`Complications with multiple outputs:`
+Multiple outputs effectively give the recipe many build phases to consider.The ` --debug_output_id` argument is the mechanism to specify which of these should be used to create the debug envs and scripts.The --debug_output_id argument accepts an fnmatch pattern. You can match any part of the output filenames.
+For example, Opencv recipe has multiple outputs. If we wanted to debug the libopencv  output, we would specify it with a command like:
+
+```shell
+    open-ce build feedstock --debug  --output-id="libopencv*"
+```
+
 ## `open-ce build image` sub command
 
 This `open-ce build image` script is used to create a runtime container image with Open-CE

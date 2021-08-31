@@ -82,13 +82,13 @@ def validate_conda_build_args(recipe, expect_recipe=None, expect_config=None, ex
             assert term in variants
             assert variants.get(term) == value
 
-def validate_conda_debug_args(recipe,expect_activation_string, debug_output_id=None):
+def validate_conda_debug_args(recipe, expect_activation_string, debug_output_id=None):
 
     """
     Used to mock `conda_build.api.debug`
     Args:
         recipe: The placeholder argument for the conda_build.api.build 'recipe' arg.
-        debug_output_ids: A string that must occur in the 'recipe' arg.
+        debug_output_ids: A string that must occur in the expect_activation_string
     """
     # pylint: disable=W0613
     if debug_output_id:
