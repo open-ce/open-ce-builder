@@ -94,8 +94,16 @@ class BuildCommand():
         """
         Returns true if all of the output_files already exist.
         """
-        return all((os.path.exists(os.path.join(os.path.abspath(output_folder), package))
-                    for package in self.output_files))
+        #pylint: disable=import-outside-toplevel
+        from open_ce import conda_utils
+
+        # Only check the output folder if it already exists and is a conda channel.
+        channels = self.channels
+        if os.path.exists(os.path.join(output_folder, 'channeldata.json')):
+            channels = [os.path.abspath(output_folder)] + channels
+
+        return all(conda_utils.output_file_exists(package, channels)
+                    for package in self.output_files)
 
     def name(self):
         """
