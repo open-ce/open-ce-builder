@@ -43,9 +43,6 @@ def test_get_licenses(mocker, capfd):
     template_file = "tests/open-ce-licenses.template"
     opence._main(["get", get_licenses.COMMAND, "--conda_env_file", "tests/test-conda-env3.yaml", "--output_folder", output_folder, "--template_files", template_file])
 
-    captured = capfd.readouterr()
-    assert "Failed to connect to git.xiph.org port 443: No route to host" in captured.err
-
     output_file = os.path.join(output_folder, utils.DEFAULT_LICENSES_FILE)
     assert os.path.exists(output_file)
     with open(output_file) as file_stream:
