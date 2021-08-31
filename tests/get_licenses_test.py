@@ -32,7 +32,7 @@ import open_ce.get_licenses as get_licenses
 import open_ce.utils as utils
 from open_ce.errors import OpenCEError
 
-def test_get_licenses(mocker, capfd):
+def test_get_licenses(mocker):
     '''
     This is a complete test of `get_licenses`.
     '''
