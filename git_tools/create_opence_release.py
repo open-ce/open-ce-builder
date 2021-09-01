@@ -121,6 +121,8 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals
                                 pat=args.pat,
                                 skipped_repos=[args.primary_repo, ".github"] + inputs.parse_arg_list(args.skipped_repos))
 
+    repos.sort(key=lambda repo: repo["name"])
+
     tag_all_repos.clone_repos(repos=repos,
                               branch=None,
                               repo_dir=args.repo_dir,
