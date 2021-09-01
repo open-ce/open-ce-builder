@@ -29,6 +29,7 @@ import re
 import tempfile
 import git_utils
 import tag_all_repos
+from create_version_branch import _get_repo_version
 
 sys.path.append(os.path.join(pathlib.Path(__file__).parent.absolute(), '..'))
 from open_ce import inputs # pylint: disable=wrong-import-position
@@ -229,7 +230,7 @@ def _create_release_notes(repos, version, current_tag, previous_tag, repo_dir=".
     retval += "| Package          | Version |\n"
     retval += "| :--------------- | :-------- |\n"
     try:
-        retval += _get_package_versions()
+        retval += _get_package_versions(repos, repo_dir)
     except Exception as exc:# pylint: disable=broad-except
         print("Error trying to get package versions: ", exc)
     retval += "\n"
@@ -255,8 +256,13 @@ def _get_bug_fix_changes(repos, current_tag, previous_tag, repo_dir="./"):
             retval += "\n"
     return retval
 
-def _get_package_versions():
-    return ""
+def _get_package_versions(repos, repo_dir="./"):
+    retval = ""
+    for repo in repos:
+        repo_path = os.path.abspath(os.path.join(repo_dir, repo["name"]))
+        version = _get_repo_version(repo_path)
+        retval += "| {} | {} |\n".format(repo["name"], version)
+    return retval
 
 if __name__ == '__main__':
     _main()
