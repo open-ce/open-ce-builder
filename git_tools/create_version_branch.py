@@ -79,7 +79,7 @@ def _get_repo_version(repo_path, variants, variant_config_files=None):
                     package_version = meta.meta['package']['version']
                     if package_version and package_version != "None":
                         os.chdir(saved_working_directory)
-                        return package_version
+                        return package_version, meta.meta['package']['name']
 
     os.chdir(saved_working_directory)
     raise Exception("Error: Unable to determine current version of the feedstock")

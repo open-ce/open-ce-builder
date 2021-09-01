@@ -265,8 +265,8 @@ def _get_package_versions(repos, repo_dir, variants, config_file):
     for repo in repos:
         repo_path = os.path.abspath(os.path.join(repo_dir, repo["name"]))
         print("--->Getting version info for {}".format(repo))
-        version = _get_repo_version(repo_path, variants, config_file)
-        retval += "| {} | {} |\n".format(repo["name"], version)
+        version, name = _get_repo_version(repo_path, variants, config_file)
+        retval += "| {} | {} |\n".format(name, version)
     return retval
 
 if __name__ == '__main__':
