@@ -15,7 +15,7 @@
 # *****************************************************************
 
 channels:
-    - https://anaconda.org/anaconda 
+    - defaults
 packages:
     - feedstock : package11
       git_tag : package11-bug-fix

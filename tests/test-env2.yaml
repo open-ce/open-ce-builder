@@ -17,7 +17,7 @@
 imported_envs:
     - test-env1.yaml
 channels:
-    - https://anaconda.org/anaconda 
+    - defaults
 packages:
     - feedstock : package21 #[python == '2.1' or cudatoolkit=='9.2']
     - feedstock : package22
