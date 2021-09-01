@@ -220,7 +220,7 @@ def _get_all_feedstocks(env_files, github_org, skipped_repos, pat=None):
 
     return org_repos
 
-def _create_release_notes(repos, version, current_tag, previous_tag, variants, config_file, repo_dir="./"): # pylint: too-many-arguments
+def _create_release_notes(repos, version, current_tag, previous_tag, variants, config_file, repo_dir="./"): # pylint: disable=too-many-arguments
     retval = "# Open-CE Version {}\n".format(version)
     retval += "\n"
     retval += "Release Description\n"
@@ -263,7 +263,7 @@ def _get_bug_fix_changes(repos, current_tag, previous_tag, repo_dir="./"):
         if changes:
             retval += "### Changes For {}\n".format(repo["name"])
             retval += "\n"
-            retval +=  git_utils.get_commits(repo_path, previous_tag, current_tag, format="* %s")
+            retval +=  changes
             retval += "\n"
             retval += "\n"
     return retval
