@@ -37,10 +37,11 @@ sys.path.append(os.path.join(pathlib.Path(__file__).parent.absolute(), '..'))
 from open_ce import inputs
 from open_ce import conda_utils
 from open_ce import build_feedstock
+from open_ce import utils
 
 def _make_parser():
     ''' Parser input arguments '''
-    parser = inputs.make_parser([git_utils.Argument.REPO_DIR, inputs.Argument.CONDA_BUILD_CONFIG],
+    parser = inputs.make_parser([git_utils.Argument.REPO_DIR, inputs.Argument.CONDA_BUILD_CONFIG] + inputs.VARIANT_ARGS,
                                     description = 'Create a version branch for a feedstock.')
 
     parser.add_argument(
@@ -63,22 +64,22 @@ def _make_parser():
 
     return parser
 
-def _get_repo_version(repo_path, variant_config_files=None):
+def _get_repo_version(repo_path, variants, variant_config_files=None):
     '''
     Get the version of the first package that appears in the recipes list for the feedstock.
     '''
     saved_working_directory = os.getcwd()
     os.chdir(os.path.abspath(repo_path))
+    for variant in variants:
+        build_config_data, _ = build_feedstock.load_package_config(variants=variant, permit_undefined_jinja=True)
 
-    build_config_data, _ = build_feedstock.load_package_config(permit_undefined_jinja=True)
-
-    for recipe in build_config_data["recipes"]:
-        rendered_recipe = conda_utils.render_yaml(recipe["path"], variant_config_files=variant_config_files, permit_undefined_jinja=True)
-        for meta, _, _ in rendered_recipe:
-            package_version = meta.meta['package']['version']
-            if package_version and package_version != "None":
-                os.chdir(saved_working_directory)
-                return package_version
+        for recipe in build_config_data["recipes"]:
+            rendered_recipe = conda_utils.render_yaml(recipe["path"], variants=variant, variant_config_files=variant_config_files, permit_undefined_jinja=True)
+            for meta, _, _ in rendered_recipe:
+                package_version = meta.meta['package']['version']
+                if package_version and package_version != "None":
+                    os.chdir(saved_working_directory)
+                    return package_version
 
     os.chdir(saved_working_directory)
     raise Exception("Error: Unable to determine current version of the feedstock")
@@ -91,6 +92,9 @@ def _get_repo_name(repo_url):
 def _create_version_branch(arg_strings=None):# pylint: disable=too-many-branches
     parser = _make_parser()
     args = parser.parse_args(arg_strings)
+
+    variants = utils.make_variants(args.python_versions, args.build_types,
+                                   args.mpi_types, args.cuda_versions)
 
     if args.repository:
         repo_name = _get_repo_name(args.repository)
@@ -113,10 +117,10 @@ def _create_version_branch(arg_strings=None):# pylint: disable=too-many-branches
         config_file = args.conda_build_configs
     try:
         git_utils.checkout(repo_path, "HEAD~")
-        previous_version = _get_repo_version(repo_path, config_file)
+        previous_version = _get_repo_version(repo_path, variants, config_file)
 
         git_utils.checkout(repo_path, current_commit)
-        current_version = _get_repo_version(repo_path, config_file)
+        current_version = _get_repo_version(repo_path, variants, config_file)
 
         if args.branch_if_changed and current_version == previous_version:
             print("The version has not changed, no branch created.")

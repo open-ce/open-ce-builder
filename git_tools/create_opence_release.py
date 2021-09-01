@@ -116,7 +116,7 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals
     repos = _get_all_feedstocks(env_files=env_file_contents,
                                 github_org=args.github_org,
                                 pat=args.pat,
-                                skipped_repos=[args.primary_repo, ".github", "nccl-feedstock"] + inputs.parse_arg_list(args.skipped_repos))
+                                skipped_repos=[args.primary_repo, ".github"] + inputs.parse_arg_list(args.skipped_repos))
 
     tag_all_repos.clone_repos(repos=repos,
                               branch=None,
@@ -135,7 +135,7 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals
         print("--->Skipping pushing feedstocks for dry run.")
 
     print("--->Generating Release Notes.")
-    release_notes = _create_release_notes(repos, version, current_tag, previous_tag, repo_dir=args.repo_dir,)
+    release_notes = _create_release_notes(repos, version, current_tag, previous_tag, variants, repo_dir=args.repo_dir,)
     print(release_notes)
 
     if args.not_dry_run:
@@ -208,7 +208,7 @@ def _get_all_feedstocks(env_files, github_org, skipped_repos, pat=None):
 
     return org_repos
 
-def _create_release_notes(repos, version, current_tag, previous_tag, repo_dir="./"):
+def _create_release_notes(repos, version, current_tag, previous_tag, variants, repo_dir="./"):
     retval = "# Open-CE Version {}\n".format(version)
     retval += "\n"
     retval += "Release Description\n"
@@ -230,7 +230,7 @@ def _create_release_notes(repos, version, current_tag, previous_tag, repo_dir=".
     retval += "| Package          | Version |\n"
     retval += "| :--------------- | :-------- |\n"
     #try:
-    retval += _get_package_versions(repos, repo_dir)
+    retval += _get_package_versions(repos, repo_dir, variants)
     #except Exception as exc:# pylint: disable=broad-except
     #    print("Error trying to get package versions: ", exc)
     retval += "\n"
@@ -256,12 +256,12 @@ def _get_bug_fix_changes(repos, current_tag, previous_tag, repo_dir="./"):
             retval += "\n"
     return retval
 
-def _get_package_versions(repos, repo_dir="./"):
+def _get_package_versions(repos, repo_dir, variants):
     retval = ""
     for repo in repos:
         repo_path = os.path.abspath(os.path.join(repo_dir, repo["name"]))
         print("--->Getting version info for {}".format(repo))
-        version = _get_repo_version(repo_path)
+        version = _get_repo_version(repo_path, variants)
         retval += "| {} | {} |\n".format(repo["name"], version)
     return retval
 
