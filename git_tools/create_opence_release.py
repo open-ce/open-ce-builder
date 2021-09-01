@@ -214,6 +214,7 @@ def _create_release_notes(repos, version, current_tag, previous_tag, repo_dir=".
     retval += "\n"
     if previous_tag:
         retval += "## Bug Fix Changes\n"
+        retval += "\n"
         try:
             retval += _get_bug_fix_changes(repos, current_tag, previous_tag, repo_dir)
         except Exception as exc:# pylint: disable=broad-except
@@ -247,9 +248,10 @@ def _get_bug_fix_changes(repos, current_tag, previous_tag, repo_dir="./"):
         print("--->Retrieving bug_fix_changes for {}".format(repo))
         changes = git_utils.get_commits(repo_path, previous_tag, current_tag, format="* %s")
         if changes:
-            retval += "### Changes For {}\n".format(repo)
+            retval += "### Changes For {}\n".format(repo["name"])
             retval += "\n"
             retval +=  git_utils.get_commits(repo_path, previous_tag, current_tag, format="* %s")
+            retval += "\n"
             retval += "\n"
     return retval
 
