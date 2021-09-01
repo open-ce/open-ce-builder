@@ -72,14 +72,14 @@ def _get_repo_version(repo_path, variants, variant_config_files=None):
     os.chdir(os.path.abspath(repo_path))
     for variant in variants:
         build_config_data, _ = build_feedstock.load_package_config(variants=variant, permit_undefined_jinja=True)
-
-        for recipe in build_config_data["recipes"]:
-            rendered_recipe = conda_utils.render_yaml(recipe["path"], variants=variant, variant_config_files=variant_config_files, permit_undefined_jinja=True)
-            for meta, _, _ in rendered_recipe:
-                package_version = meta.meta['package']['version']
-                if package_version and package_version != "None":
-                    os.chdir(saved_working_directory)
-                    return package_version
+        if build_config_data["recipes"]:
+            for recipe in build_config_data["recipes"]:
+                rendered_recipe = conda_utils.render_yaml(recipe["path"], variants=variant, variant_config_files=variant_config_files, permit_undefined_jinja=True)
+                for meta, _, _ in rendered_recipe:
+                    package_version = meta.meta['package']['version']
+                    if package_version and package_version != "None":
+                        os.chdir(saved_working_directory)
+                        return package_version
 
     os.chdir(saved_working_directory)
     raise Exception("Error: Unable to determine current version of the feedstock")
