@@ -229,10 +229,11 @@ def _create_release_notes(repos, version, current_tag, previous_tag, variants, r
     retval += "\n"
     retval += "| Package          | Version |\n"
     retval += "| :--------------- | :-------- |\n"
-    #try:
-    retval += _get_package_versions(repos, repo_dir, variants)
-    #except Exception as exc:# pylint: disable=broad-except
-    #    print("Error trying to get package versions: ", exc)
+    try:
+        retval += _get_package_versions(repos, repo_dir, variants)
+    except Exception as exc:# pylint: disable=broad-except
+        print("Error trying to get package versions: ", exc)
+        raise exc
     retval += "\n"
     retval += "This release of Open-CE supports NVIDIA's CUDA version 10.2 and 11.2 as well as Python 3.7, 3.8 and 3.9.\n"
     retval += "\n"
