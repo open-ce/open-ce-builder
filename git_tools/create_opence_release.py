@@ -133,13 +133,16 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals
     else:
         print("--->Skipping pushing feedstocks for dry run.")
 
+    print("--->Generating Release Notes.")
+    release_notes = _create_release_notes(repos, version, current_tag, previous_tag, repo_dir=args.repo_dir,)
+    print(release_notes)
+
     if args.not_dry_run:
-        print("--->Generating Release Notes.")
-        release_notes = _create_release_notes(env_file_contents, version, current_tag, previous_tag)
         print("--->Creating Draft Release.")
         git_utils.create_release(args.github_org,
                                  args.primary_repo,
-                                 args.pat, current_tag,
+                                 args.pat,
+                                 current_tag,
                                  release_name,
                                  release_notes,
                                  True)
@@ -204,7 +207,7 @@ def _get_all_feedstocks(env_files, github_org, skipped_repos, pat=None):
 
     return org_repos
 
-def _create_release_notes(env_files, version, current_tag, previous_tag):
+def _create_release_notes(repos, version, current_tag, previous_tag, repo_dir="./"):
     retval = "# Open-CE Version {}\n".format(version)
     retval += "\n"
     retval += "Release Description\n"
@@ -212,7 +215,7 @@ def _create_release_notes(env_files, version, current_tag, previous_tag):
     if previous_tag:
         retval += "## Bug Fix Changes\n"
         try:
-            retval += _get_bug_fix_changes()
+            retval += _get_bug_fix_changes(repos, current_tag, previous_tag, repo_dir)
         except Exception as exc:# pylint: disable=broad-except
             print("Error trying to find bug fix changes: ", exc)
         retval += "\n"
@@ -237,8 +240,18 @@ def _create_release_notes(env_files, version, current_tag, previous_tag):
     retval += "(https://github.com/open-ce/open-ce/blob/{}/README.md)\n".format(current_tag)
     return retval
 
-def _get_bug_fix_changes():
-    return ""
+def _get_bug_fix_changes(repos, current_tag, previous_tag, repo_dir="./"):
+    retval = ""
+    for repo in repos:
+        repo_path = os.path.abspath(os.path.join(repo_dir, repo["name"]))
+        print("--->Retrieving bug_fix_changes for {}".format(repo))
+        changes = git_utils.get_commits(repo_path, previous_tag, current_tag, format="* %s")
+        if changes:
+            retval += "### Changes For {}\n".format(repo)
+            retval += "\n"
+            retval +=  git_utils.get_commits(repo_path, previous_tag, current_tag, format="* %s")
+            retval += "\n"
+    return retval
 
 def _get_package_versions():
     return ""

@@ -245,6 +245,13 @@ def apply_patch(repo_path, patch_path):
     '''Apply a patch to the given repo.'''
     _execute_git_command(repo_path, "cat \"{}\" | git am -3 -k".format(patch_path))
 
+def get_commits(repo_path, previous_tag, current_tag="HEAD", format=None):
+    '''Get a list of commits between made between 2 tags.'''
+    format_option = ""
+    if format:
+        format_option = "--pretty=format:'{}'".format(format)
+    return _execute_git_command(repo_path, "git log {} {}..{}".format(format_option, previous_tag, current_tag))
+
 def fill_in_params(filename, params=None, **kwargs):
     '''
     Replace occurrences of `${key}` with `val`.
