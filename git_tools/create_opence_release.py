@@ -41,7 +41,7 @@ def _make_parser():
     ''' Parser input arguments '''
     parser = inputs.make_parser([git_utils.Argument.PUBLIC_ACCESS_TOKEN, git_utils.Argument.REPO_DIR,
                                     git_utils.Argument.BRANCH, git_utils.Argument.SKIPPED_REPOS,
-                                    git_utils.Argument.NOT_DRY_RUN] + inputs.VARIANT_ARGS,
+                                    git_utils.Argument.NOT_DRY_RUN, inputs.Argument.CONDA_BUILD_CONFIG] + inputs.VARIANT_ARGS,
                                     description = 'A script that can be used to cut an open-ce release.')
 
     parser.add_argument(
@@ -70,6 +70,9 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals
 
     variants = utils.make_variants(args.python_versions, args.build_types,
                                    args.mpi_types, args.cuda_versions)
+    config_file = None
+    if args.conda_build_configs:
+        config_file = args.conda_build_configs
 
     primary_repo_path = "./"
 
@@ -135,7 +138,7 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals
         print("--->Skipping pushing feedstocks for dry run.")
 
     print("--->Generating Release Notes.")
-    release_notes = _create_release_notes(repos, version, current_tag, previous_tag, variants, repo_dir=args.repo_dir,)
+    release_notes = _create_release_notes(repos, version, current_tag, previous_tag, variants, config_file, repo_dir=args.repo_dir,)
     print(release_notes)
 
     if args.not_dry_run:
@@ -208,7 +211,7 @@ def _get_all_feedstocks(env_files, github_org, skipped_repos, pat=None):
 
     return org_repos
 
-def _create_release_notes(repos, version, current_tag, previous_tag, variants, repo_dir="./"):
+def _create_release_notes(repos, version, current_tag, previous_tag, variants, config_file, repo_dir="./"):
     retval = "# Open-CE Version {}\n".format(version)
     retval += "\n"
     retval += "Release Description\n"
@@ -230,7 +233,7 @@ def _create_release_notes(repos, version, current_tag, previous_tag, variants, r
     retval += "| Package          | Version |\n"
     retval += "| :--------------- | :-------- |\n"
     try:
-        retval += _get_package_versions(repos, repo_dir, variants)
+        retval += _get_package_versions(repos, repo_dir, variants, config_file)
     except Exception as exc:# pylint: disable=broad-except
         print("Error trying to get package versions: ", exc)
         raise exc
@@ -257,12 +260,12 @@ def _get_bug_fix_changes(repos, current_tag, previous_tag, repo_dir="./"):
             retval += "\n"
     return retval
 
-def _get_package_versions(repos, repo_dir, variants):
+def _get_package_versions(repos, repo_dir, variants, config_file):
     retval = ""
     for repo in repos:
         repo_path = os.path.abspath(os.path.join(repo_dir, repo["name"]))
         print("--->Getting version info for {}".format(repo))
-        version = _get_repo_version(repo_path, variants)
+        version = _get_repo_version(repo_path, variants, config_file)
         retval += "| {} | {} |\n".format(repo["name"], version)
     return retval
 
