@@ -74,7 +74,10 @@ def _get_repo_version(repo_path, variants, variant_config_files=None):
         build_config_data, _ = build_feedstock.load_package_config(variants=variant, permit_undefined_jinja=True)
         if build_config_data["recipes"]:
             for recipe in build_config_data["recipes"]:
-                rendered_recipe = conda_utils.render_yaml(recipe["path"], variants=variant, variant_config_files=variant_config_files, permit_undefined_jinja=True)
+                rendered_recipe = conda_utils.render_yaml(recipe["path"],
+                                                          variants=variant,
+                                                          variant_config_files=variant_config_files,
+                                                          permit_undefined_jinja=True)
                 for meta, _, _ in rendered_recipe:
                     package_version = meta.meta['package']['version']
                     if package_version and package_version != "None":

@@ -41,7 +41,8 @@ def _make_parser():
     ''' Parser input arguments '''
     parser = inputs.make_parser([git_utils.Argument.PUBLIC_ACCESS_TOKEN, git_utils.Argument.REPO_DIR,
                                     git_utils.Argument.BRANCH, git_utils.Argument.SKIPPED_REPOS,
-                                    git_utils.Argument.NOT_DRY_RUN, inputs.Argument.CONDA_BUILD_CONFIG] + inputs.VARIANT_ARGS,
+                                    git_utils.Argument.NOT_DRY_RUN, inputs.Argument.CONDA_BUILD_CONFIG] +
+                                    inputs.VARIANT_ARGS,
                                     description = 'A script that can be used to cut an open-ce release.')
 
     parser.add_argument(
@@ -64,7 +65,7 @@ def _make_parser():
 
     return parser
 
-def _main(arg_strings=None): # pylint: disable=too-many-locals
+def _main(arg_strings=None): # pylint: disable=too-many-locals, too-many-statements
     parser = _make_parser()
     args = parser.parse_args(arg_strings)
 
@@ -140,7 +141,13 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals
         print("--->Skipping pushing feedstocks for dry run.")
 
     print("--->Generating Release Notes.")
-    release_notes = _create_release_notes(repos, version, current_tag, previous_tag, variants, config_file, repo_dir=args.repo_dir,)
+    release_notes = _create_release_notes(repos,
+                                          version,
+                                          current_tag,
+                                          previous_tag,
+                                          variants,
+                                          config_file,
+                                          repo_dir=args.repo_dir,)
     print(release_notes)
 
     if args.not_dry_run:
@@ -213,7 +220,7 @@ def _get_all_feedstocks(env_files, github_org, skipped_repos, pat=None):
 
     return org_repos
 
-def _create_release_notes(repos, version, current_tag, previous_tag, variants, config_file, repo_dir="./"):
+def _create_release_notes(repos, version, current_tag, previous_tag, variants, config_file, repo_dir="./"): # pylint: too-many-arguments
     retval = "# Open-CE Version {}\n".format(version)
     retval += "\n"
     retval += "Release Description\n"
@@ -252,7 +259,7 @@ def _get_bug_fix_changes(repos, current_tag, previous_tag, repo_dir="./"):
     for repo in repos:
         repo_path = os.path.abspath(os.path.join(repo_dir, repo["name"]))
         print("--->Retrieving bug_fix_changes for {}".format(repo))
-        changes = git_utils.get_commits(repo_path, previous_tag, current_tag, format="* %s")
+        changes = git_utils.get_commits(repo_path, previous_tag, current_tag, commit_format="* %s")
         if changes:
             retval += "### Changes For {}\n".format(repo["name"])
             retval += "\n"
