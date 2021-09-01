@@ -116,7 +116,7 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals
     repos = _get_all_feedstocks(env_files=env_file_contents,
                                 github_org=args.github_org,
                                 pat=args.pat,
-                                skipped_repos=[args.primary_repo, ".github"] + inputs.parse_arg_list(args.skipped_repos))
+                                skipped_repos=[args.primary_repo, ".github", "nccl-feedstock"] + inputs.parse_arg_list(args.skipped_repos))
 
     tag_all_repos.clone_repos(repos=repos,
                               branch=None,
