@@ -72,7 +72,7 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals
                                    args.mpi_types, args.cuda_versions)
     config_file = None
     if args.conda_build_configs:
-        config_file = args.conda_build_configs
+        config_file = os.path.abspath(args.conda_build_configs)
 
     primary_repo_path = "./"
 
