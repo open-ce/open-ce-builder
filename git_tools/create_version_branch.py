@@ -70,7 +70,7 @@ def _get_repo_version(repo_path, variant_config_files=None):
     saved_working_directory = os.getcwd()
     os.chdir(os.path.abspath(repo_path))
 
-    build_config_data, _ = build_feedstock.load_package_config()
+    build_config_data, _ = build_feedstock.load_package_config(permit_undefined_jinja=True)
 
     for recipe in build_config_data["recipes"]:
         rendered_recipe = conda_utils.render_yaml(recipe["path"], variant_config_files=variant_config_files, permit_undefined_jinja=True)
