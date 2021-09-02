@@ -87,8 +87,8 @@ def validate_conda_debug_args(recipe, expect_activation_string, debug_output_id=
     """
     Used to mock `conda_build.api.debug`
     Args:
-        recipe: The placeholder argument for the conda_build.api.build 'recipe' arg.
-        debug_output_ids: A string that must occur in the expect_activation_string
+        recipe: The placeholder argument for the conda_build.api.debug 'recipe' arg.
+        debug_output_id: Output ID for which conda debug is invoked in case of multiple output recipe.
     """
     # pylint: disable=W0613
     if debug_output_id:

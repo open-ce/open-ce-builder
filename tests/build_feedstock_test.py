@@ -266,7 +266,7 @@ def test_build_feedstock_conda_pkg_format(mocker):
 
 def test_build_feedstock_default_debug(mocker):
     '''
-    Tests that the default arguments for 'build_feedstock' generate the correct 'conda_build.api.debug' input args.
+    Tests the default arguments for 'build_feedstock' with "--debug" option.
     '''
     mocker.patch(
           'os.getcwd',
@@ -283,12 +283,12 @@ def test_build_feedstock_default_debug(mocker):
    '''
 
     mocker.patch('conda_build.api.debug',
-                 side_effect=(lambda x,**kwargs:helpers.validate_conda_debug_args(x,expect_activation_string=activation_str)))
-    opence._main(["build", build_feedstock.COMMAND,"--debug"])
+                 side_effect=(lambda x, **kwargs:helpers.validate_conda_debug_args(x, expect_activation_string=activation_str)))
+    opence._main(["build", build_feedstock.COMMAND, "--debug"])
 
 def test_build_feedstock_default_debug_output_id(mocker):
     '''
-    Tests that the default arguments for 'build_feedstock' generate the correct 'conda_build.api.debug --debug output id' input args.
+    Tests 'build_feedstock' debug option with --debug_output_id' input args.
     '''
     output_id_var="output_1"
     mocker.patch('os.path.exists',return_value=True)
@@ -303,5 +303,5 @@ def test_build_feedstock_default_debug_output_id(mocker):
       ################################################################################
     '''.format(output_id_var)
     mocker.patch('conda_build.api.debug',
-                 side_effect=(lambda x,**kwargs: helpers.validate_conda_debug_args(x,debug_output_id=output_id_var, expect_activation_string=activation_str)))
-    opence._main(["build", build_feedstock.COMMAND, "--debug", "--debug_output_id", "output_1"])
+                 side_effect=(lambda x, **kwargs: helpers.validate_conda_debug_args(x, debug_output_id=output_id_var, expect_activation_string=activation_str)))
+    opence._main(["build", build_feedstock.COMMAND, "--debug", "--debug_output_id", output_id_var])

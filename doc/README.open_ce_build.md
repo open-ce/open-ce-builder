@@ -295,10 +295,12 @@ optional arguments:
   --conda_pkg_format CONDA_PKG_FORMAT
                         Conda package format to be used, such as "tarball" or
                         "conda". (default: tarball)
-  --debug DEBUG        
-                        Setup debug environment using `conda debug`
+  --debug               Creates debug environment and provides a single command line that
+                        one can copy/paste to enter that environment. (default: False)
   --debug_output_id DEBUG_OUTPUT_ID
-                       If running debug, specify the output to setup.
+                        Output ID in case of multiple output recipe, for which debug
+                        envs and scripts should be created. (default: None)
+
 ==============================================================================
 ```
 
@@ -310,7 +312,7 @@ For example,
     open-ce build feedstock --output_folder=/home/builder/condabuild
 ```
 
-The `open-ce build feedstock --debug` command can be used to debug a feedstock. what debug does is to create environments for you and provide you with a single command line that you can copy/paste to enter a debugging environment.When complete, conda debug prints something like this:
+The `open-ce build feedstock --debug` command is used to debug a feedstock. This option when used, will create debug environment and provide a single command line that one can copy/paste to enter into that environment for further debugging. The output of `open-ce build feedstock --debug` looks like this:
 
 ```shell
    ################################################################################
@@ -322,11 +324,11 @@ The `open-ce build feedstock --debug` command can be used to debug a feedstock. 
 ```
 
 ###  Complications with multiple outputs:
-Multiple outputs effectively give the recipe many build phases to consider. The ` --debug_output_id` argument is the mechanism to specify which of these should be used to create the debug envs and scripts.The --debug_output_id argument accepts an fnmatch pattern. You can match any part of the output filenames.
-For example, Opencv recipe has multiple outputs. If we wanted to debug the libopencv  output, we would specify it with a command like:
+Multiple outputs effectively give the recipe many build phases to consider. The ` --debug_output_id` argument is the mechanism to specify which of these should be used to create the debug envs and scripts. The --debug_output_id argument accepts an fnmatch pattern. One can match any part of the output filenames.
+For example, `opencv` recipe has multiple outputs. If we want to debug just `libopencv` output, we would specify it as `--debug_output_id`:
 
 ```shell
-    open-ce build feedstock --debug  --output-id="libopencv*"
+    open-ce build feedstock --debug  --debug_output_id="libopencv*"
 ```
 
 ## `open-ce build image` sub command

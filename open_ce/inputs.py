@@ -129,8 +129,8 @@ https://github.com/open-ce/open-ce/blob/main/doc/README.yaml.md"""))
     DEBUG = (lambda parser: parser.add_argument(
                                         '--debug',
                                         action='store_true',
-                                        help="create environments for you and provide you with a single command line that"
-                                              "you can copy/paste to enter a debugging environment."))
+                                        help="Creates debug environment and provides a single command line that "
+                                             "one can copy/paste to enter that environment."))
 
     SKIP_BUILD_PACKAGES = (lambda parser: parser.add_argument(
                                         '--skip_build_packages',
@@ -221,7 +221,8 @@ path of \"recipe\"."""))
                                         '--debug_output_id',
                                          type=str,
                                          default=None,
-                                         help="Output ID in case of multiple output recipe"))
+                                         help="Output ID in case of multiple output recipe, "
+                                              "for which debug envs and scripts should be created."))
 
     TEST_LABELS = (lambda parser: parser.add_argument(
                                         '--test_labels',
