@@ -321,8 +321,8 @@ The `open-ce build feedstock --debug` command can be used to debug a feedstock. 
   ################################################################################
 ```
 
-`Complications with multiple outputs:`
-Multiple outputs effectively give the recipe many build phases to consider.The ` --debug_output_id` argument is the mechanism to specify which of these should be used to create the debug envs and scripts.The --debug_output_id argument accepts an fnmatch pattern. You can match any part of the output filenames.
+###Complications with multiple outputs:
+Multiple outputs effectively give the recipe many build phases to consider. The ` --debug_output_id` argument is the mechanism to specify which of these should be used to create the debug envs and scripts.The --debug_output_id argument accepts an fnmatch pattern. You can match any part of the output filenames.
 For example, Opencv recipe has multiple outputs. If we wanted to debug the libopencv  output, we would specify it with a command like:
 
 ```shell
