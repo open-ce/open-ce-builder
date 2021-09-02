@@ -37,6 +37,7 @@ import conda_build.metadata
 import conda.cli.python_api
 from conda.models.match_spec import MatchSpec
 from conda.models.version import VersionOrder
+from conda.api import SubdirData
 # pylint: enable=wrong-import-position,wrong-import-order
 
 def render_yaml(path, variants=None, variant_config_files=None, schema=None, permit_undefined_jinja=False):
@@ -163,3 +164,11 @@ def output_file_to_string(output_file):
     '''
     match_spec = MatchSpec.from_dist_str(os.path.basename(output_file))
     return "{} {} {}".format(match_spec.get("name", ""), match_spec.get("version", ""), match_spec.get("build", "")).strip()
+
+def output_file_exists(output_file, channels):
+    '''
+    Returns whether a given package name exists within a list of conda channels.
+    '''
+    match_spec = MatchSpec.from_dist_str(os.path.basename(output_file))
+    subdir = os.path.dirname(output_file)
+    return bool(SubdirData.query_all(match_spec, channels=channels, subdirs=[subdir]))

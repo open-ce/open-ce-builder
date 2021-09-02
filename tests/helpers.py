@@ -152,4 +152,4 @@ def mock_renderer(path, package_deps):
     return make_render_result(package, package_deps[package])
 
 def mock_get_output_file_paths(meta):
-    return [meta.meta['package']['name'] + "-" + meta.meta['package']['version'] + "-" + meta.meta['build']['string'] + ".tar.bz2"]
+    return ["noarch/" + meta.meta['package']['name'] + "-" + meta.meta['package']['version'] + "-" + meta.meta['build']['string'] + ".tar.bz2"]
