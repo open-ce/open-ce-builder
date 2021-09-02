@@ -315,16 +315,17 @@ For example,
 The `open-ce build feedstock --debug` command is used to debug a feedstock. This option when used, will create debug environment and provide a single command line that one can copy/paste to enter into that environment for further debugging. The output of `open-ce build feedstock --debug` looks like this:
 
 ```shell
-   ################################################################################
-   Build and/or host environments created for debugging.  To enter a debugging environment:
+    ################################################################################
+    Build and/or host environments created for debugging.  To enter a debugging environment:
 
-   cd /Users/UserName/miniconda3/conda-bld/debug_1542385789430/work && source /Users/UserName/miniconda3/conda-bld/debug_1542385789430/work/build_env_setup.sh
+    cd /Users/UserName/miniconda3/conda-bld/debug_1542385789430/work && source /Users/UserName/miniconda3/conda-bld/debug_1542385789430/work/build_env_setup.sh
 
-  ################################################################################
+    ################################################################################
 ```
+This option is same as that of `conda debug` command. For further details, refer [Anaconda's doc](https://docs.conda.io/projects/conda-build/en/latest/user-guide/recipes/debugging.html)
 
 ###  Complications with multiple outputs:
-Multiple outputs effectively give the recipe many build phases to consider. The ` --debug_output_id` argument is the mechanism to specify which of these should be used to create the debug envs and scripts. The --debug_output_id argument accepts an fnmatch pattern. One can match any part of the output filenames.
+Multiple outputs effectively give the recipe many build phases to consider. The `--debug_output_id` argument is the mechanism to specify which of these should be used to create the debug envs and scripts. The `--debug_output_id` argument accepts an fnmatch pattern. One can match any part of the output filenames.
 For example, `opencv` recipe has multiple outputs. If we want to debug just `libopencv` output, we would specify it as `--debug_output_id`:
 
 ```shell
