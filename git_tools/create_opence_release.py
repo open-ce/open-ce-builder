@@ -229,6 +229,7 @@ def _create_release_notes(repos, version, current_tag, previous_tag, variants, c
         retval += "## Bug Fix Changes\n"
         retval += "\n"
         try:
+            retval += _get_bug_fix_changes({"name": "open-ce"}, current_tag, previous_tag, "../")
             retval += _get_bug_fix_changes(repos, current_tag, previous_tag, repo_dir)
         except Exception as exc:# pylint: disable=broad-except
             print("Error trying to find bug fix changes: ", exc)
