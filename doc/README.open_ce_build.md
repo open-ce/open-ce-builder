@@ -332,6 +332,10 @@ For example, `opencv` recipe has multiple outputs. If we want to debug just `lib
     open-ce build feedstock --debug  --debug_output_id="libopencv*"
 ```
 
+###  Complications with feedstocks that have multiple recipes:
+Some feedstock repositories in the Open-CE project have more than one recipe included, often containing meta-packages or variant controls as defined in the `config/build-config.yaml` file. When using the `--debug` option on a feedstock with multiple recipes, a debug environment will be created for each included recipe. 
+One further complication occurs when a feedstock includes multiple recipes, and one of them contains multiple outputs. In this case, since the `--debug_output_id` option is required and it would subsequently be passed to each included recipe in the feedstock, it's best to edit the `config/build-config.yaml` file to only include the recipe desired to debug.
+
 ## `open-ce build image` sub command
 
 This `open-ce build image` script is used to create a runtime container image with Open-CE
