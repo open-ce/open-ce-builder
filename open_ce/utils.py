@@ -308,7 +308,7 @@ def get_branch_of_tag(git_tag):
 
     # Clean branches and sort so that highest release version number is last
     possible_branches = [possible_branch.replace('*','').strip() for possible_branch in possible_branches]
-    possible_branches = list(filter(lambda x: x == "remotes/origin/main" or
+    possible_branches = list(filter(lambda x: x == "remotes/origin/main" or x == "remotes/origin/master" or
                                x.startswith("remotes/origin/r"), sorted(possible_branches)))
 
     return possible_branches[-1]
