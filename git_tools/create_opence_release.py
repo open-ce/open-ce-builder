@@ -98,7 +98,7 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals, too-many-stateme
             raise Exception(message)
 
     if not git_utils.branch_exists(primary_repo_path, branch_name):
-        print("--->Creating {} branch in {}".format(current_tag, args.primary_repo))
+        print("--->Creating {} branch in {}".format(branch_name, args.primary_repo))
         git_utils.create_branch(primary_repo_path, branch_name)
     else:
         print("--->Branch {} already exists in {}. Not creating it.".format(current_tag, args.primary_repo))
