@@ -32,7 +32,7 @@ import open_ce.get_licenses as get_licenses
 import open_ce.utils as utils
 from open_ce.errors import OpenCEError
 
-def test_get_licenses(mocker, capfd):
+def test_get_licenses(mocker):
     '''
     This is a complete test of `get_licenses`.
     '''
@@ -42,9 +42,6 @@ def test_get_licenses(mocker, capfd):
     output_folder = "get_licenses_output"
     template_file = "tests/open-ce-licenses.template"
     opence._main(["get", get_licenses.COMMAND, "--conda_env_file", "tests/test-conda-env3.yaml", "--output_folder", output_folder, "--template_files", template_file])
-
-    captured = capfd.readouterr()
-    assert "Unable to download source for 'icu-58.2" in captured.err
 
     output_file = os.path.join(output_folder, utils.DEFAULT_LICENSES_FILE)
     assert os.path.exists(output_file)

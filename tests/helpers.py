@@ -82,6 +82,18 @@ def validate_conda_build_args(recipe, expect_recipe=None, expect_config=None, ex
             assert term in variants
             assert variants.get(term) == value
 
+def validate_conda_debug_args(recipe, expect_activation_string, debug_output_id=None):
+
+    """
+    Used to mock `conda_build.api.debug`
+    Args:
+        recipe: The placeholder argument for the conda_build.api.debug 'recipe' arg.
+        debug_output_id: Output ID for which conda debug is invoked in case of multiple output recipe.
+    """
+    # pylint: disable=W0613
+    if debug_output_id:
+        assert debug_output_id in expect_activation_string
+
 class DirTracker(object):
     def __init__(self, starting_dir=os.getcwd()):
         self.current_dir = starting_dir
@@ -140,4 +152,4 @@ def mock_renderer(path, package_deps):
     return make_render_result(package, package_deps[package])
 
 def mock_get_output_file_paths(meta):
-    return [meta.meta['package']['name'] + "-" + meta.meta['package']['version'] + "-" + meta.meta['build']['string'] + ".tar.bz2"]
+    return ["noarch/" + meta.meta['package']['name'] + "-" + meta.meta['package']['version'] + "-" + meta.meta['build']['string'] + ".tar.bz2"]

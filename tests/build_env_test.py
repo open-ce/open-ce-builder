@@ -127,11 +127,11 @@ def test_build_env(mocker, caplog):
 
     env_file = os.path.join(test_dir, 'test-env2.yaml')
     opence._main(["build", build_env.COMMAND, env_file, "--python_versions", py_version, "--run_tests"])
-    validate_and_remove_conda_env_files(py_version, channels=["https://anaconda.org/anaconda"])
+    validate_and_remove_conda_env_files(py_version, channels=["defaults"])
 
     #---The second test specifies a python version that is supported in the env file by package21.
     py_version = "2.1"
-    channel = "my_channel"
+    channel = "defaults"
     package_deps = {"package11": ["package15"],
                     "package12": ["package11"],
                     "package13": ["package12", "package14"],

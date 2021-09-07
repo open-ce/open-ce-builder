@@ -241,7 +241,8 @@ usage: open-ce build feedstock [-h] [--conda_build_configs CONDA_BUILD_CONFIG]
                                [--working_directory WORKING_DIRECTORY]
                                [--local_src_dir LOCAL_SRC_DIR]
                                [--conda_pkg_format CONDA_PKG_FORMAT]
-
+                               [--debug DEBUG]
+                               [--debug_output_id DEBUG_OUTPUT_ID] 
 optional arguments:
   -h, --help            show this help message and exit
   --conda_build_configs CONDA_BUILD_CONFIGS
@@ -294,6 +295,12 @@ optional arguments:
   --conda_pkg_format CONDA_PKG_FORMAT
                         Conda package format to be used, such as "tarball" or
                         "conda". (default: tarball)
+  --debug               Creates debug environment and provides a single command line that
+                        one can copy/paste to enter that environment. (default: False)
+  --debug_output_id DEBUG_OUTPUT_ID
+                        Output ID in case of multiple output recipe, for which debug
+                        envs and scripts should be created. (default: None)
+
 ==============================================================================
 ```
 
@@ -304,6 +311,30 @@ For example,
     cd spacy-feedstock
     open-ce build feedstock --output_folder=/home/builder/condabuild
 ```
+
+The `open-ce build feedstock --debug` command is used to debug a feedstock. This option when used, will create debug environment and provide a single command line that one can copy/paste to enter into that environment for further debugging. The output of `open-ce build feedstock --debug` looks like this:
+
+```shell
+    ################################################################################
+    Build and/or host environments created for debugging.  To enter a debugging environment:
+
+    cd /Users/UserName/miniconda3/conda-bld/debug_1542385789430/work && source /Users/UserName/miniconda3/conda-bld/debug_1542385789430/work/build_env_setup.sh
+
+    ################################################################################
+```
+This option is same as that of `conda debug` command. For further details, refer [Anaconda's doc](https://docs.conda.io/projects/conda-build/en/latest/user-guide/recipes/debugging.html)
+
+###  Complications with multiple outputs:
+Multiple outputs effectively give the recipe many build phases to consider. The `--debug_output_id` argument is the mechanism to specify which of these should be used to create the debug envs and scripts. The `--debug_output_id` argument accepts an fnmatch pattern. One can match any part of the output filenames.
+For example, `opencv` recipe has multiple outputs. If we want to debug just `libopencv` output, we would specify it as `--debug_output_id`:
+
+```shell
+    open-ce build feedstock --debug  --debug_output_id="libopencv*"
+```
+
+###  Complications with feedstocks that have multiple recipes:
+Some feedstock repositories in the Open-CE project have more than one recipe included, often containing meta-packages or variant controls as defined in the `config/build-config.yaml` file. When using the `--debug` option on a feedstock with multiple recipes, a debug environment will be created for each included recipe. 
+One further complication occurs when a feedstock includes multiple recipes, and one of them contains multiple outputs. In this case, since the `--debug_output_id` option is required and it would subsequently be passed to each included recipe in the feedstock, it's best to use the `--recipes` option to only choose the recipe desired to debug.
 
 ## `open-ce build image` sub command
 

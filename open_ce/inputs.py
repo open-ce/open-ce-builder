@@ -126,6 +126,12 @@ https://github.com/open-ce/open-ce/blob/main/doc/README.yaml.md"""))
                                              "directory. Only files within the root level open-ce directory and "
                                              "local_files will be visible at build time."))
 
+    DEBUG = (lambda parser: parser.add_argument(
+                                        '--debug',
+                                        action='store_true',
+                                        help="Creates debug environment and provides a single command line that "
+                                             "one can copy/paste to enter that environment."))
+
     SKIP_BUILD_PACKAGES = (lambda parser: parser.add_argument(
                                         '--skip_build_packages',
                                         action='store_true',
@@ -210,6 +216,13 @@ path of \"recipe\"."""))
                                         '--git_up_to_date',
                                         action='store_true',
                                         help=argparse.SUPPRESS))
+
+    DEBUG_OUTPUT_ID = (lambda parser:  parser.add_argument(
+                                        '--debug_output_id',
+                                         type=str,
+                                         default=None,
+                                         help="Output ID in case of multiple output recipe, "
+                                              "for which debug envs and scripts should be created."))
 
     TEST_LABELS = (lambda parser: parser.add_argument(
                                         '--test_labels',
