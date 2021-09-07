@@ -88,7 +88,7 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals, too-many-stateme
     version_msg = "Open-CE Version {}".format(version)
     release_name = "v{}".format(version)
 
-    env_file_contents = env_config.load_env_config_files([open_ce_env_file], utils.ALL_VARIANTS, ignore_urls=True)
+    env_file_contents = env_config.load_env_config_files([open_ce_env_file], utils.ALL_VARIANTS(), ignore_urls=True)
     for env_file_content in env_file_contents:
         env_file_tag = env_file_content.get(env_config.Key.git_tag_for_env.name, None)
         if env_file_tag != current_tag:
@@ -142,7 +142,7 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals, too-many-stateme
                                           version,
                                           current_tag,
                                           previous_tag,
-                                          utils.ALL_VARIANTS,
+                                          utils.ALL_VARIANTS(),
                                           config_file,
                                           repo_dir=args.repo_dir,)
     print(release_notes)
