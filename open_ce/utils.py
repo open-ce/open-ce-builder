@@ -78,10 +78,12 @@ def make_variants(python_versions=DEFAULT_PYTHON_VERS,
 
     return results
 
-ALL_VARIANTS = make_variants(SUPPORTED_PYTHON_VERS,
-                             SUPPORTED_BUILD_TYPES,
-                             SUPPORTED_MPI_TYPES,
-                             SUPPORTED_CUDA_VERS)
+def ALL_VARIANTS():
+    '''Returns a list of all possible variant combinations.'''
+    return make_variants(SUPPORTED_PYTHON_VERS,
+                         SUPPORTED_BUILD_TYPES,
+                         SUPPORTED_MPI_TYPES,
+                         SUPPORTED_CUDA_VERS)
 
 def remove_version(package):
     '''Remove conda version from dependency.'''
