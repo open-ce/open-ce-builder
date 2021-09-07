@@ -202,7 +202,10 @@ def _git_tag_to_version(git_tag):
 def _get_all_feedstocks(env_files, github_org, skipped_repos, pat=None):
     feedstocks = set()
     for env in env_files:
-        for package in env.get(env_config.Key.packages.name, []):
+        packages = env.get(env_config.Key.packages.name, [])
+        if packages is None:
+            packages = []
+        for package in packages:
             feedstock = package.get(env_config.Key.feedstock.name, "")
             if not utils.is_url(feedstock):
                 feedstocks.add(feedstock)
