@@ -41,8 +41,7 @@ def _make_parser():
     ''' Parser input arguments '''
     parser = inputs.make_parser([git_utils.Argument.PUBLIC_ACCESS_TOKEN, git_utils.Argument.REPO_DIR,
                                     git_utils.Argument.BRANCH, git_utils.Argument.SKIPPED_REPOS,
-                                    git_utils.Argument.NOT_DRY_RUN, inputs.Argument.CONDA_BUILD_CONFIG] +
-                                    inputs.VARIANT_ARGS,
+                                    git_utils.Argument.NOT_DRY_RUN, inputs.Argument.CONDA_BUILD_CONFIG],
                                     description = 'A script that can be used to cut an open-ce release.')
 
     parser.add_argument(
@@ -69,8 +68,6 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals, too-many-stateme
     parser = _make_parser()
     args = parser.parse_args(arg_strings)
 
-    variants = utils.make_variants(args.python_versions, args.build_types,
-                                   args.mpi_types, args.cuda_versions)
     config_file = None
     if args.conda_build_configs:
         config_file = os.path.abspath(args.conda_build_configs)
@@ -91,7 +88,7 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals, too-many-stateme
     version_msg = "Open-CE Version {}".format(version)
     release_name = "v{}".format(version)
 
-    env_file_contents = env_config.load_env_config_files([open_ce_env_file], variants, ignore_urls=True)
+    env_file_contents = env_config.load_env_config_files([open_ce_env_file], utils.ALL_VARIANTS, ignore_urls=True)
     for env_file_content in env_file_contents:
         env_file_tag = env_file_content.get(env_config.Key.git_tag_for_env.name, None)
         if env_file_tag != current_tag:
@@ -145,7 +142,7 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals, too-many-stateme
                                           version,
                                           current_tag,
                                           previous_tag,
-                                          variants,
+                                          utils.ALL_VARIANTS,
                                           config_file,
                                           repo_dir=args.repo_dir,)
     print(release_notes)

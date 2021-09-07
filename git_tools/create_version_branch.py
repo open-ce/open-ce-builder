@@ -41,7 +41,7 @@ from open_ce import utils
 
 def _make_parser():
     ''' Parser input arguments '''
-    parser = inputs.make_parser([git_utils.Argument.REPO_DIR, inputs.Argument.CONDA_BUILD_CONFIG] + inputs.VARIANT_ARGS,
+    parser = inputs.make_parser([git_utils.Argument.REPO_DIR, inputs.Argument.CONDA_BUILD_CONFIG],
                                     description = 'Create a version branch for a feedstock.')
 
     parser.add_argument(
@@ -96,9 +96,6 @@ def _create_version_branch(arg_strings=None):# pylint: disable=too-many-branches
     parser = _make_parser()
     args = parser.parse_args(arg_strings)
 
-    variants = utils.make_variants(args.python_versions, args.build_types,
-                                   args.mpi_types, args.cuda_versions)
-
     if args.repository:
         repo_name = _get_repo_name(args.repository)
         repo_url = args.repository
@@ -120,10 +117,10 @@ def _create_version_branch(arg_strings=None):# pylint: disable=too-many-branches
         config_file = args.conda_build_configs
     try:
         git_utils.checkout(repo_path, "HEAD~")
-        previous_version = _get_repo_version(repo_path, variants, config_file)
+        previous_version = _get_repo_version(repo_path, utils.ALL_VARIANTS, config_file)
 
         git_utils.checkout(repo_path, current_commit)
-        current_version = _get_repo_version(repo_path, variants, config_file)
+        current_version = _get_repo_version(repo_path, utils.ALL_VARIANTS, config_file)
 
         if args.branch_if_changed and current_version == previous_version:
             print("The version has not changed, no branch created.")

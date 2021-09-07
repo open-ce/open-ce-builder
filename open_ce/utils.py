@@ -30,9 +30,13 @@ from open_ce import inputs
 
 
 DEFAULT_BUILD_TYPES = "cpu,cuda"
+SUPPORTED_BUILD_TYPES = DEFAULT_BUILD_TYPES
 DEFAULT_PYTHON_VERS = "3.8"
+SUPPORTED_PYTHON_VERS = "3.7,3.8,3.9"
 DEFAULT_MPI_TYPES = "openmpi"
+SUPPORTED_MPI_TYPES = "system,openmpi"
 DEFAULT_CUDA_VERS = "10.2"
+SUPPORTED_CUDA_VERS = "10.2,11.2"
 CONDA_BUILD_CONFIG_FILE = "conda_build_config.yaml"
 DEFAULT_CONDA_BUILD_CONFIG = os.path.abspath(os.path.join(os.getcwd(), CONDA_BUILD_CONFIG_FILE))
 DEFAULT_GIT_LOCATION = "https://github.com/open-ce"
@@ -58,8 +62,10 @@ OPEN_CE_VERSION_STRING = "Open-CE Version"
 DEFAULT_GRAPH_FILE = "graph.png"
 DEFAULT_TEST_RESULT_FILE = "test_results.xml"
 
-def make_variants(python_versions=DEFAULT_PYTHON_VERS, build_types=DEFAULT_BUILD_TYPES, mpi_types=DEFAULT_MPI_TYPES,
-cuda_versions=DEFAULT_CUDA_VERS):
+def make_variants(python_versions=DEFAULT_PYTHON_VERS,
+                  build_types=DEFAULT_BUILD_TYPES,
+                  mpi_types=DEFAULT_MPI_TYPES,
+                  cuda_versions=DEFAULT_CUDA_VERS):
     '''Create a cross product of possible variant combinations.'''
     results = []
     for build_type in inputs.parse_arg_list(build_types):
@@ -71,6 +77,11 @@ cuda_versions=DEFAULT_CUDA_VERS):
         results += [dict(zip(variants,y)) for y in product(*variants.values())]
 
     return results
+
+ALL_VARIANTS = make_variants(SUPPORTED_PYTHON_VERS,
+                             SUPPORTED_BUILD_TYPES,
+                             SUPPORTED_MPI_TYPES,
+                             SUPPORTED_CUDA_VERS)
 
 def remove_version(package):
     '''Remove conda version from dependency.'''
