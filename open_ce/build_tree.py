@@ -344,13 +344,13 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
                 node = deps.pop()
                 ancestor_build_cmds = {x.build_command for x in networkx.ancestors(dep_graph, node)
                                                                 if x.build_command is not None}
-                channels = node.channels
+                channels = []
 
                 ancestor_channels = []
                 for cmd in ancestor_build_cmds:
                     ancestor_channels += cmd.channels
 
-                for channel in ancestor_channels + self._channels:
+                for channel in node.channels + ancestor_channels + self._channels:
                     if not channel in channels:
                         channels += [channel]
 
