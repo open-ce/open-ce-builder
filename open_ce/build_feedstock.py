@@ -45,7 +45,7 @@ def get_conda_build_config():
     recipe_conda_build_config = os.path.join(os.getcwd(), "config", "conda_build_config.yaml")
     return recipe_conda_build_config if os.path.exists(recipe_conda_build_config) else None
 
-def load_package_config(config_file=None, variants=None, recipe_path=None):
+def load_package_config(config_file=None, variants=None, recipe_path=None, permit_undefined_jinja=False):
     '''
     Check for a config file. If the user does not provide a recipe config
     file as an argument, it will be assumed that there is only one
@@ -66,7 +66,7 @@ def load_package_config(config_file=None, variants=None, recipe_path=None):
         if not os.path.exists(config_file):
             raise OpenCEError(Error.CONFIG_FILE, config_file)
 
-        build_config_data = conda_utils.render_yaml(config_file, variants)
+        build_config_data = conda_utils.render_yaml(config_file, variants, permit_undefined_jinja=permit_undefined_jinja)
 
     return build_config_data, config_file
 

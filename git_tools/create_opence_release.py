@@ -29,6 +29,7 @@ import re
 import tempfile
 import git_utils
 import tag_all_repos
+from create_version_branch import _get_repo_version
 
 sys.path.append(os.path.join(pathlib.Path(__file__).parent.absolute(), '..'))
 from open_ce import inputs # pylint: disable=wrong-import-position
@@ -40,7 +41,7 @@ def _make_parser():
     ''' Parser input arguments '''
     parser = inputs.make_parser([git_utils.Argument.PUBLIC_ACCESS_TOKEN, git_utils.Argument.REPO_DIR,
                                     git_utils.Argument.BRANCH, git_utils.Argument.SKIPPED_REPOS,
-                                    git_utils.Argument.NOT_DRY_RUN] + inputs.VARIANT_ARGS,
+                                    git_utils.Argument.NOT_DRY_RUN, inputs.Argument.CONDA_BUILD_CONFIG],
                                     description = 'A script that can be used to cut an open-ce release.')
 
     parser.add_argument(
@@ -63,12 +64,13 @@ def _make_parser():
 
     return parser
 
-def _main(arg_strings=None): # pylint: disable=too-many-locals
+def _main(arg_strings=None): # pylint: disable=too-many-locals, too-many-statements
     parser = _make_parser()
     args = parser.parse_args(arg_strings)
 
-    variants = utils.make_variants(args.python_versions, args.build_types,
-                                   args.mpi_types, args.cuda_versions)
+    config_file = None
+    if args.conda_build_configs:
+        config_file = os.path.abspath(args.conda_build_configs)
 
     primary_repo_path = "./"
 
@@ -82,11 +84,12 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals
     previous_tag = _get_previous_git_tag_from_env_file(primary_repo_path, args.branch, open_ce_env_file)
     version = _git_tag_to_version(current_tag)
     release_number = ".".join(version.split(".")[:-1])
+    bug_fix = version.split(".")[-1]
     branch_name = "open-ce-r{}".format(release_number)
     version_msg = "Open-CE Version {}".format(version)
     release_name = "v{}".format(version)
 
-    env_file_contents = env_config.load_env_config_files([open_ce_env_file], variants, ignore_urls=True)
+    env_file_contents = env_config.load_env_config_files([open_ce_env_file], utils.ALL_VARIANTS(), ignore_urls=True)
     for env_file_content in env_file_contents:
         env_file_tag = env_file_content.get(env_config.Key.git_tag_for_env.name, None)
         if env_file_tag != current_tag:
@@ -96,7 +99,7 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals
             raise Exception(message)
 
     if not git_utils.branch_exists(primary_repo_path, branch_name):
-        print("--->Creating {} branch in {}".format(current_tag, args.primary_repo))
+        print("--->Creating {} branch in {}".format(branch_name, args.primary_repo))
         git_utils.create_branch(primary_repo_path, branch_name)
     else:
         print("--->Branch {} already exists in {}. Not creating it.".format(current_tag, args.primary_repo))
@@ -117,6 +120,8 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals
                                 pat=args.pat,
                                 skipped_repos=[args.primary_repo, ".github"] + inputs.parse_arg_list(args.skipped_repos))
 
+    repos.sort(key=lambda repo: repo["name"])
+
     tag_all_repos.clone_repos(repos=repos,
                               branch=None,
                               repo_dir=args.repo_dir,
@@ -133,9 +138,27 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals
     else:
         print("--->Skipping pushing feedstocks for dry run.")
 
+    print("--->Generating Release Notes.")
+    release_notes = _create_release_notes(repos,
+                                          version,
+                                          release_number,
+                                          bug_fix,
+                                          current_tag,
+                                          previous_tag,
+                                          utils.ALL_VARIANTS(),
+                                          config_file,
+                                          repo_dir=args.repo_dir,)
+    print(release_notes)
+
     if args.not_dry_run:
         print("--->Creating Draft Release.")
-        git_utils.create_release(args.github_org, args.primary_repo, args.pat, current_tag, release_name, version_msg, True)
+        git_utils.create_release(args.github_org,
+                                 args.primary_repo,
+                                 args.pat,
+                                 current_tag,
+                                 release_name,
+                                 release_notes,
+                                 True)
     else:
         print("--->Skipping release creation for dry run.")
 
@@ -182,7 +205,10 @@ def _git_tag_to_version(git_tag):
 def _get_all_feedstocks(env_files, github_org, skipped_repos, pat=None):
     feedstocks = set()
     for env in env_files:
-        for package in env.get(env_config.Key.packages.name, []):
+        packages = env.get(env_config.Key.packages.name, [])
+        if packages is None:
+            packages = []
+        for package in packages:
             feedstock = package.get(env_config.Key.feedstock.name, "")
             if not utils.is_url(feedstock):
                 feedstocks.add(feedstock)
@@ -196,6 +222,71 @@ def _get_all_feedstocks(env_files, github_org, skipped_repos, pat=None):
     org_repos = [repo for repo in org_repos if repo["name"] not in skipped_repos]
 
     return org_repos
+
+def _create_release_notes(repos, version, release_number, bug_fix, current_tag, # pylint: disable=too-many-arguments
+                          previous_tag, variants, config_file, repo_dir="./"):
+    retval = "# Open-CE Version {}\n".format(version)
+    retval += "\n"
+    if previous_tag:
+        retval += "This is bug fix {} of [release {} of Open Cognitive Environment ".format(bug_fix, release_number)
+        retval += "(Open-CE)](https://github.com/open-ce/open-ce/releases/tag/open-ce-v{}.0).\n".format(release_number)
+    else:
+        retval += "This is release {} of Open Cognitive Environment (Open-CE).\n".format(version)
+    retval += "\n"
+    if previous_tag:
+        retval += "## Bug Fix Changes\n"
+        retval += "\n"
+        try:
+            retval += _get_bug_fix_changes([{"name": "open-ce"}], current_tag, previous_tag, "../")
+            retval += _get_bug_fix_changes(repos, current_tag, previous_tag, repo_dir)
+        except Exception as exc:# pylint: disable=broad-except
+            print("Error trying to find bug fix changes: ", exc)
+        retval += "\n"
+    retval += "## Package Versions\n"
+    retval += "\n"
+    retval += "A release of Open-CE consists of the environment files within the `open-ce` repository and a collection of "
+    retval += "feedstock repositories. The feedstock repositories contain recipes for various python packages. The "
+    retval += "following packages (among others) are part of this release:\n"
+    retval += "\n"
+    retval += "| Package          | Version |\n"
+    retval += "| :--------------- | :-------- |\n"
+    try:
+        retval += _get_package_versions(repos, repo_dir, variants, config_file)
+    except Exception as exc:# pylint: disable=broad-except
+        print("Error trying to get package versions: ", exc)
+    retval += "\n"
+    retval += "This release of Open-CE supports NVIDIA's CUDA "
+    retval += "versions {} as well as Python {}.\n".format(utils.SUPPORTED_CUDA_VERS,
+                                                           utils.SUPPORTED_PYTHON_VERS)
+    retval += "\n"
+    retval += "## Getting Started"
+    retval += "\n"
+    retval += "To get started with this release, see [the main readme]"
+    retval += "(https://github.com/open-ce/open-ce/blob/{}/README.md)\n".format(current_tag)
+    return retval
+
+def _get_bug_fix_changes(repos, current_tag, previous_tag, repo_dir="./"):
+    retval = ""
+    for repo in repos:
+        repo_path = os.path.abspath(os.path.join(repo_dir, repo["name"]))
+        print("--->Retrieving bug_fix_changes for {}".format(repo))
+        changes = git_utils.get_commits(repo_path, previous_tag, current_tag, commit_format="* %s")
+        if changes:
+            retval += "### Changes For {}\n".format(repo["name"])
+            retval += "\n"
+            retval +=  changes
+            retval += "\n"
+            retval += "\n"
+    return retval
+
+def _get_package_versions(repos, repo_dir, variants, config_file):
+    retval = ""
+    for repo in repos:
+        repo_path = os.path.abspath(os.path.join(repo_dir, repo["name"]))
+        print("--->Getting version info for {}".format(repo))
+        version, name = _get_repo_version(repo_path, variants, config_file)
+        retval += "| {} | {} |\n".format(name, version)
+    return retval
 
 if __name__ == '__main__':
     _main()
