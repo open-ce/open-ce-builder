@@ -231,7 +231,7 @@ def _create_release_notes(repos, version, release_number, bug_fix, current_tag, 
         retval += "This is bug fix {} of [release {} of Open Cognitive Environment ".format(bug_fix, release_number)
         retval += "(Open-CE)](https://github.com/open-ce/open-ce/releases/tag/open-ce-v{}.0).\n".format(release_number)
     else:
-        retval += "This is release {} of Open Cognitive Environment (Open-CE).".format(version)
+        retval += "This is release {} of Open Cognitive Environment (Open-CE).\n".format(version)
     retval += "\n"
     if previous_tag:
         retval += "## Bug Fix Changes\n"
