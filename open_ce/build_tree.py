@@ -344,16 +344,23 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
                 node = deps.pop()
                 ancestor_build_cmds = {x.build_command for x in networkx.ancestors(dep_graph, node)
                                                                 if x.build_command is not None}
+                channels = node.channels
+
                 ancestor_channels = []
                 for cmd in ancestor_build_cmds:
                     ancestor_channels += cmd.channels
+
+                for channel in ancestor_channels + self._channels:
+                    if not channel in channels:
+                        channels += [channel]
+
                 for package in node.packages:
                     package_name = utils.remove_version(package)
                     if package_name in seen:
                         continue
                     seen.add(package_name)
                     # Pass in channels ordered by priority.
-                    package_info = conda_utils.get_latest_package_info(node.channels + ancestor_channels + self._channels,
+                    package_info = conda_utils.get_latest_package_info(channels,
                                                                        package)
                     # package_info is empty for a virtual package.
                     # As of now, this is just one case of package_info being empty.
