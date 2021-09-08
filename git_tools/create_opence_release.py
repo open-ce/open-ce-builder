@@ -84,6 +84,7 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals, too-many-stateme
     previous_tag = _get_previous_git_tag_from_env_file(primary_repo_path, args.branch, open_ce_env_file)
     version = _git_tag_to_version(current_tag)
     release_number = ".".join(version.split(".")[:-1])
+    bug_fix = version.split(".")[-1]
     branch_name = "open-ce-r{}".format(release_number)
     version_msg = "Open-CE Version {}".format(version)
     release_name = "v{}".format(version)
@@ -140,6 +141,8 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals, too-many-stateme
     print("--->Generating Release Notes.")
     release_notes = _create_release_notes(repos,
                                           version,
+                                          release_number,
+                                          bug_fix,
                                           current_tag,
                                           previous_tag,
                                           utils.ALL_VARIANTS(),
@@ -220,10 +223,15 @@ def _get_all_feedstocks(env_files, github_org, skipped_repos, pat=None):
 
     return org_repos
 
-def _create_release_notes(repos, version, current_tag, previous_tag, variants, config_file, repo_dir="./"): # pylint: disable=too-many-arguments
+def _create_release_notes(repos, version, release_number, bug_fix, current_tag, # pylint: disable=too-many-arguments
+                          previous_tag, variants, config_file, repo_dir="./"):
     retval = "# Open-CE Version {}\n".format(version)
     retval += "\n"
-    retval += "Release Description\n"
+    if previous_tag:
+        retval += "This is bug fix {} of [release {} of Open Cognitive Environment ".format(bug_fix, release_number)
+        retval += "(Open-CE)](https://github.com/open-ce/open-ce/releases/tag/open-ce-v{}.0).\n".format(release_number)
+    else:
+        retval += "This is release {} of Open Cognitive Environment (Open-CE).".format(version)
     retval += "\n"
     if previous_tag:
         retval += "## Bug Fix Changes\n"
@@ -247,7 +255,9 @@ def _create_release_notes(repos, version, current_tag, previous_tag, variants, c
     except Exception as exc:# pylint: disable=broad-except
         print("Error trying to get package versions: ", exc)
     retval += "\n"
-    retval += "This release of Open-CE supports NVIDIA's CUDA version 10.2 and 11.2 as well as Python 3.7, 3.8 and 3.9.\n"
+    retval += "This release of Open-CE supports NVIDIA's CUDA "
+    retval += "versions {} as well as Python {}.\n".format(utils.SUPPORTED_CUDA_VERS,
+                                                           utils.SUPPORTED_PYTHON_VERS)
     retval += "\n"
     retval += "## Getting Started"
     retval += "\n"
