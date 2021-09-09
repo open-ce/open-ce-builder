@@ -30,6 +30,7 @@ import os
 import sys
 import shutil
 import pathlib
+import re
 import git_utils
 
 sys.path.append(os.path.join(pathlib.Path(__file__).parent.absolute(), '..'))
@@ -92,6 +93,18 @@ def _get_repo_name(repo_url):
         repo_url += ".git"
     return os.path.splitext(os.path.basename(repo_url))[0]
 
+def versions_match(current_version, previous_version):
+    if current_version == previous_version:
+        return True
+    version_regex = re.compile(r"^(.+\..+)\.(.+)$")
+    current_match = version_regex.match(current_version)
+    previous_match = version_regex.match(previous_version)
+    if not current_match or not previous_match:
+        return False
+    if len(current_match.groups()) != 2 or len(previous_match.groups()) != 2:
+        return False
+    return current_match.groups()[0] == previous_match.groups()[0]
+
 def _create_version_branch(arg_strings=None):# pylint: disable=too-many-branches
     parser = _make_parser()
     args = parser.parse_args(arg_strings)
@@ -122,7 +135,7 @@ def _create_version_branch(arg_strings=None):# pylint: disable=too-many-branches
         git_utils.checkout(repo_path, current_commit)
         current_version = _get_repo_version(repo_path, utils.ALL_VARIANTS(), config_file)
 
-        if args.branch_if_changed and current_version == previous_version:
+        if args.branch_if_changed and versions_match(current_version, previous_version):
             print("The version has not changed, no branch created.")
         else:
             if args.branch_if_changed:
