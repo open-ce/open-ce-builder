@@ -69,6 +69,9 @@ def _make_parser():
 def _get_repo_version(repo_path, variants, variant_config_files=None):
     '''
     Get the version of the first package that appears in the recipes list for the feedstock.
+    Copying to a temporary directory is to get around an unknown issue with conda's render
+    function which seems to cache the file the first time it is read, even if the file is
+    changed by checking out a new git commit.
     '''
     saved_working_directory = os.getcwd()
     with tempfile.TemporaryDirectory() as renamed_path:
