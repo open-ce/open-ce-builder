@@ -154,7 +154,7 @@ def _create_version_branch(arg_strings=None):# pylint: disable=too-many-branches
                 print("The branch {} already exists.".format(branch_name))
             else:
                 git_utils.create_branch(repo_path, branch_name)
-                #git_utils.push_branch(repo_path, branch_name)
+                git_utils.push_branch(repo_path, branch_name)
 
             if args.branch_if_changed:
                 git_utils.checkout(repo_path, current_commit)
