@@ -19,6 +19,7 @@
 import os
 import datetime
 import glob
+import csv
 import tarfile
 import zipfile
 import shutil
@@ -40,7 +41,7 @@ COMMAND = 'licenses'
 
 DESCRIPTION = 'Gather license information for a group of packages'
 
-ARGUMENTS = [Argument.OUTPUT_FOLDER, Argument.CONDA_ENV_FILE, Argument.TEMPLATE_FILES]
+ARGUMENTS = [Argument.OUTPUT_FOLDER, Argument.CONDA_ENV_FILE, Argument.TEMPLATE_FILES, Argument.LICENSES_FILE]
 
 COPYRIGHT_STRINGS = ["Copyright", "copyright (C)", "copyright (c)"]
 SECONDARY_COPYRIGHT_STRINGS = ["All rights reserved"]
@@ -199,6 +200,19 @@ class LicenseGenerator():
 
         log.info("Licenses file generated: %s", licenses_file)
 
+    def import_licenses_file(self, licenses_file):
+        """
+        Import a licenses file from the provided path.
+        """
+        with open(licenses_file) as csv_stream:
+            reader = csv.reader(csv_stream, delimiter='\t')
+            for row in reader:
+                self._licenses.add(LicenseGenerator.LicenseInfo(row[0],
+                                            row[1],
+                                            row[2].split(",") if len(row) > 2 else None,
+                                            row[3] if len(row) > 3 else None,
+                                            row[4].split(",") if len(row) > 4 else None))
+
     def gen_file_from_template(self, template, output_folder):
         """
         Fill in a jinja template file with license information and
@@ -209,6 +223,9 @@ class LicenseGenerator():
         for info in self._licenses:
             for license_type in info.license_type:
                 license_dict[license_type].append(info)
+
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
 
         file_loader = FileSystemLoader([os.path.dirname(template), os.getcwd()])
         env = Environment(loader=file_loader)
@@ -512,15 +529,18 @@ def get_licenses(args):
     """
     Entry point for `get licenses`.
     """
-    if not args.conda_env_files:
+    if not args.conda_env_files and not args.licenses_file:
         raise OpenCEError(Error.CONDA_ENV_FILE_REQUIRED)
 
     gen = LicenseGenerator()
 
-    for conda_env_file in parse_arg_list(args.conda_env_files):
-        gen.add_licenses(conda_env_file)
+    if not args.licenses_file:
+        for conda_env_file in parse_arg_list(args.conda_env_files):
+            gen.add_licenses(conda_env_file)
 
-    gen.write_licenses_file(args.output_folder)
+        gen.write_licenses_file(args.output_folder)
+    else:
+        gen.import_licenses_file(args.licenses_file)
 
     if args.template_files:
         for template_file in parse_arg_list(args.template_files):

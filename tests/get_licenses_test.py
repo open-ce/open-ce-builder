@@ -61,6 +61,23 @@ def test_get_licenses(mocker):
     assert "libopus" in template_contents or "tzdata" in template_contents
     shutil.rmtree(output_folder)
 
+def test_get_licenses_licenses_file_arg():
+    '''
+    This tests that the --licenses_file argument works properly.
+    '''
+    output_folder = "get_licenses_output"
+    template_file = "tests/open-ce-licenses.template"
+    opence._main(["get", get_licenses.COMMAND, "--licenses_file", "tests/open-ce-licenses.csv", "--output_folder", output_folder, "--template_files", template_file])
+
+    template_output_file = os.path.join(output_folder, os.path.splitext(os.path.basename(template_file))[0] + ".txt")
+    assert os.path.exists(template_output_file)
+    with open(template_output_file) as file_stream:
+        template_contents = file_stream.read()
+
+    print(template_contents)
+    assert "libopus" in template_contents
+    shutil.rmtree(output_folder)
+
 def test_get_licenses_failed_conda_create(mocker):
     '''
     This tests that an exception is thrown when `conda env create` fails.

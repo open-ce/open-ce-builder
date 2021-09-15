@@ -258,6 +258,16 @@ path of \"recipe\"."""))
                                      help="Comma delimited list of template files to initialize with Open-CE "
                                           " information."))
 
+    LICENSES_FILE = (lambda parser: parser.add_argument(
+                                    '--licenses_file',
+                                    type=str,
+                                    default=None,
+                                    help="Path to a licenses.csv file. This file will be used as the input to the template "
+                                         " provided in the --template_files argument. The format should be tab delimeted "
+                                         " and match the format of the licenses.csv file outputed by the licenses tool. "
+                                         " When this argument is provided, the licenses tool won't search packages for "
+                                         " license information. It will only use what is in the csv file."))
+
     VERSION = (lambda parser: parser.add_argument(
                                      '-v',
                                      '--version',
