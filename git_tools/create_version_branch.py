@@ -30,6 +30,8 @@ import os
 import sys
 import shutil
 import pathlib
+import re
+import tempfile
 import git_utils
 
 sys.path.append(os.path.join(pathlib.Path(__file__).parent.absolute(), '..'))
@@ -67,30 +69,48 @@ def _make_parser():
 def _get_repo_version(repo_path, variants, variant_config_files=None):
     '''
     Get the version of the first package that appears in the recipes list for the feedstock.
+    Copying to a temporary directory is to get around an unknown issue with conda's render
+    function which seems to cache the file the first time it is read, even if the file is
+    changed by checking out a new git commit.
     '''
     saved_working_directory = os.getcwd()
-    os.chdir(os.path.abspath(repo_path))
-    for variant in variants:
-        build_config_data, _ = build_feedstock.load_package_config(variants=variant, permit_undefined_jinja=True)
-        if build_config_data["recipes"]:
-            for recipe in build_config_data["recipes"]:
-                rendered_recipe = conda_utils.render_yaml(recipe["path"],
-                                                          variants=variant,
-                                                          variant_config_files=variant_config_files,
-                                                          permit_undefined_jinja=True)
-                for meta, _, _ in rendered_recipe:
-                    package_version = meta.meta['package']['version']
-                    if package_version and package_version != "None":
-                        os.chdir(saved_working_directory)
-                        return package_version, meta.meta['package']['name']
+    with tempfile.TemporaryDirectory() as renamed_path:
+        new_repo_path = os.path.join(renamed_path, "repo")
+        shutil.copytree(repo_path, new_repo_path)
+        os.chdir(os.path.abspath(new_repo_path))
+        for variant in variants:
+            build_config_data, _ = build_feedstock.load_package_config(variants=variant, permit_undefined_jinja=True)
+            if build_config_data["recipes"]:
+                for recipe in build_config_data["recipes"]:
+                    rendered_recipe = conda_utils.render_yaml(recipe["path"],
+                                                            variants=variant,
+                                                            variant_config_files=variant_config_files,
+                                                            permit_undefined_jinja=True)
+                    for meta, _, _ in rendered_recipe:
+                        package_version = meta.meta['package']['version']
+                        if package_version and package_version != "None":
+                            os.chdir(saved_working_directory)
+                            return package_version, meta.meta['package']['name']
 
-    os.chdir(saved_working_directory)
+        os.chdir(saved_working_directory)
     raise Exception("Error: Unable to determine current version of the feedstock")
 
 def _get_repo_name(repo_url):
     if not repo_url.endswith(".git"):
         repo_url += ".git"
     return os.path.splitext(os.path.basename(repo_url))[0]
+
+def _versions_match(current_version, previous_version):
+    if current_version == previous_version:
+        return True
+    version_regex = re.compile(r"^(.+\..+)\.(.+)$")
+    current_match = version_regex.match(current_version)
+    previous_match = version_regex.match(previous_version)
+    if not current_match or not previous_match:
+        return False
+    if len(current_match.groups()) != 2 or len(previous_match.groups()) != 2:
+        return False
+    return current_match.groups()[0] == previous_match.groups()[0]
 
 def _create_version_branch(arg_strings=None):# pylint: disable=too-many-branches
     parser = _make_parser()
@@ -114,15 +134,15 @@ def _create_version_branch(arg_strings=None):# pylint: disable=too-many-branches
     current_commit = git_utils.get_current_branch(repo_path)
     config_file = None
     if args.conda_build_configs:
-        config_file = args.conda_build_configs
+        config_file = os.path.abspath(args.conda_build_configs)
     try:
         git_utils.checkout(repo_path, "HEAD~")
-        previous_version = _get_repo_version(repo_path, utils.ALL_VARIANTS(), config_file)
+        previous_version, _ = _get_repo_version(repo_path, utils.ALL_VARIANTS(), config_file)
 
         git_utils.checkout(repo_path, current_commit)
-        current_version = _get_repo_version(repo_path, utils.ALL_VARIANTS(), config_file)
+        current_version, _ = _get_repo_version(repo_path, utils.ALL_VARIANTS(), config_file)
 
-        if args.branch_if_changed and current_version == previous_version:
+        if args.branch_if_changed and _versions_match(current_version, previous_version):
             print("The version has not changed, no branch created.")
         else:
             if args.branch_if_changed:
@@ -150,8 +170,4 @@ def _create_version_branch(arg_strings=None):# pylint: disable=too-many-branches
         raise exc
 
 if __name__ == '__main__':
-    try:
-        _create_version_branch()
-    except Exception as exc:# pylint: disable=broad-except
-        print("Error: ", exc)
-        sys.exit(1)
+    _create_version_branch()
