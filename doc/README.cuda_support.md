@@ -29,6 +29,7 @@ is a reference table below.
 | 1.1 (meerkat)   | 10.2 \| 11.0  |
 | 1.2 (prariedog) | 10.2 \| 11.0  |
 | 1.3 (chipmunk) | 10.2 \| 11.2  |
+| 1.4 (groundhog) | 10.2 \| 11.2  |
 
 It's important to install CUDA correctly. This procedure is dependent on the system
 type and CUDA version. It's advised to follow NVIDIA's [official installation documentation](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html)
