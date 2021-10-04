@@ -73,14 +73,16 @@ def test_check_build_numbers():
     # Verify that check passes when version is the same, and build number increases
     check_build_numbers.main(["--python_versions", "2.3", "--build_types", "cuda"])
 
+    utils.run_and_log("git checkout new_test_branch")
     # Verify that check fails when version is the same, and build number is the same.
     with pytest.raises(AssertionError) as exc:
         check_build_numbers.main(["--python_versions", "2.3", "--build_types", "cpu"])
     assert "At least one package needs to increase the build number or change the version in at least one variant." in str(exc.value)
-
+    utils.run_and_log("git checkout new_test_branch")
     # Verify that check passes when version increases and build number goes back to 1.
     check_build_numbers.main(["--python_versions", "2.4", "--build_types", "cpu"])
 
+    utils.run_and_log("git checkout new_test_branch")
     # Verify that check passes when version increase and build number stays the same.
     check_build_numbers.main(["--python_versions", "2.4", "--build_types", "cuda"])
 
