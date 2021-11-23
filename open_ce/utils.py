@@ -24,10 +24,10 @@ import re
 import urllib.request
 import tempfile
 import multiprocessing as mp
+from distutils.version import LooseVersion
 import pkg_resources
 from open_ce.errors import OpenCEError, Error, show_warning, log
 from open_ce import inputs
-from distutils.version import LooseVersion
 
 DEFAULT_BUILD_TYPES = "cpu,cuda"
 SUPPORTED_BUILD_TYPES = DEFAULT_BUILD_TYPES
