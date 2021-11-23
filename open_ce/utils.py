@@ -24,10 +24,10 @@ import re
 import urllib.request
 import tempfile
 import multiprocessing as mp
+from distutils.version import LooseVersion
 import pkg_resources
 from open_ce.errors import OpenCEError, Error, show_warning, log
 from open_ce import inputs
-
 
 DEFAULT_BUILD_TYPES = "cpu,cuda"
 SUPPORTED_BUILD_TYPES = DEFAULT_BUILD_TYPES
@@ -309,9 +309,9 @@ def get_branch_of_tag(git_tag):
     # Clean branches and sort so that highest release version number is last
     possible_branches = [possible_branch.replace('*','').strip() for possible_branch in possible_branches]
     possible_branches = list(filter(lambda x: x == "remotes/origin/main" or x == "remotes/origin/master" or
-                               x.startswith("remotes/origin/r"), sorted(possible_branches)))
+                               x.startswith("remotes/origin/r"), sorted(possible_branches, key=LooseVersion)))
 
-    return possible_branches[-1]
+    return possible_branches[1] if len(possible_branches) > 1 else possible_branches[0]
 
 def git_clone(git_url, git_tag, location, up_to_date=False):
     '''
