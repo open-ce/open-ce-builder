@@ -311,7 +311,7 @@ def get_branch_of_tag(git_tag):
     possible_branches = list(filter(lambda x: x == "remotes/origin/main" or x == "remotes/origin/master" or
                                x.startswith("remotes/origin/r"), sorted(possible_branches)))
 
-    return possible_branches[-1]
+    return possible_branches[1] if len(possible_branches) > 1 else possible_branches[0]
 
 def git_clone(git_url, git_tag, location, up_to_date=False):
     '''
