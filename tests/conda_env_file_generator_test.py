@@ -133,7 +133,7 @@ def test_variant_specific_env_files():
     base_arg_strings = ["build", build_env.COMMAND, "--skip_build",
                    "--python_versions", "3.7", "--repository_folder", os.path.join(tmp_test.name, "repos"),
                    "--output_folder", os.path.join(tmp_test.name, "output"),
-                   "https://raw.githubusercontent.com/open-ce/open-ce/open-ce-v1.2.1/envs/opence-env.yaml"]
+                   "https://raw.githubusercontent.com/open-ce/open-ce/open-ce-v1.5.0/envs/opence-env.yaml"]
 
     opence._main(base_arg_strings + ["--build_types", "cuda,cpu"])
     file = open(glob.glob(os.path.join(tmp_test.name, "output", "*cpu*.yaml"))[0],mode='r')
