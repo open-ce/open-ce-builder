@@ -125,7 +125,7 @@ optional arguments:
                         or "system". (default: openmpi)
   --cuda_versions CUDA_VERSIONS
                         CUDA version to build for , such as "10.2" or "11.2".
-                        (default: 10.2)
+                        (default: 11.2)
   --container_build, --docker_build
                         Perform a build within a container. NOTE: When
                         the --container_build flag is used, all arguments with
