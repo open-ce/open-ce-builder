@@ -152,7 +152,7 @@ optional arguments:
                         system, podman has preference over docker. (default: )
   --conda_pkg_format CONDA_PKG_FORMAT
                         Conda package format to be used, such as "tarball" or
-                        "conda". (default: tarball)
+                        "conda". (default: conda)
 ==============================================================================
 ```
 

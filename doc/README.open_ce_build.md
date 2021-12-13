@@ -171,7 +171,7 @@ optional arguments:
                         system, podman has preference over docker. (default: )
   --conda_pkg_format CONDA_PKG_FORMAT
                         Conda package format to be used, such as "tarball" or
-                        "conda". (default: tarball)
+                        "conda". (default: conda)
 ==============================================================================
 ```
 
@@ -294,7 +294,7 @@ optional arguments:
                         RPM/Debians/Tar. (default: None)
   --conda_pkg_format CONDA_PKG_FORMAT
                         Conda package format to be used, such as "tarball" or
-                        "conda". (default: tarball)
+                        "conda". (default: conda)
   --debug               Creates debug environment and provides a single command line that
                         one can copy/paste to enter that environment. (default: False)
   --debug_output_id DEBUG_OUTPUT_ID
