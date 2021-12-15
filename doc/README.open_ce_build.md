@@ -140,7 +140,7 @@ optional arguments:
                         or "system". (default: openmpi)
   --cuda_versions CUDA_VERSIONS
                         CUDA version to build for , such as "10.2" or "11.2".
-                        (default: 10.2)
+                        (default: 11.2)
   --skip_build_packages
                         Do not perform builds of packages. (default: False)
   --run_tests           Run Open-CE tests for each potential conda environment
@@ -171,7 +171,7 @@ optional arguments:
                         system, podman has preference over docker. (default: )
   --conda_pkg_format CONDA_PKG_FORMAT
                         Conda package format to be used, such as "tarball" or
-                        "conda". (default: tarball)
+                        "conda". (default: conda)
 ==============================================================================
 ```
 
@@ -265,7 +265,7 @@ optional arguments:
                         or "system". (default: openmpi)
   --cuda_versions CUDA_VERSIONS
                         CUDA version to build for ,
-                        such as "10.2" or "11.2". (default: 10.2)
+                        such as "10.2" or "11.2". (default: 11.2)
   --recipe-config-file RECIPE_CONFIG_FILE
                         Path to the recipe configuration YAML file. The configuration
                         file lists paths to recipes to be built within a feedstock.
@@ -294,7 +294,7 @@ optional arguments:
                         RPM/Debians/Tar. (default: None)
   --conda_pkg_format CONDA_PKG_FORMAT
                         Conda package format to be used, such as "tarball" or
-                        "conda". (default: tarball)
+                        "conda". (default: conda)
   --debug               Creates debug environment and provides a single command line that
                         one can copy/paste to enter that environment. (default: False)
   --debug_output_id DEBUG_OUTPUT_ID

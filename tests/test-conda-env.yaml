@@ -8,4 +8,4 @@ dependencies:
 - package4 1.2.*
 - package5 1.2.*
 - package6 1.2.*
-name: opence-conda-env-py3.6-cuda-openmpi
+name: opence-conda-env-py3.8-cuda-openmpi

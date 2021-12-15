@@ -1,7 +1,7 @@
-#open-ce-variant:py3.6-cuda-openmpi-10.2
+#open-ce-variant:py3.8-cuda-openmpi-10.2
 #Open-CE Version:open-ce-v1.0.0
 channels:
 - defaults
 dependencies:
 - pytest 6.2.2
-name: opence-conda-env-py3.6-cuda-openmpi
+name: opence-conda-env-py3.8-cuda-openmpi

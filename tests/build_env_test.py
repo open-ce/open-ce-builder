@@ -464,7 +464,7 @@ def test_run_tests(mocker):
     Test that the _run_tests function works properly.
     '''
     dirTracker = helpers.DirTracker()
-    mock_build_tree = TestBuildTree([], "3.6", "cpu,cuda", "openmpi", "10.2")
+    mock_build_tree = TestBuildTree([], utils.DEFAULT_PYTHON_VERS, "cpu,cuda", "openmpi", "10.2")
     mock_test_commands = [test_feedstock.TestCommand("Test1",
                                                       conda_env="test-conda-env2.yaml",
                                                       bash_command="echo Test1"),

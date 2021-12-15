@@ -1,4 +1,4 @@
-#open-ce-variant:py3.6-cuda-openmpi-10.2
+#open-ce-variant:py3.8-cuda-openmpi-10.2
 channels:
 - defaults
 dependencies:
@@ -7,4 +7,4 @@ dependencies:
 - icu 58.2
 - libgcc-ng=8.2
 - libstdcxx-ng=8.2
-name: opence-conda-env-py3.6-cuda-openmpi
+name: opence-conda-env-py3.8-cuda-openmpi

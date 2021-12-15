@@ -35,7 +35,7 @@ DEFAULT_PYTHON_VERS = "3.8"
 SUPPORTED_PYTHON_VERS = "3.7,3.8,3.9"
 DEFAULT_MPI_TYPES = "openmpi"
 SUPPORTED_MPI_TYPES = "system,openmpi"
-DEFAULT_CUDA_VERS = "10.2"
+DEFAULT_CUDA_VERS = "11.2"
 SUPPORTED_CUDA_VERS = "10.2,11.2"
 CONDA_BUILD_CONFIG_FILE = "conda_build_config.yaml"
 DEFAULT_CONDA_BUILD_CONFIG = os.path.abspath(os.path.join(os.getcwd(), CONDA_BUILD_CONFIG_FILE))
@@ -56,7 +56,7 @@ OPEN_CE_INFO_FILE = "open-ce-info.yaml"
 CONTAINER_TOOLS = ["podman", "docker"]
 DEFAULT_CONTAINER_TOOL = next(filter(lambda tool: os.system("which {} &> /dev/null".format(tool))
                                       == 0, CONTAINER_TOOLS), None)
-DEFAULT_PKG_FORMAT = "tarball"  # use .tar.bz2 output format
+DEFAULT_PKG_FORMAT = "conda"  # use .conda output format
 NUM_THREAD_POOL = 16
 OPEN_CE_VERSION_STRING = "Open-CE Version"
 DEFAULT_GRAPH_FILE = "graph.png"
