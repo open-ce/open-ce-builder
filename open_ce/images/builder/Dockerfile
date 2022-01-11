@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi7/ubi
+FROM registry.access.redhat.com/ubi8/ubi:8.5-214
 
 ENV CONDA_HOME=${CONDA_HOME:-/opt/conda}
 ENV PATH=$CONDA_HOME/bin:$PATH
@@ -11,7 +11,7 @@ ENV BUILD_USER=builder
 ARG BUILD_ID=1084
 
 RUN export ARCH="$(uname -m)" && \
-    yum repolist && yum install -y rsync openssh-clients diffutils procps && \
+    yum repolist && yum install -y rsync openssh-clients diffutils procps gcc-toolset-10 && \
     # Create CICD Group
     groupadd --non-unique --gid ${GROUP_ID} ${CICD_GROUP} && \
     # Adduser Builder
@@ -34,8 +34,9 @@ RUN export ARCH="$(uname -m)" && \
     chown -R ${BUILD_USER}:${CICD_GROUP} ${CONDA_HOME}
 
 USER ${BUILD_USER}
-RUN export PATH="${PATH}" && \
+RUN export PATH="/opt/rh/gcc-toolset-10/root/usr/bin:${PATH}" && \
     echo "PATH="${PATH}"" >> ${HOME}/.profile && \
+    echo "PATH="${PATH}"" >> ${HOME}/.bashrc && \
     mkdir -p $HOME/.cache && \
     echo ". $CONDA_HOME/etc/profile.d/conda.sh" >> ${HOME}/.bashrc && \
     echo "export PYTHONPATH=${PYTHONPATH}:$HOME/open_ce" >> ${HOME}/.bashrc && \
