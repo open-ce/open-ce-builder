@@ -35,7 +35,8 @@ ARGUMENTS = inputs.PRIMARY_BUILD_ARGS + \
              Argument.LOCAL_SRC_DIR,
              Argument.CONDA_PKG_FORMAT,
              Argument.DEBUG,
-             Argument.DEBUG_OUTPUT_ID]
+             Argument.DEBUG_OUTPUT_ID,
+             Argument.ARCH]
 
 def get_conda_build_config():
     '''

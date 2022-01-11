@@ -38,7 +38,8 @@ ARGUMENTS = ENV_BUILD_ARGS + \
              Argument.TEST_LABELS,
              Argument.CONTAINER_BUILD_ARGS,
              Argument.CONTAINER_TOOL,
-             Argument.CONDA_PKG_FORMAT]
+             Argument.CONDA_PKG_FORMAT,
+             Argument.ARCH]
 
 def _run_tests(build_tree, test_labels, conda_env_files, output_folder):
     """

@@ -146,6 +146,12 @@ https://github.com/open-ce/open-ce/blob/main/doc/README.yaml.md"""))
                                         '--conda_env_files',
                                         type=str,
                                         help='Comma delimited list of paths to conda environment files.' ))
+    ARCH = (lambda parser: parser.add_argument(
+                                        '--arch',
+                                        type=str,
+                                        default="p9",
+                                        help='Flag for Power9/Power10. Use p10 for power10 builds'))
+
 
     LOCAL_CONDA_CHANNEL = (lambda parser: parser.add_argument(
                                         '--local_conda_channel',
