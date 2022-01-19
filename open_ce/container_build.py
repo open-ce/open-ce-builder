@@ -203,13 +203,13 @@ def build_in_container(image_name, args, arg_strings):
                                       args.command,
                                       args.sub_command,
                                       ' '.join(arg_strings[0:]))
-    try:
-        _execute_in_container(container_name, cmd, args.container_tool)
-    finally:
+    #try:
+    #    _execute_in_container(container_name, cmd, args.container_tool)
+    #finally:
         # Cleanup
-        _stop_container(container_name, args.container_tool)
+    #    _stop_container(container_name, args.container_tool)
 
-def _generate_dockerfile_name(build_types, cuda_version):
+def _generate_dockerfile_name(build_types, cuda_version, ppc_arch="p9"):
     '''
     Ensure we have valid combinations.  I.e. Specify a valid cuda version
     '''
@@ -220,7 +220,10 @@ def _generate_dockerfile_name(build_types, cuda_version):
             raise OpenCEError(Error.UNSUPPORTED_CUDA, cuda_version)
     else:
         #Build with cpu based image
-        dockerfile = os.path.join(BUILD_IMAGE_PATH, "Dockerfile")
+        if ppc_arch == "p10":
+            dockerfile = os.path.join(BUILD_IMAGE_PATH, "Dockerfile-p10")
+        else:
+            dockerfile = os.path.join(BUILD_IMAGE_PATH, "Dockerfile")
         build_image_path = BUILD_IMAGE_PATH
     return build_image_path, dockerfile
 
@@ -251,7 +254,7 @@ def build_with_container_tool(args, arg_strings):
     parser = make_parser()
     _, unused_args = parser.parse_known_args(arg_strings[1:])
 
-    build_image_path, dockerfile = _generate_dockerfile_name(args.build_types, args.cuda_versions)
+    build_image_path, dockerfile = _generate_dockerfile_name(args.build_types, args.cuda_versions, args.ppc_arch)
 
     if  'cuda' not in args.build_types or _capable_of_cuda_containers(args.cuda_versions):
         image_name = build_image(build_image_path, dockerfile, args.container_tool,
