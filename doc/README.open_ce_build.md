@@ -131,7 +131,7 @@ optional arguments:
                         current working directory. (default: )
   --python_versions PYTHON_VERSIONS
                         Comma delimited list of python versions to build for ,
-                        such as "3.7" or "3.8". (default: 3.8)
+                        such as "3.7" or "3.8". (default: 3.9)
   --build_types BUILD_TYPES
                         Comma delimited list of build types, such as "cpu" or
                         "cuda". (default: cpu,cuda)
@@ -256,7 +256,7 @@ optional arguments:
                         Conda channels to be used. (default: [])
   --python_versions PYTHON_VERSIONS
                         Comma delimited list of python versions to build for ,
-                        such as "3.7" or "3.8". (default: 3.8)
+                        such as "3.7" or "3.8". (default: 3.9)
   --build_types BUILD_TYPES
                         Comma delimited list of build types, such as "cpu" or
                         "cuda". (default: cpu,cuda)
