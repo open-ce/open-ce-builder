@@ -58,13 +58,16 @@ def _use_root_user(container_tool):
 def _home_path(container_tool):
     return "/root" if _use_root_user(container_tool) else "/home/builder"
 
-def build_image(build_image_path, dockerfile, container_tool, cuda_version=None, container_build_args=""):
+def build_image(build_image_path, dockerfile, container_tool, cuda_version=None,
+                container_build_args="", ppc_arch=utils.DEFAULT_PPC_ARCH):
     """
     Build a container image from the Dockerfile in BUILD_IMAGE_PATH.
     Returns a result code and the name of the new image.
     """
     if cuda_version:
         image_name = REPO_NAME + ":" + IMAGE_NAME + "-cuda" + cuda_version
+    elif ppc_arch == "p10":
+        image_name = REPO_NAME + ":" + IMAGE_NAME + "-cpu-p10"
     else:
         image_name = REPO_NAME + ":" + IMAGE_NAME + "-cpu"
     build_cmd = container_tool + " build "
@@ -209,7 +212,7 @@ def build_in_container(image_name, args, arg_strings):
         # Cleanup
     #    _stop_container(container_name, args.container_tool)
 
-def _generate_dockerfile_name(build_types, cuda_version, ppc_arch="p9"):
+def _generate_dockerfile_name(build_types, cuda_version, ppc_arch=utils.DEFAULT_PPC_ARCH):
     '''
     Ensure we have valid combinations.  I.e. Specify a valid cuda version
     '''
@@ -259,7 +262,7 @@ def build_with_container_tool(args, arg_strings):
     if  'cuda' not in args.build_types or _capable_of_cuda_containers(args.cuda_versions):
         image_name = build_image(build_image_path, dockerfile, args.container_tool,
                                  args.cuda_versions if 'cuda' in args.build_types else None,
-                                 args.container_build_args)
+                                 args.container_build_args, args.ppc_arch)
     else:
         raise OpenCEError(Error.INCOMPAT_CUDA, utils.get_driver_level(), args.cuda_versions)
 

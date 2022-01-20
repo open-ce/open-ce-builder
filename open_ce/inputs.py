@@ -149,7 +149,7 @@ https://github.com/open-ce/open-ce/blob/main/doc/README.yaml.md"""))
     ARCH = (lambda parser: parser.add_argument(
                                         '--ppc_arch',
                                         type=str,
-                                        default="p9",
+                                        default=utils.DEFAULT_PPC_ARCH,
                                         help='Flag for Power9/Power10. Use p10 for power10 builds'))
 
 

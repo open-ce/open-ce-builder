@@ -61,6 +61,7 @@ NUM_THREAD_POOL = 16
 OPEN_CE_VERSION_STRING = "Open-CE Version"
 DEFAULT_GRAPH_FILE = "graph.png"
 DEFAULT_TEST_RESULT_FILE = "test_results.xml"
+DEFAULT_PPC_ARCH = "p9"
 
 def make_variants(python_versions=DEFAULT_PYTHON_VERS,
                   build_types=DEFAULT_BUILD_TYPES,
