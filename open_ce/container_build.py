@@ -206,11 +206,11 @@ def build_in_container(image_name, args, arg_strings):
                                       args.command,
                                       args.sub_command,
                                       ' '.join(arg_strings[0:]))
-    #try:
-    #    _execute_in_container(container_name, cmd, args.container_tool)
-    #finally:
+    try:
+        _execute_in_container(container_name, cmd, args.container_tool)
+    finally:
         # Cleanup
-    #    _stop_container(container_name, args.container_tool)
+        _stop_container(container_name, args.container_tool)
 
 def _generate_dockerfile_name(build_types, cuda_version, ppc_arch=utils.DEFAULT_PPC_ARCH):
     '''
