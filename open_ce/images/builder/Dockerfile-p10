@@ -35,8 +35,12 @@ RUN export ARCH="$(uname -m)" && \
 
 USER ${BUILD_USER}
 RUN export PATH="/opt/rh/gcc-toolset-10/root/usr/bin:${PATH}" && \
+    export GCC_10_HOME_DIR="/opt/rh/gcc-toolset-10/root/usr" && \
+    export GCC_11_HOME_DIR="/opt/rh/gcc-toolset-11/root/usr" && \
     echo "PATH="${PATH}"" >> ${HOME}/.profile && \
     echo "PATH="${PATH}"" >> ${HOME}/.bashrc && \
+    echo "GCC_10_HOME_DIR="${GCC_10_HOME_DIR}"" >> ${HOME}/.bashrc && \
+    echo "GCC_11_HOME_DIR="${GCC_11_HOME_DIR}"" >> ${HOME}/.bashrc && \
     mkdir -p $HOME/.cache && \
     echo ". $CONDA_HOME/etc/profile.d/conda.sh" >> ${HOME}/.bashrc && \
     echo "export PYTHONPATH=${PYTHONPATH}:$HOME/open_ce" >> ${HOME}/.bashrc && \

@@ -1,6 +1,6 @@
 """
 # *****************************************************************
-# (C) Copyright IBM Corp. 2020, 2021. All Rights Reserved.
+# (C) Copyright IBM Corp. 2020, 2022. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -146,7 +146,7 @@ https://github.com/open-ce/open-ce/blob/main/doc/README.yaml.md"""))
                                         '--conda_env_files',
                                         type=str,
                                         help='Comma delimited list of paths to conda environment files.' ))
-    ARCH = (lambda parser: parser.add_argument(
+    PPC_ARCH = (lambda parser: parser.add_argument(
                                         '--ppc_arch',
                                         type=str,
                                         default=utils.DEFAULT_PPC_ARCH,
@@ -369,6 +369,22 @@ def _create_env_config_paths(args):
                 log.info("Unable to find '%s' locally. Attempting to use '%s'.", config_file, new_url)
                 args.env_config_file[index] = new_url
 
+def _check_ppc_arch(args):
+    '''
+    This will check if ppc_arch is p10 and set the corresponding
+    needed environment variables for GCC_10_HOME and GCC_11_HOME
+    '''
+    if "ppc_arch" in vars(args).keys() and args.ppc_arch:
+        if args.ppc_arch == "p10":
+            if "GCC_10_HOME" not in os.environ:
+                os.environ["GCC_10_HOME"] = utils.DEFAULT_GCC_10_HOME_DIR
+            if os.path.exists(os.environ["GCC_10_HOME"]):
+                PATH = os.environ["PATH"]
+                os.environ["PATH"] = "{0}:{1}".format(os.path.join(os.environ["GCC_10_HOME"], "bin"), PATH)
+                print("Path variable set to : ", os.environ["PATH"])
+            if "GCC_11_HOME" not in os.environ and os.path.exists(utils.DEFAULT_GCC_11_HOME_DIR):
+                os.environ["GCC_11_HOME"] = utils.DEFAULT_GCC_11_HOME_DIR
+ 
 def parse_args(parser, arg_strings=None):
     '''
     Parses input arguments and handles more complex defaults.
@@ -379,6 +395,8 @@ def parse_args(parser, arg_strings=None):
     args = parser.parse_args(arg_strings)
 
     _create_env_config_paths(args)
+
+    _check_ppc_arch(args)
 
     if "conda_build_configs" in vars(args).keys():
         if args.conda_build_configs is None:

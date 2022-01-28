@@ -1,6 +1,6 @@
 """
 # *****************************************************************
-# (C) Copyright IBM Corp. 2020, 2021. All Rights Reserved.
+# (C) Copyright IBM Corp. 2020, 2022. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ ARGUMENTS = ENV_BUILD_ARGS + \
              Argument.CONTAINER_BUILD_ARGS,
              Argument.CONTAINER_TOOL,
              Argument.CONDA_PKG_FORMAT,
-             Argument.ARCH]
+             Argument.PPC_ARCH]
 
 def _run_tests(build_tree, test_labels, conda_env_files, output_folder):
     """

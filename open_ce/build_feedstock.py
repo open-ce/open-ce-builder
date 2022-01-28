@@ -1,6 +1,6 @@
 """
 # *****************************************************************
-# (C) Copyright IBM Corp. 2020, 2021. All Rights Reserved.
+# (C) Copyright IBM Corp. 2020, 2022. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ ARGUMENTS = inputs.PRIMARY_BUILD_ARGS + \
              Argument.CONDA_PKG_FORMAT,
              Argument.DEBUG,
              Argument.DEBUG_OUTPUT_ID,
-             Argument.ARCH]
+             Argument.PPC_ARCH]
 
 def get_conda_build_config():
     '''
