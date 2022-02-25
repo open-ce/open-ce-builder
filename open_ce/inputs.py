@@ -400,7 +400,8 @@ def parse_args(parser, arg_strings=None):
 
     _create_env_config_paths(args)
 
-    _check_ppc_arch(args)
+    if not args.container_build:
+        _check_ppc_arch(args)
 
     if "conda_build_configs" in vars(args).keys():
         if args.conda_build_configs is None:

@@ -449,4 +449,4 @@ For example:
     open-ce build env --build_type=cpu --ppc_arch=p10 --conda_build_config=open-ce/envs/conda_build_config.yaml,open-ce/envs/conda_build_config_p10.yaml tensorflow-env.yaml
 ```
 
-Packages built with above commands runs on Power10 with MMA optimization and on Power9 without MMA optimization. GCC10 is also needed at runtime for some of these packages to work, may it be P9 or P10.
+Packages built with above commands run on Power10 with MMA optimization and on Power9 without MMA optimization. GCC10 is also needed at runtime for most of these packages to work, may it be P9 or P10.
