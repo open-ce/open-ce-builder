@@ -150,7 +150,7 @@ https://github.com/open-ce/open-ce/blob/main/doc/README.yaml.md"""))
                                         '--ppc_arch',
                                         type=str,
                                         default=utils.DEFAULT_PPC_ARCH,
-                                        help='Flag for Power9/Power10. Use p10 for power10 builds'))
+                                        help='Power Architecture to build for, such as "p9" or "p10". Use p10 for power10 enabled builds.'))
 
 
     LOCAL_CONDA_CHANNEL = (lambda parser: parser.add_argument(

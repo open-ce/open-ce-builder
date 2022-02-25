@@ -148,6 +148,11 @@ After performing the build using the `open-ce build env` tool, the `open-ce test
 
 After performing the build using `open-ce build env`, the `open-ce build image` command can be used to create a runtime container image containing the newly created conda channel, as well as a conda environment with the newly build Open-CE packages. For more details on `open-ce build image`, please see [`doc/README.open_ce_build.md`](doc/README.open_ce_build.md#open-ce-build-image-sub-command).
 
+### Building Packages with Power10 MMA Optimization
+
+One can build the major Open-CE libraries like Tensorflow, Pytorch, Xgboost, etc. with Power10 MMA optimization.
+For details, please see [`doc/README.open_ce_build.md`](doc/README.open_ce_build.md).
+
 ### Contributions
 
 For contribution information, please see the [CONTRIBUTING.md](CONTRIBUTING.md) page.
