@@ -89,6 +89,9 @@ class Error(Enum):
     TEMP_BUILD_IMAGE_FILES = (37, "Error removing temporary files created during build image.")
     UNABLE_DOWNLOAD_SOURCE = (38, "Unable to download source for '{}'.")
     UNABLE_CLONE_SOURCE = (39, "Unable to clone source for '{}'.")
+    GCC10_11_COMPILER_NOT_FOUND = (40, "GCC10 and 11 are either not installed or are installed at non-default location." +
+                                       "Please install gcc-toolset-10 and gcc-toolset-11 and set GCC_10_HOME and " +
+                                       "GCC_11_HOME appropriately.")
 
 class OpenCEError(Exception):
     """

@@ -21,7 +21,7 @@ import os
 import argparse
 from enum import Enum, unique
 from open_ce import utils
-from open_ce.errors import Error, show_warning, log
+from open_ce.errors import OpenCEError, Error, show_warning, log
 from open_ce import __version__ as open_ce_version
 
 class OpenCEFormatter(argparse.ArgumentDefaultsHelpFormatter):
@@ -382,8 +382,12 @@ def _check_ppc_arch(args):
                 PATH = os.environ["PATH"]
                 os.environ["PATH"] = "{0}:{1}".format(os.path.join(os.environ["GCC_10_HOME"], "bin"), PATH)
                 print("Path variable set to : ", os.environ["PATH"])
+            else:
+                raise OpenCEError(Error.GCC10_11_COMPILER_NOT_FOUND)
             if "GCC_11_HOME" not in os.environ and os.path.exists(utils.DEFAULT_GCC_11_HOME_DIR):
                 os.environ["GCC_11_HOME"] = utils.DEFAULT_GCC_11_HOME_DIR
+            else:
+                raise OpenCEError(Error.GCC10_11_COMPILER_NOT_FOUND)
  
 def parse_args(parser, arg_strings=None):
     '''
