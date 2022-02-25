@@ -419,7 +419,7 @@ check the Dockerfile for details.
 
 ### Building packages with Power10 MMA optimization
 
-## System Requirement
+#### System Requirement
 System: RHEL 8.5 or above
 OS: Linux
 Power Architecture: Power9/Power10
@@ -441,7 +441,7 @@ Currently GCC 11 is used only to build [`openblas-feedstock`](https://github.com
 
 GCC 10/11 setup is automated if the builds are done in a podman container using `--container_build` option. Please see [`Dockerfile`](https://github.com/open-ce/open-ce-builder/blob/main/open_ce/images/builder/Dockerfile-p10) used for containerized build of these packages.
 
-## Build packages
+#### Build packages
 Power10 MMA Optimization is applicable for cpu only builds. One has to use `--ppc_arch=p10` flag in the `open-ce build env` or `open-ce build feedstock` command to build P10 enabled packages. Another important argument which is must to build these packages is `--conda_build_config=open-ce/envs/conda_build_config.yaml,open-ce/envs/conda_build_config_p10.yaml`.[`conda_build_config_p10.yaml`](https://github.com/open-ce/open-ce/blob/main/envs/conda_build_config_p10.yaml) contains Power10 specific settings.
 
 For example:
