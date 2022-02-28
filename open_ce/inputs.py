@@ -150,7 +150,11 @@ https://github.com/open-ce/open-ce/blob/main/doc/README.yaml.md"""))
                                         '--ppc_arch',
                                         type=str,
                                         default=utils.DEFAULT_PPC_ARCH,
-                                        help='Power Architecture to build for, such as "p9" or "p10". Use p10 for power10 enabled builds.'))
+                                        help="""R|Power Architecture to build for. Values: p9 or p10.
+p9: Libraries can be used on Power8, Power9 and Power 10,
+    but do not use MMA acceleration.
+p10: Libraries can be used on Power9 and Power10, and use
+    MMA acceleration on Power10."""))
 
 
     LOCAL_CONDA_CHANNEL = (lambda parser: parser.add_argument(

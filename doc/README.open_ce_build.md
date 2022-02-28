@@ -173,8 +173,11 @@ optional arguments:
   --conda_pkg_format CONDA_PKG_FORMAT
                         Conda package format to be used, such as "tarball" or
                         "conda". (default: conda)
-  --ppc_arch PPC_ARCH   Power Architecture to build for, such as "p9" or "p10". Use p10 for power10 enabled builds.
-                        (default: p9)
+  --ppc_arch PPC_ARCH   Power Architecture to build for. Values: p9 or p10.
+                        p9: Libraries can be used on Power8, Power9 and Power 10,
+                            but do not use MMA acceleration.
+                        p10: Libraries can be used on Power9 and Power10, and use
+                            MMA acceleration on Power10. (default: p9)
 ==============================================================================
 ```
 
@@ -304,8 +307,11 @@ optional arguments:
   --debug_output_id DEBUG_OUTPUT_ID
                         Output ID in case of multiple output recipe, for which debug
                         envs and scripts should be created. (default: None)
-  --ppc_arch PPC_ARCH   Power Architecture to build for, such as "p9" or "p10". Use p10 for power10 enabled builds.
-                        (default: p9)
+  --ppc_arch PPC_ARCH   Power Architecture to build for. Values: p9 or p10.
+                        p9: Libraries can be used on Power8, Power9 and Power 10,
+                            but do not use MMA acceleration.
+                        p10: Libraries can be used on Power9 and Power10, and use
+                            MMA acceleration on Power10. (default: p9)
 
 ==============================================================================
 ```
@@ -420,10 +426,10 @@ check the Dockerfile for details.
 ### Building packages with Power10 MMA optimization
 
 #### System Requirement
-System: RHEL 8.5 or above
-OS: Linux
-Power Architecture: Power9/Power10
-GCC Compiler: GCC10 and GCC11
+* System: RHEL 8.5 or above
+* OS: Linux
+* Power Architecture: Power9/Power10
+* GCC Compiler: GCC10 and GCC11
 
 One can build Power10 enabled packages with above system requirements. Note that Power10 is not required on your build system. The libraries can be built on Power9 as well.
 To install GCC 10 or 11, following command can be used -

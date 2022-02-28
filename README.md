@@ -150,7 +150,7 @@ After performing the build using `open-ce build env`, the `open-ce build image` 
 
 ### Building Packages with Power10 MMA Optimization
 
-One can build the major Open-CE libraries like Tensorflow, Pytorch, Xgboost, etc. with Power10 MMA optimization.
+One can build the major Open-CE libraries like TensorFlow, Pytorch, Xgboost, etc. with Power10 MMA optimization.
 For details, please see [`doc/README.open_ce_build.md`](doc/README.open_ce_build.md).
 
 ### Contributions
