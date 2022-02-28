@@ -1,6 +1,6 @@
 """
 # *****************************************************************
-# (C) Copyright IBM Corp. 2020, 2021. All Rights Reserved.
+# (C) Copyright IBM Corp. 2020, 2022. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -61,6 +61,9 @@ NUM_THREAD_POOL = 16
 OPEN_CE_VERSION_STRING = "Open-CE Version"
 DEFAULT_GRAPH_FILE = "graph.png"
 DEFAULT_TEST_RESULT_FILE = "test_results.xml"
+DEFAULT_PPC_ARCH = "p9"
+DEFAULT_GCC_10_HOME_DIR = "/opt/rh/gcc-toolset-10/root/usr"
+DEFAULT_GCC_11_HOME_DIR = "/opt/rh/gcc-toolset-11/root/usr"
 
 def make_variants(python_versions=DEFAULT_PYTHON_VERS,
                   build_types=DEFAULT_BUILD_TYPES,

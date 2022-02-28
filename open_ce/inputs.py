@@ -1,6 +1,6 @@
 """
 # *****************************************************************
-# (C) Copyright IBM Corp. 2020, 2021. All Rights Reserved.
+# (C) Copyright IBM Corp. 2020, 2022. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import os
 import argparse
 from enum import Enum, unique
 from open_ce import utils
-from open_ce.errors import Error, show_warning, log
+from open_ce.errors import OpenCEError, Error, show_warning, log
 from open_ce import __version__ as open_ce_version
 
 class OpenCEFormatter(argparse.ArgumentDefaultsHelpFormatter):
@@ -146,6 +146,16 @@ https://github.com/open-ce/open-ce/blob/main/doc/README.yaml.md"""))
                                         '--conda_env_files',
                                         type=str,
                                         help='Comma delimited list of paths to conda environment files.' ))
+    PPC_ARCH = (lambda parser: parser.add_argument(
+                                        '--ppc_arch',
+                                        type=str,
+                                        default=utils.DEFAULT_PPC_ARCH,
+                                        help="""R|Power Architecture to build for. Values: p9 or p10.
+p9: Libraries can be used on Power8, Power9 and Power 10,
+    but do not use MMA acceleration.
+p10: Libraries can be used on Power9 and Power10, and use
+    MMA acceleration on Power10."""))
+
 
     LOCAL_CONDA_CHANNEL = (lambda parser: parser.add_argument(
                                         '--local_conda_channel',
@@ -363,6 +373,27 @@ def _create_env_config_paths(args):
                 log.info("Unable to find '%s' locally. Attempting to use '%s'.", config_file, new_url)
                 args.env_config_file[index] = new_url
 
+def _check_ppc_arch(args):
+    '''
+    This will check if ppc_arch is p10 and set the corresponding
+    needed environment variables for GCC_10_HOME and GCC_11_HOME
+    '''
+    if "ppc_arch" in vars(args).keys() and args.ppc_arch:
+        if args.ppc_arch == "p10":
+            if "GCC_10_HOME" not in os.environ:
+                os.environ["GCC_10_HOME"] = utils.DEFAULT_GCC_10_HOME_DIR
+            if os.path.exists(os.environ["GCC_10_HOME"]):
+                PATH = os.environ["PATH"]
+                os.environ["PATH"] = "{0}:{1}".format(os.path.join(os.environ["GCC_10_HOME"], "bin"), PATH)
+                print("Path variable set to : ", os.environ["PATH"])
+            else:
+                raise OpenCEError(Error.GCC10_11_COMPILER_NOT_FOUND)
+
+            if "GCC_11_HOME" not in os.environ:
+                os.environ["GCC_11_HOME"] = utils.DEFAULT_GCC_11_HOME_DIR
+            if not os.path.exists(utils.DEFAULT_GCC_11_HOME_DIR):
+                raise OpenCEError(Error.GCC10_11_COMPILER_NOT_FOUND)
+
 def parse_args(parser, arg_strings=None):
     '''
     Parses input arguments and handles more complex defaults.
@@ -371,8 +402,10 @@ def parse_args(parser, arg_strings=None):
                           the local path.
     '''
     args = parser.parse_args(arg_strings)
-
     _create_env_config_paths(args)
+
+    if "container_build" not in vars(args).keys() or not args.container_build:
+        _check_ppc_arch(args)
 
     if "conda_build_configs" in vars(args).keys():
         if args.conda_build_configs is None:

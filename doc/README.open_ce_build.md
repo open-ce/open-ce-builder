@@ -90,6 +90,7 @@ usage: open-ce build env [-h] [--conda_build_configs CONDA_BUILD_CONFIG]
                          [--container_build_args CONTAINER_BUILD_ARGS]
                          [--container_tool CONTAINER_TOOL]
                          [--conda_pkg_format CONDA_PKG_FORMAT]
+                         [--ppc_arch PPC_ARCH]
                          env_config_file [env_config_file ...]
 
 positional arguments:
@@ -172,6 +173,11 @@ optional arguments:
   --conda_pkg_format CONDA_PKG_FORMAT
                         Conda package format to be used, such as "tarball" or
                         "conda". (default: conda)
+  --ppc_arch PPC_ARCH   Power Architecture to build for. Values: p9 or p10.
+                        p9: Libraries can be used on Power8, Power9 and Power 10,
+                            but do not use MMA acceleration.
+                        p10: Libraries can be used on Power9 and Power10, and use
+                            MMA acceleration on Power10. (default: p9)
 ==============================================================================
 ```
 
@@ -243,6 +249,7 @@ usage: open-ce build feedstock [-h] [--conda_build_configs CONDA_BUILD_CONFIG]
                                [--conda_pkg_format CONDA_PKG_FORMAT]
                                [--debug DEBUG]
                                [--debug_output_id DEBUG_OUTPUT_ID] 
+                               [--ppc_arch PPC_ARCH]
 optional arguments:
   -h, --help            show this help message and exit
   --conda_build_configs CONDA_BUILD_CONFIGS
@@ -300,6 +307,11 @@ optional arguments:
   --debug_output_id DEBUG_OUTPUT_ID
                         Output ID in case of multiple output recipe, for which debug
                         envs and scripts should be created. (default: None)
+  --ppc_arch PPC_ARCH   Power Architecture to build for. Values: p9 or p10.
+                        p9: Libraries can be used on Power8, Power9 and Power 10,
+                            but do not use MMA acceleration.
+                        p10: Libraries can be used on Power9 and Power10, and use
+                            MMA acceleration on Power10. (default: p9)
 
 ==============================================================================
 ```
@@ -410,3 +422,42 @@ The Dockerfile for this runtime image is located in [`images/opence-runtime/Dock
 This file can also be built and run manually and supports GPUs if the system is set up with
 `nvidia-container-runtime`. When building the Dockerfile directly, it does require a few arguents,
 check the Dockerfile for details.
+
+### Building packages with Power10 MMA optimization
+
+#### System Requirements
+* System: RHEL 8.5 or above
+* OS: Linux
+* Power Architecture: Power9/Power10
+* GCC Compiler: GCC10 and GCC11
+
+One can build Power10 enabled packages with above system requirements. Note that Power10 is not required on your build system. The libraries can be built on Power9 as well.
+To install GCC 10 or 11, following command can be used -
+```shell
+    yum install -y gcc-toolset-10 gcc-toolset-11
+```
+
+Set GCC_10_HOME and GCC_11_HOME environment variables to proceed with the builds on baremetal, if GCC10 or GCC11 is installed at a non-default location.
+
+For example:
+```shell
+    export GCC_10_HOME=/opt/rh/gcc-toolset-10/root/usr
+```
+
+Currently GCC 11 is used only to build [`openblas-feedstock`](https://github.com/open-ce/openblas-feedstock). All other Open-CE recipes can be built using GCC 10.
+
+GCC 10/11 setup is automated if the builds are done in a podman container using `--container_build` option. Please see [`Dockerfile`](https://github.com/open-ce/open-ce-builder/blob/main/open_ce/images/builder/Dockerfile-p10) used for containerized build of these packages.
+
+#### Build packages
+Power10 MMA Optimization is applicable for cpu only builds. One has to use `--ppc_arch=p10` flag in the `open-ce build env` or `open-ce build feedstock` command to build P10 enabled packages. Another important argument which is must to build these packages is `--conda_build_config=open-ce/envs/conda_build_config.yaml,open-ce/envs/conda_build_config_p10.yaml`.[`conda_build_config_p10.yaml`](https://github.com/open-ce/open-ce/blob/main/envs/conda_build_config_p10.yaml) contains Power10 specific settings.
+
+For example:
+```shell
+    open-ce build env --build_type=cpu --ppc_arch=p10 --conda_build_config=open-ce/envs/conda_build_config.yaml,open-ce/envs/conda_build_config_p10.yaml tensorflow-env.yaml
+```
+
+#### Using packages with Power10 MMA optimization
+When using packages that were built with ppc_arch=p10, note that:
+
+* These packages will work on Power9 or Power10, but not on Power8
+* At runtime, GCC10 needs to be present on the system. Packages like TF, PyTorch, SentencePiece, ONNX Runtime, etc. require some GCC10 libraries to be present at runtime. This applies to both Power9 and Power10 systems.

@@ -1,6 +1,6 @@
 """
 # *****************************************************************
-# (C) Copyright IBM Corp. 2020, 2021. All Rights Reserved.
+# (C) Copyright IBM Corp. 2020, 2022. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -42,7 +42,8 @@ def make_parser():
                  Argument.OUTPUT_FOLDER,
                  Argument.CONDA_BUILD_CONFIG,
                  Argument.CONTAINER_BUILD_ARGS,
-                 Argument.CONTAINER_TOOL]
+                 Argument.CONTAINER_TOOL,
+                 Argument.PPC_ARCH]
     parser = argparse.ArgumentParser(arguments)
     parser.add_argument('command_placeholder', nargs=1, type=str)
     parser.add_argument('sub_command_placeholder', nargs=1, type=str)
@@ -58,13 +59,18 @@ def _use_root_user(container_tool):
 def _home_path(container_tool):
     return "/root" if _use_root_user(container_tool) else "/home/builder"
 
-def build_image(build_image_path, dockerfile, container_tool, cuda_version=None, container_build_args=""):
+#pylint: disable=too-many-arguments
+def build_image(build_image_path, dockerfile, container_tool, cuda_version=None,
+                container_build_args="", ppc_arch=utils.DEFAULT_PPC_ARCH):
+
     """
     Build a container image from the Dockerfile in BUILD_IMAGE_PATH.
     Returns a result code and the name of the new image.
     """
     if cuda_version:
         image_name = REPO_NAME + ":" + IMAGE_NAME + "-cuda" + cuda_version
+    elif ppc_arch == "p10":
+        image_name = REPO_NAME + ":" + IMAGE_NAME + "-cpu-p10"
     else:
         image_name = REPO_NAME + ":" + IMAGE_NAME + "-cpu"
     build_cmd = container_tool + " build "
@@ -209,7 +215,7 @@ def build_in_container(image_name, args, arg_strings):
         # Cleanup
         _stop_container(container_name, args.container_tool)
 
-def _generate_dockerfile_name(build_types, cuda_version):
+def _generate_dockerfile_name(build_types, cuda_version, ppc_arch=utils.DEFAULT_PPC_ARCH):
     '''
     Ensure we have valid combinations.  I.e. Specify a valid cuda version
     '''
@@ -220,7 +226,10 @@ def _generate_dockerfile_name(build_types, cuda_version):
             raise OpenCEError(Error.UNSUPPORTED_CUDA, cuda_version)
     else:
         #Build with cpu based image
-        dockerfile = os.path.join(BUILD_IMAGE_PATH, "Dockerfile")
+        if ppc_arch == "p10":
+            dockerfile = os.path.join(BUILD_IMAGE_PATH, "Dockerfile-p10")
+        else:
+            dockerfile = os.path.join(BUILD_IMAGE_PATH, "Dockerfile")
         build_image_path = BUILD_IMAGE_PATH
     return build_image_path, dockerfile
 
@@ -250,13 +259,15 @@ def build_with_container_tool(args, arg_strings):
 
     parser = make_parser()
     _, unused_args = parser.parse_known_args(arg_strings[1:])
+    if not args.ppc_arch:
+        args.ppc_arch = utils.DEFAULT_PPC_ARCH
 
-    build_image_path, dockerfile = _generate_dockerfile_name(args.build_types, args.cuda_versions)
+    build_image_path, dockerfile = _generate_dockerfile_name(args.build_types, args.cuda_versions, args.ppc_arch)
 
     if  'cuda' not in args.build_types or _capable_of_cuda_containers(args.cuda_versions):
         image_name = build_image(build_image_path, dockerfile, args.container_tool,
                                  args.cuda_versions if 'cuda' in args.build_types else None,
-                                 args.container_build_args)
+                                 args.container_build_args, args.ppc_arch)
     else:
         raise OpenCEError(Error.INCOMPAT_CUDA, utils.get_driver_level(), args.cuda_versions)
 

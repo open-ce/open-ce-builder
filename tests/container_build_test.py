@@ -1,5 +1,5 @@
 # *****************************************************************
-# (C) Copyright IBM Corp. 2020, 2021. All Rights Reserved.
+# (C) Copyright IBM Corp. 2020, 2022. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -127,6 +127,7 @@ def make_args(command="build",
               cuda_versions="10.2",
               container_build_args="",
               container_tool=utils.DEFAULT_CONTAINER_TOOL,
+              ppc_arch=utils.DEFAULT_PPC_ARCH,
               **kwargs):
     return Namespace(command = command,
                      sub_command = sub_command,
@@ -138,6 +139,7 @@ def make_args(command="build",
                      cuda_versions=cuda_versions,
                      container_build_args=container_build_args,
                      container_tool=container_tool,
+                     ppc_arch=ppc_arch,
                      **kwargs)
 
 def test_build_in_container(mocker):
@@ -262,6 +264,13 @@ def test_generate_dockerfile_name():
     with pytest.raises(OpenCEError) as exc:
         container_build._generate_dockerfile_name(build_type, cuda_version)
     assert "Cannot build using container" in str(exc.value)
+
+    #Power10 CPU build
+    build_type = "cpu"
+    cuda_version = "11.0"
+    ppc_arch = "p10"
+    image_path, docker_file_name = container_build._generate_dockerfile_name(build_type, cuda_version, ppc_arch)
+    assert docker_file_name == os.path.join(image_path, "Dockerfile-p10")
 
 def test_capable_of_cuda_containers(mocker):
     '''
