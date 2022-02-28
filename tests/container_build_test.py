@@ -1,5 +1,5 @@
 # *****************************************************************
-# (C) Copyright IBM Corp. 2020, 2021. All Rights Reserved.
+# (C) Copyright IBM Corp. 2020, 2022. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -127,6 +127,7 @@ def make_args(command="build",
               cuda_versions="10.2",
               container_build_args="",
               container_tool=utils.DEFAULT_CONTAINER_TOOL,
+              ppc_arch=utils.DEFAULT_PPC_ARCH,
               **kwargs):
     return Namespace(command = command,
                      sub_command = sub_command,
@@ -138,6 +139,7 @@ def make_args(command="build",
                      cuda_versions=cuda_versions,
                      container_build_args=container_build_args,
                      container_tool=container_tool,
+                     ppc_arch=ppc_arch,
                      **kwargs)
 
 def test_build_in_container(mocker):

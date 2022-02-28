@@ -42,7 +42,8 @@ def make_parser():
                  Argument.OUTPUT_FOLDER,
                  Argument.CONDA_BUILD_CONFIG,
                  Argument.CONTAINER_BUILD_ARGS,
-                 Argument.CONTAINER_TOOL]
+                 Argument.CONTAINER_TOOL,
+                 Argument.PPC_ARCH]
     parser = argparse.ArgumentParser(arguments)
     parser.add_argument('command_placeholder', nargs=1, type=str)
     parser.add_argument('sub_command_placeholder', nargs=1, type=str)
@@ -256,6 +257,8 @@ def build_with_container_tool(args, arg_strings):
 
     parser = make_parser()
     _, unused_args = parser.parse_known_args(arg_strings[1:])
+    if not args.ppc_arch:
+        args.ppc_arch = utils.DEFAULT_PPC_ARCH
 
     build_image_path, dockerfile = _generate_dockerfile_name(args.build_types, args.cuda_versions, args.ppc_arch)
 
