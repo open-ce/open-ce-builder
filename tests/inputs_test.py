@@ -17,6 +17,7 @@
 
 import os
 import pathlib
+import pytest
 from importlib.util import spec_from_loader, module_from_spec
 from importlib.machinery import SourceFileLoader
 
@@ -27,7 +28,7 @@ opence = module_from_spec(spec)
 spec.loader.exec_module(opence)
 
 from open_ce.inputs import make_parser, _create_env_config_paths, Argument, _check_ppc_arch, parse_args
-
+from open_ce.errors import OpenCEError, Error
 
 def test_create_env_config_paths(mocker):
     '''
@@ -102,4 +103,21 @@ def test_check_ppc_arch_for_p10_container_build(mocker):
     parse_args(parser, args_str)
     assert "GCC_10_HOME" not in os.environ
     assert "GCC_11_HOME" not in os.environ
+
+def test_check_ppc_arch_for_p10_with_no_gcc_path(mocker):
+    '''
+    Test if GCC_10_HOME and GCC_11_HOME don't exist, an error is thrown
+    '''
+    mocker.patch(
+        'os.path.exists',
+        return_value=False
+    )
+
+    parser = make_parser([Argument.ENV_FILE, Argument.PPC_ARCH])
+
+    args = parser.parse_args(["test-env.yaml", "--ppc_arch=p10"])
+
+    with pytest.raises(OpenCEError) as exc:
+        _check_ppc_arch(args)
+    assert Error.GCC10_11_COMPILER_NOT_FOUND.value[1] in str(exc.value)
 

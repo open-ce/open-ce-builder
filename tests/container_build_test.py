@@ -265,6 +265,13 @@ def test_generate_dockerfile_name():
         container_build._generate_dockerfile_name(build_type, cuda_version)
     assert "Cannot build using container" in str(exc.value)
 
+    #Power10 CPU build
+    build_type = "cpu"
+    cuda_version = "11.0"
+    ppc_arch = "p10"
+    image_path, docker_file_name = container_build._generate_dockerfile_name(build_type, cuda_version, ppc_arch)
+    assert docker_file_name == os.path.join(image_path, "Dockerfile-p10")
+
 def test_capable_of_cuda_containers(mocker):
     '''
     Simple test for _capable_of_cuda_containers
