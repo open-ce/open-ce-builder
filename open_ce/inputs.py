@@ -401,7 +401,6 @@ def parse_args(parser, arg_strings=None):
                           the local path.
     '''
     args = parser.parse_args(arg_strings)
-
     _create_env_config_paths(args)
 
     if "container_build" not in vars(args).keys() or not args.container_build:
