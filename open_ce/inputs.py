@@ -392,7 +392,7 @@ def _check_ppc_arch(args):
                 os.environ["GCC_11_HOME"] = utils.DEFAULT_GCC_11_HOME_DIR
             else:
                 raise OpenCEError(Error.GCC10_11_COMPILER_NOT_FOUND)
- 
+
 def parse_args(parser, arg_strings=None):
     '''
     Parses input arguments and handles more complex defaults.

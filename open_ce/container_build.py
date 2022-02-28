@@ -59,8 +59,10 @@ def _use_root_user(container_tool):
 def _home_path(container_tool):
     return "/root" if _use_root_user(container_tool) else "/home/builder"
 
+#pylint: disable=too-many-arguments
 def build_image(build_image_path, dockerfile, container_tool, cuda_version=None,
                 container_build_args="", ppc_arch=utils.DEFAULT_PPC_ARCH):
+
     """
     Build a container image from the Dockerfile in BUILD_IMAGE_PATH.
     Returns a result code and the name of the new image.
