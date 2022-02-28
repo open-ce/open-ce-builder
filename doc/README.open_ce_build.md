@@ -425,7 +425,7 @@ check the Dockerfile for details.
 
 ### Building packages with Power10 MMA optimization
 
-#### System Requirement
+#### System Requirements
 * System: RHEL 8.5 or above
 * OS: Linux
 * Power Architecture: Power9/Power10
@@ -460,4 +460,4 @@ For example:
 When using packages that were built with ppc_arch=p10, note that:
 
 * These packages will work on Power9 or Power10, but not on Power8
-* At runtime, gcc10 needs to be present on the system. Packages like TF, pytorch, sentencepiece, onnxruntime, etc. require some gcc10 libraries to be present at runtime. This applies to both Power9 and Power10 systems.
+* At runtime, GCC10 needs to be present on the system. Packages like TF, PyTorch, SentencePiece, ONNX Runtime, etc. require some GCC10 libraries to be present at runtime. This applies to both Power9 and Power10 systems.
