@@ -425,7 +425,8 @@ OS: Linux
 Power Architecture: Power9/Power10
 GCC Compiler: GCC10 and GCC11
 
-One can build Power10 enabled packages on Power9 or Power10 with above system requirements. To install GCC 10 or 11, following command can be used -
+One can build Power10 enabled packages with above system requirements. Note that Power10 is not required on your build system. The libraries can be built on Power9 as well.
+To install GCC 10 or 11, following command can be used -
 ```shell
     yum install -y gcc-toolset-10 gcc-toolset-11
 ```
@@ -449,4 +450,8 @@ For example:
     open-ce build env --build_type=cpu --ppc_arch=p10 --conda_build_config=open-ce/envs/conda_build_config.yaml,open-ce/envs/conda_build_config_p10.yaml tensorflow-env.yaml
 ```
 
-Packages built with above commands run on Power10 with MMA optimization and on Power9 without MMA optimization. GCC10 is also needed at runtime for most of these packages to work, may it be P9 or P10.
+#### Using packages with Power10 MMA optimization
+When using packages that were built with ppc_arch=p10, note that:
+
+* These packages will work on Power9 or Power10, but not on Power8
+* At runtime, gcc10 needs to be present on the system. Packages like TF, pytorch, sentencepiece, onnxruntime, etc. require some gcc10 libraries to be present at runtime. This applies to both Power9 and Power10 systems.
