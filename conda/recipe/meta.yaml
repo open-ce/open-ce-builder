@@ -1,5 +1,5 @@
 {% set name = "open-ce-builder" %}
-{% set version = "8.0.0" %}
+{% set version = "9.0.0" %}
 
 package:
   name: {{ name }}
