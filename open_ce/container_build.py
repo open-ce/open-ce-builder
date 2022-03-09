@@ -76,10 +76,13 @@ def build_image(build_image_path, dockerfile, container_tool, cuda_version=None,
     build_cmd = container_tool + " build "
     build_cmd += "-f " + dockerfile + " "
     build_cmd += "-t " + image_name + " "
+    user_in_container = "root"
     if not _use_root_user(container_tool):
         build_cmd += "--build-arg BUILD_ID=" + str(os.getuid()) + " "
         build_cmd += "--build-arg GROUP_ID=" + str(os.getgid()) + " "
+        user_in_container = "builder"
 
+    build_cmd += "--build-arg USER_IN_CONTAINER=" + user_in_container + " "
     build_cmd += container_build_args + " "
     build_cmd += build_image_path
 
@@ -197,6 +200,7 @@ def build_in_container(image_name, args, arg_strings):
         config_in_container.append(os.path.join(home_path, os.path.basename(conda_build_config)))
     arg_strings = arg_strings + ["--conda_build_configs", ",".join(config_in_container)]
 
+    arg_strings = arg_strings + ["--ppc_arch", args.ppc_arch]
     # Add local_files directory (if it exists)
     if os.path.isdir(LOCAL_FILES_PATH):
         _copy_to_container(LOCAL_FILES_PATH, home_path, container_name, args.container_tool)
