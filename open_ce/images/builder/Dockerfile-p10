@@ -9,7 +9,6 @@ ENV CICD_GROUP=cicd
 ARG GROUP_ID=1500
 ENV BUILD_USER=builder
 ARG BUILD_ID=1084
-ARG USER_IN_CONTAINER=root
 
 RUN export ARCH="$(uname -m)" && \
     yum repolist && yum install -y rsync openssh-clients diffutils procps gcc-toolset-10 gcc-toolset-11 && \
@@ -39,9 +38,9 @@ RUN export ARCH="$(uname -m)" && \
     echo "PATH="${PATH}"" >> ${HOME}/.bashrc && \
     echo "GCC_10_HOME="${GCC_10_HOME}"" >> ${HOME}/.bashrc && \
     echo "GCC_11_HOME="${GCC_11_HOME}"" >> ${HOME}/.bashrc && \
-    if [ "$USER_IN_CONTAINER" != "root" ]; then chown -R ${BUILD_USER}:${CICD_GROUP} ${CONDA_HOME}; fi
+    chown -R ${BUILD_USER}:${CICD_GROUP} ${CONDA_HOME}
 
-USER ${USER_IN_CONTAINER}
+USER ${BUILD_USER}
 RUN export PATH="/opt/rh/gcc-toolset-10/root/usr/bin:${PATH}" && \
     export GCC_10_HOME="/opt/rh/gcc-toolset-10/root/usr" && \
     export GCC_11_HOME="/opt/rh/gcc-toolset-11/root/usr" && \

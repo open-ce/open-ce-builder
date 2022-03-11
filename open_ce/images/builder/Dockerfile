@@ -9,7 +9,6 @@ ENV CICD_GROUP=cicd
 ARG GROUP_ID=1500
 ENV BUILD_USER=builder
 ARG BUILD_ID=1084
-ARG USER_IN_CONTAINER=root
 
 RUN export ARCH="$(uname -m)" && \
     yum repolist && yum install -y rsync openssh-clients diffutils procps binutils && \
@@ -32,9 +31,9 @@ RUN export ARCH="$(uname -m)" && \
     mkdir -p $CONDA_HOME/conda-bld && \
     mkdir -p $HOME/.cache && \
     echo "export PYTHONPATH=${PYTHONPATH}:$HOME/open_ce" >> ${HOME}/.bashrc && \
-    if [ "$USER_IN_CONTAINER" != "root" ]; then chown -R ${BUILD_USER}:${CICD_GROUP} ${CONDA_HOME}; fi
+    chown -R ${BUILD_USER}:${CICD_GROUP} ${CONDA_HOME}
 
-USER ${USER_IN_CONTAINER}
+USER ${BUILD_USER}
 RUN export PATH="${PATH}" && \
     echo "PATH="${PATH}"" >> ${HOME}/.profile && \
     mkdir -p $HOME/.cache && \
