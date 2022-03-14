@@ -76,13 +76,10 @@ def build_image(build_image_path, dockerfile, container_tool, cuda_version=None,
     build_cmd = container_tool + " build "
     build_cmd += "-f " + dockerfile + " "
     build_cmd += "-t " + image_name + " "
-    user_in_container = "root"
     if not _use_root_user(container_tool):
         build_cmd += "--build-arg BUILD_ID=" + str(os.getuid()) + " "
         build_cmd += "--build-arg GROUP_ID=" + str(os.getgid()) + " "
-        user_in_container = "builder"
 
-    build_cmd += "--build-arg USER_IN_CONTAINER=" + user_in_container + " "
     build_cmd += container_build_args + " "
     build_cmd += build_image_path
 
