@@ -21,7 +21,7 @@ jobs:
         env:
           ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
         run: |
-          conda install -y conda-build anaconda-client
+          conda install -y conda-build=3.21.7 anaconda-client
           conda config --set anaconda_upload yes
           export ANACONDA_API_TOKEN=$ANACONDA_TOKEN
           ./packaging_scripts/create_conda_package.sh
