@@ -456,8 +456,10 @@ For example:
     open-ce build env --build_type=cpu --ppc_arch=p10 --conda_build_config=open-ce/envs/conda_build_config.yaml,open-ce/envs/conda_build_config_p10.yaml tensorflow-env.yaml
 ```
 
+Open-CE also contains [`open-ce/envs/opence-p10-env.yaml`](https://github.com/open-ce/open-ce/blob/main/envs/opence-p10-env.yaml) which builds all the Power10 enabled packages in one go.
+
 #### Using packages with Power10 MMA optimization
 When using packages that were built with ppc_arch=p10, note that:
 
 * These packages will work on Power9 or Power10, but not on Power8
-* At runtime, GCC10 needs to be present on the system. Packages like TF, PyTorch, SentencePiece, ONNX Runtime, etc. require some GCC10 libraries to be present at runtime. This applies to both Power9 and Power10 systems.
+* At runtime, GCC10 needs to be present on the system. Packages like TF, PyTorch, SentencePiece, ONNX Runtime, etc. require some GCC10 libraries namely libgfortran.so to be present at runtime. This applies to both Power9 and Power10 systems. It is recommended to use this library provided by RHEL toolchain.
