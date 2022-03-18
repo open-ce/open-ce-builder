@@ -26,7 +26,7 @@ The `open-ce` tool allows a user to build collections of conda recipes described
 
 * `conda` >= 4.11
   * The conda tool can either be installed through [Anaconda](https://www.anaconda.com/products/individual#Downloads) or [Miniconda](https://docs.conda.io/en/latest/miniconda.html).
-* `conda-build` >= 3.21.7
+* `conda-build` == 3.21.7
   * Once `conda` is installed, `conda-build` can be installed with the command: `conda install conda-build`
 * `networkx` >= 2.5
 * `python` >= 3.7
@@ -103,12 +103,18 @@ The following commands will use the `opence-env.yaml` Open-CE environment file f
 # Build packages
 open-ce build env --python_versions 3.7,3.8,3.9 --build_types cuda opence-env
 ```
-### Building Packages with Power10 MMA Optimization
+
+### Power10 MMA Optimization
+#### Building Packages
 
 One can build the major Open-CE libraries like TensorFlow, Pytorch, Xgboost, etc. with Power10 MMA optimization.
 For details, please see [`doc/README.open_ce_build.md`](doc/README.open_ce_build.md).
 
-#### Building within a container
+#### Running Packages
+
+These packages will work on Power9 or Power10, but not on Power8. At runtime, system GCC10 (gcc-toolset-10) needs to be present on the system. This applies to both Power9 and Power10 systems.
+
+### Building within a container
 
 Passing the `--container_build` argument to the `open-ce build env` command will create a container image and perform the actual build inside of a container based on that image. This will provide a "clean" environment for the builds and make builds more system independent. It is recommended to build with this option as opposed to running on a bare metal machine. For more information on the `--container_build` option, please see [`doc/README.open_ce_build.md`](doc/README.open_ce_build.md#open-ce-build-env-sub-command).
 
