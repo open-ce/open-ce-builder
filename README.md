@@ -5,8 +5,8 @@
 </p>
 
 [![Installation Options](https://img.shields.io/badge/Install%20with-conda%20%7C%20pip-brightgreen)](#installing-the-open-ce-build-tools)
-[![Python Support](https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9-blue.svg)](#requirements)
-[![Cuda Support](https://img.shields.io/badge/cuda-10.2%20%7C%2011.0%20%7C%2011.2-blue)](doc/README.cuda_support.md)
+[![Python Support](https://img.shields.io/badge/python-3.8%20%7C%203.9-blue.svg)](#requirements)
+[![Cuda Support](https://img.shields.io/badge/cuda-11.0%20%7C%2011.2-blue)](doc/README.cuda_support.md)
 
 [![Builder Unit Tests](https://github.com/open-ce/open-ce/workflows/Open-CE%20Builder%20Unit%20Tests/badge.svg)](https://github.com/open-ce/open-ce-builder/actions?query=workflow%3A%22Open-CE+Builder+Unit+Tests%22+branch%3Amain)
 [![Builder Unit Test Coverage](https://codecov.io/gh/open-ce/open-ce-builder/branch/main/graph/badge.svg)](https://codecov.io/gh/open-ce/open-ce-builder)
@@ -29,7 +29,7 @@ The `open-ce` tool allows a user to build collections of conda recipes described
 * `conda-build` == 3.21.7
   * Once `conda` is installed, `conda-build` can be installed with the command: `conda install conda-build`
 * `networkx` >= 2.5
-* `python` >= 3.7
+* `python` >= 3.8
 * `junit-xml` >= 1.9
 * `docker` >= 1.13 or `podman` >= 2.0.5
   * docker or podman required only when building within a container (see below).
@@ -38,7 +38,7 @@ The `open-ce` tool allows a user to build collections of conda recipes described
 
 ### CUDA Requirements
 
-Currently CUDA 10.2 and 11.2 are supported by the recipes in Open-CE. Please see [`doc/README.cuda_support.md`](doc/README.cuda_support.md) for details on setting
+Currently CUDA 11.2 is supported by the recipes in Open-CE. Please see [`doc/README.cuda_support.md`](doc/README.cuda_support.md) for details on setting
 up a proper build enviornment for CUDA support.
 
 Open-CE expects the `CUDA_HOME` environment variable to be set to the location of the CUDA installation. Note that not all recipes work when `CUDA_HOME` references a non-standard CUDA installation location. Reference the [cuda README](doc/README.cuda_support.md) for more information.
@@ -97,11 +97,11 @@ The following commands will build version 1.1.4 of the open-ce environment file 
 open-ce build env --git_tag open-ce-v1.1.4 opence-env
 ```
 
-The following commands will use the `opence-env.yaml` Open-CE environment file from a specific Open-CE release to build all of the Open-CE packages for Python 3.7, 3.8 and 3.9, including only CUDA builds. The commands should be run from within the same directory that contains `local_files`.
+The following commands will use the `opence-env.yaml` Open-CE environment file from a specific Open-CE release to build all of the Open-CE packages for Python 3.8 and 3.9, including only CUDA builds. The commands should be run from within the same directory that contains `local_files`.
 
 ```bash
 # Build packages
-open-ce build env --python_versions 3.7,3.8,3.9 --build_types cuda opence-env
+open-ce build env --python_versions 3.8,3.9 --build_types cuda opence-env
 ```
 
 ### Power10 MMA Optimization
