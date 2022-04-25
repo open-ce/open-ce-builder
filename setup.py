@@ -52,7 +52,7 @@ setup(
         ],
     },
 
-    python_requires=">= 3.7",
+    python_requires=">= 3.8",
     install_requires=REQUIRED_PACKAGES,
     tests_require=["pytest"],
     # PyPI package information.
@@ -62,7 +62,6 @@ setup(
         "Intended Audience :: Education",
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: Apache Software License",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Topic :: Software Development :: Libraries :: Python Modules",

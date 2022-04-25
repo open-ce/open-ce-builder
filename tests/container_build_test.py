@@ -124,7 +124,7 @@ def make_args(command="build",
               provided_env_files=None,
               conda_build_config=None,
               build_types="cuda",
-              cuda_versions="10.2",
+              cuda_versions="11.2",
               container_build_args="",
               container_tool=utils.DEFAULT_CONTAINER_TOOL,
               ppc_arch=utils.DEFAULT_PPC_ARCH,
@@ -219,7 +219,7 @@ def test_build_with_container_tool(mocker):
     '''
     image_name = "my_image"
     arg_strings = ["path/to/open-ce", "build", "env", "--container_build", "my-env.yaml",
-                   "--cuda_versions", "10.2", "--build_types", "cuda"]
+                   "--cuda_versions", "11.2", "--build_types", "cuda"]
     args = make_args()
 
     mocker.patch('open_ce.container_build.build_image', return_value=(0, image_name))
@@ -234,7 +234,7 @@ def test_build_with_container_tool_failures(mocker):
     Failure cases for build_with_container_tool
     '''
     arg_strings = ["path/to/open-ce", "build", "env", "--container_build", "my-env.yaml",
-                   "--cuda_versions", "10.2", "--build_types", "cuda"]
+                   "--cuda_versions", "11.2", "--build_types", "cuda"]
     args = make_args()
     mocker.patch('os.system', return_value=1)
 
@@ -276,7 +276,7 @@ def test_capable_of_cuda_containers(mocker):
     '''
     Simple test for _capable_of_cuda_containers
     '''
-    cuda_version = "10.2"
+    cuda_version = "11.2"
 
     mocker.patch('open_ce.utils.cuda_driver_installed', return_value=0)
     ret = container_build._capable_of_cuda_containers(cuda_version)
@@ -301,7 +301,7 @@ def test_build_with_container_tool_incompatible_cuda_versions(mocker):
 
     #with docker_build argument
     arg_strings = ["path/to/open-ce", "build", "env", "--docker_build", "my-env.yaml",
-                   "--cuda_versions", "10.2", "--build_types", "cuda"]
+                   "--cuda_versions", "11.2", "--build_types", "cuda"]
     args = make_args()
     with pytest.raises(OpenCEError) as exc:
         container_build.build_with_container_tool(args, arg_strings)
@@ -309,7 +309,7 @@ def test_build_with_container_tool_incompatible_cuda_versions(mocker):
 
     #with container_build argument
     arg_strings = ["path/to/open-ce", "build", "env", "--container_build", "my-env.yaml",
-                   "--cuda_versions", "10.2", "--build_types", "cuda"]
+                   "--cuda_versions", "11.2", "--build_types", "cuda"]
     args = make_args()
     mocker.patch('open_ce.container_build._capable_of_cuda_containers', return_value=0)
     mocker.patch('open_ce.utils.get_driver_level',return_value="abc")
