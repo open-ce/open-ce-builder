@@ -11,7 +11,7 @@ ENV BUILD_USER=builder
 ARG BUILD_ID=1084
 
 RUN export ARCH="$(uname -m)" && \
-    yum repolist && yum install -y rsync openssh-clients diffutils procps gcc-toolset-10 gcc-toolset-11 && \
+    yum repolist && yum install -y rsync openssh-clients diffutils procps gcc-toolset-11 && \
     # Create CICD Group
     groupadd --non-unique --gid ${GROUP_ID} ${CICD_GROUP} && \
     # Adduser Builder
@@ -31,22 +31,18 @@ RUN export ARCH="$(uname -m)" && \
     mkdir -p $CONDA_HOME/conda-bld && \
     mkdir -p $HOME/.cache && \
     echo "export PYTHONPATH=${PYTHONPATH}:$HOME/open_ce" >> ${HOME}/.bashrc && \
-    export PATH="/opt/rh/gcc-toolset-10/root/usr/bin:${PATH}" && \
-    export GCC_10_HOME="/opt/rh/gcc-toolset-10/root/usr" && \
+    export PATH="/opt/rh/gcc-toolset-11/root/usr/bin:${PATH}" && \
     export GCC_11_HOME="/opt/rh/gcc-toolset-11/root/usr" && \
     echo "PATH="${PATH}"" >> ${HOME}/.profile && \
     echo "PATH="${PATH}"" >> ${HOME}/.bashrc && \
-    echo "GCC_10_HOME="${GCC_10_HOME}"" >> ${HOME}/.bashrc && \
     echo "GCC_11_HOME="${GCC_11_HOME}"" >> ${HOME}/.bashrc && \
     chown -R ${BUILD_USER}:${CICD_GROUP} ${CONDA_HOME}
 
 USER ${BUILD_USER}
-RUN export PATH="/opt/rh/gcc-toolset-10/root/usr/bin:${PATH}" && \
-    export GCC_10_HOME="/opt/rh/gcc-toolset-10/root/usr" && \
+RUN export PATH="/opt/rh/gcc-toolset-11/root/usr/bin:${PATH}" && \
     export GCC_11_HOME="/opt/rh/gcc-toolset-11/root/usr" && \
     echo "PATH="${PATH}"" >> ${HOME}/.profile && \
     echo "PATH="${PATH}"" >> ${HOME}/.bashrc && \
-    echo "GCC_10_HOME="${GCC_10_HOME}"" >> ${HOME}/.bashrc && \
     echo "GCC_11_HOME="${GCC_11_HOME}"" >> ${HOME}/.bashrc && \
     mkdir -p $HOME/.cache && \
     echo ". $CONDA_HOME/etc/profile.d/conda.sh" >> ${HOME}/.bashrc && \
