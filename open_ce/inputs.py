@@ -382,17 +382,17 @@ def _check_ppc_arch(args):
         if args.ppc_arch == "p10":
             if "GCC_10_HOME" not in os.environ:
                 os.environ["GCC_10_HOME"] = utils.DEFAULT_GCC_10_HOME_DIR
-            if os.path.exists(os.environ["GCC_10_HOME"]):
-                PATH = os.environ["PATH"]
-                os.environ["PATH"] = "{0}:{1}".format(os.path.join(os.environ["GCC_10_HOME"], "bin"), PATH)
-                print("Path variable set to : ", os.environ["PATH"])
-            else:
+            if not os.path.exists(os.environ["GCC_10_HOME"]):
                 raise OpenCEError(Error.GCC10_11_COMPILER_NOT_FOUND)
 
             if "GCC_11_HOME" not in os.environ:
                 os.environ["GCC_11_HOME"] = utils.DEFAULT_GCC_11_HOME_DIR
+                PATH = os.environ["PATH"]
+                os.environ["PATH"] = "{0}:{1}".format(os.path.join(os.environ["GCC_11_HOME"], "bin"), PATH)
+                print("Path variable set to : ", os.environ["PATH"])
             if not os.path.exists(utils.DEFAULT_GCC_11_HOME_DIR):
                 raise OpenCEError(Error.GCC10_11_COMPILER_NOT_FOUND)
+
 
 def parse_args(parser, arg_strings=None):
     '''
