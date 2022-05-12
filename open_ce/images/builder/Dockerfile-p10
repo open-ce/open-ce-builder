@@ -31,7 +31,7 @@ RUN export ARCH="$(uname -m)" && \
     mkdir -p $CONDA_HOME/conda-bld && \
     mkdir -p $HOME/.cache && \
     echo "export PYTHONPATH=${PYTHONPATH}:$HOME/open_ce" >> ${HOME}/.bashrc && \
-    export PATH="/opt/rh/gcc-toolset-10/root/usr/bin:${PATH}" && \
+    export PATH="/opt/rh/gcc-toolset-11/root/usr/bin:${PATH}" && \
     export GCC_10_HOME="/opt/rh/gcc-toolset-10/root/usr" && \
     export GCC_11_HOME="/opt/rh/gcc-toolset-11/root/usr" && \
     echo "PATH="${PATH}"" >> ${HOME}/.profile && \
@@ -41,7 +41,7 @@ RUN export ARCH="$(uname -m)" && \
     chown -R ${BUILD_USER}:${CICD_GROUP} ${CONDA_HOME}
 
 USER ${BUILD_USER}
-RUN export PATH="/opt/rh/gcc-toolset-10/root/usr/bin:${PATH}" && \
+RUN export PATH="/opt/rh/gcc-toolset-11/root/usr/bin:${PATH}" && \
     export GCC_10_HOME="/opt/rh/gcc-toolset-10/root/usr" && \
     export GCC_11_HOME="/opt/rh/gcc-toolset-11/root/usr" && \
     echo "PATH="${PATH}"" >> ${HOME}/.profile && \
