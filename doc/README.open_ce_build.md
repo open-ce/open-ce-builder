@@ -470,4 +470,4 @@ Open-CE also contains [`open-ce/envs/opence-p10-env.yaml`](https://github.com/op
 When using packages that were built with ppc_arch=p10, note that:
 
 * These packages will work on Power9 or Power10, but not on Power8
-* At runtime, GCC10 needs to be present on the system. Packages like TF, PyTorch, SentencePiece, ONNX Runtime, etc. require some GCC10 libraries namely libgfortran.so to be present at runtime. This applies to both Power9 and Power10 systems. It is recommended to use the libraries provided by RHEL toolchain (viz. `yum install -y gcc-toolset-11`).
+* At runtime, GCC11 needs to be present on the system. Packages like TF, PyTorch, SentencePiece, ONNX Runtime, etc. require some GCC11 libraries namely libgfortran.so to be present at runtime. This applies to both Power9 and Power10 systems. It is recommended to use the libraries provided by RHEL toolchain (viz. `yum install -y gcc-toolset-11`).
