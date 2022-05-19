@@ -310,8 +310,12 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
             if current_deps:
                 external_deps += current_deps
 
-        # Execute _create_commands_helper in parallel
-        commands = utils.run_in_parallel(self._create_commands_helper, create_commands_args)
+        # Execute _create_commands_helper in parallel is resulting into error with conda-build v3.21.8
+        # So switching to non-parallel approach.
+        #commands = utils.run_in_parallel(self._create_commands_helper, create_commands_args)
+        commands = []
+        for variant, env_config_data, conda_build_configs, feedstock in create_commands_args:
+             commands.append(self._create_commands_helper(variant, env_config_data, conda_build_configs, feedstock))
 
         # Add the results of _create_commands_helper to the graph
         for command in commands:
