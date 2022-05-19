@@ -455,9 +455,9 @@ def test_system_exit(mocker):
     mocker.patch("open_ce.build_tree.BuildTree._get_repo", side_effect=SystemExit(1))
 
     arg_strings = ["build", build_env.COMMAND, "tests/test-env1.yaml"]
-    with pytest.raises(OpenCEError) as exc:
+    with pytest.raises(SystemExit) as exc:
         opence._main(arg_strings)
-    assert "Unexpected Error: 1" in str(exc.value)
+    assert "SystemExit(1)" in str(exc)
 
 def test_run_tests(mocker):
     '''
