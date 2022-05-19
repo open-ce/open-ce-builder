@@ -315,7 +315,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         #commands = utils.run_in_parallel(self._create_commands_helper, create_commands_args)
         commands = []
         for variant, env_config_data, conda_build_configs, feedstock in create_commands_args:
-             commands.append(self._create_commands_helper(variant, env_config_data, conda_build_configs, feedstock))
+            commands.append(self._create_commands_helper(variant, env_config_data, conda_build_configs, feedstock))
 
         # Add the results of _create_commands_helper to the graph
         for command in commands:
