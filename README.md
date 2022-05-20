@@ -66,6 +66,15 @@ cd open-ce-builder
 pip install -e .
 ```
 
+####Open-CE compatibility with Open-CE Builder
+| Open-CE version         | Open-CE Builder version |
+|-------------------------|-------------------------|
+| All releases upto 1.5.2 | <=9.0.0                 |
+| >= 1.5.3                | 9.0.0                   |
+| 1.6.0                   | 10.0.0                  |
+| 1.6.1                   | 10.0.1                  |
+
+
 ### Building a Collection of Packages
 To build an entire integrated and functional conda channel using Open-CE, start by installing the needed tools in the [Requirements](#requirements) section above.
 The `open-ce build env` command can then be used to build a collection of Open-CE packages. An Open-CE environment file needs to be passed in as input. A selection of environment files are provided within the [`open-ce` repo](https://github.com/open-ce/open-ce) for different frameworks such as TensorFlow and PyTorch. The output from running `open-ce build env` will be a local conda channel (by default called `condabuild`) and one or more conda environment file(s) in the output folder depending on the selected build configuration. For more details on `open-ce build env`, please see [`doc/README.open_ce_build.md`](doc/README.open_ce_build.md#open-ce-build-env-sub-command).

@@ -32,7 +32,7 @@ while a similar build for pytorch may look like this:
 ```
 
 Note that `bazel` is used to build `TensorFlow`. By default, `bazel` caches the files/source code it downloads during the build to ~/.cache/bazel. In case the home directory is low in memory, the packages using bazel as a build tool might fail.
-One can change this cache directory location used by bazel by setting `$TEST_TMPDIR` in the `build.sh` of the respective feedstock like this:
+One can change the cache directory location used by bazel by setting `$TEST_TMPDIR` in the `build.sh` of the respective feedstock like this:
 
 ```shell
     export TEST_TMPDIR=/dev/shm/.cache
