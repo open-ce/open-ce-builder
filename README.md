@@ -104,6 +104,9 @@ The following commands will use the `opence-env.yaml` Open-CE environment file f
 open-ce build env --python_versions 3.8,3.9 --build_types cuda opence-env
 ```
 
+Note that having conda-forge in your channel list may sometime cause conflicts or unexpected errors due to dependencies' versions mismatch. So, it is recommended to avoid mixing the channels during the build as well as at runtime.
+
+
 ### Power10 MMA Optimization
 #### Building Packages
 
