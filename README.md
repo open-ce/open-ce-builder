@@ -66,7 +66,7 @@ cd open-ce-builder
 pip install -e .
 ```
 
-####Open-CE compatibility with Open-CE Builder
+#### Open-CE compatibility with Open-CE Builder
 | Open-CE version         | Open-CE Builder version |
 |-------------------------|-------------------------|
 | All releases upto 1.5.2 | <=9.0.0                 |
