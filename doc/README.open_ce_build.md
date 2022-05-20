@@ -31,6 +31,14 @@ while a similar build for pytorch may look like this:
     open-ce build env pytorch-env.yaml
 ```
 
+Note that `bazel` is used to build `TensorFlow`. By default, `bazel` caches the files/source code it downloads during the build to ~/.cache/bazel. In case the home directory is low in memory, the packages using bazel as a build tool might fail.
+One can change the cache directory location used by bazel by setting `$TEST_TMPDIR` in the `build.sh` of the respective feedstock like this:
+
+```shell
+    export TEST_TMPDIR=/dev/shm/.cache
+    bazel build ...
+```
+
 Other environment files for other packages can also be found in the `envs`
 directory; simply specify the file for whichever package environment you want.
 
@@ -444,7 +452,7 @@ For example:
     export GCC_10_HOME=/opt/rh/gcc-toolset-10/root/usr
 ```
 
-Currently GCC 11 is used only to build [`openblas-feedstock`](https://github.com/open-ce/openblas-feedstock). All other Open-CE recipes can be built using GCC 10.
+Currently GCC 10 is used to build only `tensorflow-io-gcs-filesystem` [`tensorflow-io-gcs-filesystem-feedstock`](https://github.com/open-ce/tensorflow-io-gcs-filesystem-feedstock). All other Open-CE recipes can be built using GCC 11.
 
 GCC 10/11 setup is automated if the builds are done in a podman container using `--container_build` option. Please see [`Dockerfile`](https://github.com/open-ce/open-ce-builder/blob/main/open_ce/images/builder/Dockerfile-p10) used for containerized build of these packages.
 
@@ -462,4 +470,4 @@ Open-CE also contains [`open-ce/envs/opence-p10-env.yaml`](https://github.com/op
 When using packages that were built with ppc_arch=p10, note that:
 
 * These packages will work on Power9 or Power10, but not on Power8
-* At runtime, GCC10 needs to be present on the system. Packages like TF, PyTorch, SentencePiece, ONNX Runtime, etc. require some GCC10 libraries namely libgfortran.so to be present at runtime. This applies to both Power9 and Power10 systems. It is recommended to use the libraries provided by RHEL toolchain.
+* At runtime, GCC11 needs to be present on the system. Packages like TF, PyTorch, SentencePiece, ONNX Runtime, etc. require some GCC11 libraries namely libgfortran.so to be present at runtime. This applies to both Power9 and Power10 systems. It is recommended to use the libraries provided by RHEL toolchain (viz. `yum install -y gcc-toolset-11`).
