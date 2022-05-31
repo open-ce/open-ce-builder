@@ -4,6 +4,7 @@ ENV CONDA_HOME=${CONDA_HOME:-/opt/conda}
 ENV PATH=$CONDA_HOME/bin:$PATH
 
 ENV OPEN_CE_CONDA_BUILD=3.21.7
+ENV OPEN_CE_CONDA=4.12
 
 ENV CICD_GROUP=cicd
 ARG GROUP_ID=1500
@@ -21,7 +22,7 @@ RUN export ARCH="$(uname -m)" && \
     chmod +x /tmp/anaconda.sh && \
     /bin/bash /tmp/anaconda.sh -f -b -p /opt/conda && \
     rm -f /tmp/anaconda.sh && \
-    $CONDA_HOME/bin/conda install -y conda-build=${OPEN_CE_CONDA_BUILD} networkx git junit-xml patch && \
+    $CONDA_HOME/bin/conda install -y conda-build=${OPEN_CE_CONDA_BUILD} conda=${OPEN_CE_CONDA} networkx git junit-xml patch && \
     $CONDA_HOME/bin/conda config --system --add envs_dirs $CONDA_HOME/envs && \
     $CONDA_HOME/bin/conda config --system --add pkgs_dirs $CONDA_HOME/pkgs && \
     $CONDA_HOME/bin/conda config --system --set always_yes true && \
