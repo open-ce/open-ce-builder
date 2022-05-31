@@ -13,7 +13,7 @@ jobs:
           fetch-depth: '0'
       - uses: conda-incubator/setup-miniconda@v2.0.0
         with:
-          auto-update-conda: true
+          auto-update-conda: false
           python-version: "3.9"
       - name: Build and install the conda package
         id: build_install
