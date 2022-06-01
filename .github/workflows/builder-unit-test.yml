@@ -21,7 +21,7 @@ jobs:
           fetch-depth: 2
       - uses: conda-incubator/setup-miniconda@v2.0.0
         with:
-          auto-update-conda: true
+          auto-update-conda: false
           python-version: ${{ matrix.python-version }}
       - name: Ensure open-ce can load without conda-build
         shell: bash -l {0}
