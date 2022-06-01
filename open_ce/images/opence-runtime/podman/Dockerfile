@@ -4,6 +4,7 @@ ENV CONDA_HOME=${CONDA_HOME:-/opt/conda}
 ENV PATH=$CONDA_HOME/bin:$PATH
 
 ENV OPEN_CE_CONDA_BUILD=3.21.7
+ENV OPEN_CE_CONDA=4.12
 
 ARG OPENCE_USER
 ARG LOCAL_CONDA_CHANNEL
@@ -33,7 +34,7 @@ RUN export ARCH="$(uname -m)" && \
     chmod +x /tmp/anaconda.sh && \
     /bin/bash /tmp/anaconda.sh -f -b -p /opt/conda && \
     rm -f /tmp/anaconda.sh && \
-    $CONDA_HOME/bin/conda install -y conda-build=${OPEN_CE_CONDA_BUILD} && \
+    $CONDA_HOME/bin/conda install -y conda-build=${OPEN_CE_CONDA_BUILD} conda=${OPEN_CE_CONDA} && \
     chown -R ${OPENCE_USER}:${OPENCE_GROUP} ${CONDA_HOME}
 
 USER ${OPENCE_USER}
