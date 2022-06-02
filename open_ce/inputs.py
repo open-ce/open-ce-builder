@@ -373,27 +373,6 @@ def _create_env_config_paths(args):
                 log.info("Unable to find '%s' locally. Attempting to use '%s'.", config_file, new_url)
                 args.env_config_file[index] = new_url
 
-def _check_ppc_arch(args):
-    '''
-    This will check if ppc_arch is p10 and set the corresponding
-    needed environment variables for GCC_10_HOME and GCC_11_HOME
-    '''
-    if "ppc_arch" in vars(args).keys() and args.ppc_arch:
-        if args.ppc_arch == "p10":
-            if "GCC_10_HOME" not in os.environ:
-                os.environ["GCC_10_HOME"] = utils.DEFAULT_GCC_10_HOME_DIR
-            if not os.path.exists(os.environ["GCC_10_HOME"]):
-                raise OpenCEError(Error.GCC10_11_COMPILER_NOT_FOUND)
-
-            if "GCC_11_HOME" not in os.environ:
-                os.environ["GCC_11_HOME"] = utils.DEFAULT_GCC_11_HOME_DIR
-                PATH = os.environ["PATH"]
-                os.environ["PATH"] = "{0}:{1}".format(os.path.join(os.environ["GCC_11_HOME"], "bin"), PATH)
-                print("Path variable set to : ", os.environ["PATH"])
-            if not os.path.exists(utils.DEFAULT_GCC_11_HOME_DIR):
-                raise OpenCEError(Error.GCC10_11_COMPILER_NOT_FOUND)
-
-
 def parse_args(parser, arg_strings=None):
     '''
     Parses input arguments and handles more complex defaults.
@@ -403,9 +382,6 @@ def parse_args(parser, arg_strings=None):
     '''
     args = parser.parse_args(arg_strings)
     _create_env_config_paths(args)
-
-    if "container_build" not in vars(args).keys() or not args.container_build:
-        _check_ppc_arch(args)
 
     if "conda_build_configs" in vars(args).keys():
         if args.conda_build_configs is None:

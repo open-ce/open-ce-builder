@@ -62,8 +62,6 @@ OPEN_CE_VERSION_STRING = "Open-CE Version"
 DEFAULT_GRAPH_FILE = "graph.png"
 DEFAULT_TEST_RESULT_FILE = "test_results.xml"
 DEFAULT_PPC_ARCH = "p9"
-DEFAULT_GCC_10_HOME_DIR = "/opt/rh/gcc-toolset-10/root/usr"
-DEFAULT_GCC_11_HOME_DIR = "/opt/rh/gcc-toolset-11/root/usr"
 
 def make_variants(python_versions=DEFAULT_PYTHON_VERS,
                   build_types=DEFAULT_BUILD_TYPES,
