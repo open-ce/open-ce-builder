@@ -68,8 +68,6 @@ def build_image(build_image_path, dockerfile, container_tool, cuda_version=None,
     """
     if cuda_version:
         image_name = REPO_NAME + ":" + IMAGE_NAME + "-cuda" + cuda_version
-    elif ppc_arch == "p10":
-        image_name = REPO_NAME + ":" + IMAGE_NAME + "-cpu-p10"
     else:
         image_name = REPO_NAME + ":" + IMAGE_NAME + "-cpu"
     build_cmd = container_tool + " build "
@@ -226,10 +224,7 @@ def _generate_dockerfile_name(build_types, cuda_version, ppc_arch=utils.DEFAULT_
             raise OpenCEError(Error.UNSUPPORTED_CUDA, cuda_version)
     else:
         #Build with cpu based image
-        if ppc_arch == "p10":
-            dockerfile = os.path.join(BUILD_IMAGE_PATH, "Dockerfile-p10")
-        else:
-            dockerfile = os.path.join(BUILD_IMAGE_PATH, "Dockerfile")
+        dockerfile = os.path.join(BUILD_IMAGE_PATH, "Dockerfile")
         build_image_path = BUILD_IMAGE_PATH
     return build_image_path, dockerfile
 
