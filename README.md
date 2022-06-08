@@ -72,7 +72,7 @@ pip install -e .
 | All releases upto 1.5.2 | <=9.0.0                 |
 | >= 1.5.3                | 9.0.0                   |
 | 1.6.0                   | 10.0.0                  |
-| 1.6.1                   | 10.0.1                  |
+| 1.6.1                   | 10.0.2                  |
 
 
 ### Building a Collection of Packages
