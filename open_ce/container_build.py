@@ -60,7 +60,7 @@ def _home_path(container_tool):
 
 #pylint: disable=too-many-arguments
 def build_image(build_image_path, dockerfile, container_tool, cuda_version=None,
-                container_build_args=""):
+                container_build_args="", ppc_arch=utils.DEFAULT_PPC_ARCH):
 
     """
     Build a container image from the Dockerfile in BUILD_IMAGE_PATH.
@@ -213,7 +213,7 @@ def build_in_container(image_name, args, arg_strings):
         # Cleanup
         _stop_container(container_name, args.container_tool)
 
-def _generate_dockerfile_name(build_types, cuda_version):
+def _generate_dockerfile_name(build_types, cuda_version, ppc_arch=utils.DEFAULT_PPC_ARCH):
     '''
     Ensure we have valid combinations.  I.e. Specify a valid cuda version
     '''
