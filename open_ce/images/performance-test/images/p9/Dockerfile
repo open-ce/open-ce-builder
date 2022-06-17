@@ -40,4 +40,6 @@ RUN export PATH="${PATH}" && \
     mkdir -p $HOME/.cache && \
     echo ". $CONDA_HOME/etc/profile.d/conda.sh" >> ${HOME}/.bashrc && \
     echo "export PYTHONPATH=${PYTHONPATH}:$HOME/open_ce" >> ${HOME}/.bashrc && \
-    echo "conda activate base" >> ${HOME}/.bashrc
+    echo "conda activate base" >> ${HOME}/.bashrc && \
+    echo "conda create -n opence python=3.9" >> ${HOME}/.bashrc && \
+    echo "conda activate opence" >> ${HOME}/.bashrc
