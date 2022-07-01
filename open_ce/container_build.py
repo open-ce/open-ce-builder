@@ -29,7 +29,7 @@ from open_ce.inputs import Argument
 OPEN_CE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "."))
 BUILD_IMAGE_NAME = "builder"
 BUILD_IMAGE_PATH = os.path.join(OPEN_CE_PATH, "images", BUILD_IMAGE_NAME)
-BUILD_CUDA_IMAGE_NAME = "builder-cuda-" + platform.machine()
+BUILD_CUDA_IMAGE_NAME = "builder-cuda"
 BUILD_CUDA_IMAGE_PATH = os.path.join(OPEN_CE_PATH, "images", BUILD_CUDA_IMAGE_NAME)
 LOCAL_FILES_PATH = os.path.join(os.path.join(os.getcwd(), "local_files"))
 
