@@ -18,7 +18,6 @@
 
 import os
 import datetime
-import platform
 import argparse
 import glob
 
