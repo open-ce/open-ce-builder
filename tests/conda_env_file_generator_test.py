@@ -131,7 +131,9 @@ def test_get_variant_string_no_string(mocker):
 def test_variant_specific_env_files():
     tmp_test = tempfile.TemporaryDirectory()
     base_arg_strings = ["build", build_env.COMMAND, "--skip_build",
-                   "--python_versions", utils.DEFAULT_PYTHON_VERS, "--repository_folder", os.path.join(tmp_test.name, "repos"),
+                   "--python_versions", utils.DEFAULT_PYTHON_VERS,
+                   "--cuda_versions", "11.2",
+                   "--repository_folder", os.path.join(tmp_test.name, "repos"),
                    "--output_folder", os.path.join(tmp_test.name, "output"),
                    "https://raw.githubusercontent.com/open-ce/open-ce/open-ce-v1.5.0/envs/opence-env.yaml"]
 
