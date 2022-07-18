@@ -12,7 +12,7 @@ ENV BUILD_USER=builder
 ARG BUILD_ID=1084
 
 RUN export ARCH="$(uname -m)" && \
-    yum repolist && yum install -y rsync openssh-clients diffutils procps git-lfs gcc-toolset-10 gcc-toolset-11 && \
+    yum repolist && yum install -y rsync openssh-clients diffutils procps git-lfs gcc-toolset-10 gcc-toolset-11 glibc-devel && \
     # Create CICD Group
     groupadd --non-unique --gid ${GROUP_ID} ${CICD_GROUP} && \
     # Adduser Builder

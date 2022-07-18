@@ -248,13 +248,12 @@ def test_generate_dockerfile_name():
     '''
     #CUDA build
     build_type = "cuda"
-    cuda_version = "11.0"
+    cuda_version = "11.2"
     image_path, docker_file_name = container_build._generate_dockerfile_name(build_type, cuda_version)
     assert docker_file_name == os.path.join(image_path, "Dockerfile.cuda-" + cuda_version)
 
     #CPU build
     build_type = "cpu"
-    cuda_version = "11.0"
     image_path, docker_file_name = container_build._generate_dockerfile_name(build_type, cuda_version)
     assert docker_file_name == os.path.join(image_path, "Dockerfile")
 
