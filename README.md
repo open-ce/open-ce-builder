@@ -6,7 +6,7 @@
 
 [![Installation Options](https://img.shields.io/badge/Install%20with-conda%20%7C%20pip-brightgreen)](#installing-the-open-ce-build-tools)
 [![Python Support](https://img.shields.io/badge/python-3.8%20%7C%203.9-blue.svg)](#requirements)
-[![Cuda Support](https://img.shields.io/badge/cuda-11.0%20%7C%2011.2-blue)](doc/README.cuda_support.md)
+[![Cuda Support](https://img.shields.io/badge/cuda-11.2%20%7C%2011.4-blue)](doc/README.cuda_support.md)
 
 [![Builder Unit Tests](https://github.com/open-ce/open-ce/workflows/Open-CE%20Builder%20Unit%20Tests/badge.svg)](https://github.com/open-ce/open-ce-builder/actions?query=workflow%3A%22Open-CE+Builder+Unit+Tests%22+branch%3Amain)
 [![Builder Unit Test Coverage](https://codecov.io/gh/open-ce/open-ce-builder/branch/main/graph/badge.svg)](https://codecov.io/gh/open-ce/open-ce-builder)
