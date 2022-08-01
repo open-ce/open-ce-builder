@@ -73,7 +73,7 @@ pip install -e .
 | >= 1.5.3                | 9.0.0                   |
 | 1.6.0                   | 10.0.0                  |
 | 1.6.1                   | 10.0.2                  |
-| 1.7.0                   | TODO
+| 1.7.0                   | 11.0.0                  |
 
 
 ### Building a Collection of Packages
