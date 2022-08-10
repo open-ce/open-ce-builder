@@ -115,8 +115,10 @@ def _clean_dep(dep):
     return dep.lower()
 
 def _clean_deps(deps):
-    deps = [_clean_dep(dep) for dep in deps]
-
+    if deps:
+        deps = [_clean_dep(dep) for dep in deps]
+    else:
+        deps = []
     return deps
 
 def _get_package_dependencies(path, variant_config_files, variants):
@@ -145,7 +147,9 @@ def _get_package_dependencies(path, variant_config_files, variants):
         build_deps.update(_clean_deps(meta.meta['requirements'].get('build', [])))
         output_files += conda_utils.get_output_file_paths(meta, variants=variants)
         if 'test' in meta.meta:
-            test_deps.update(_clean_deps(meta.meta['test'].get('requires', [])))
+            test_requires = meta.meta['test'].get('requires', [])
+            if test_requires:
+                test_deps.update(_clean_deps(test_requires))
 
     return packages, versions, run_deps, host_deps, build_deps, test_deps, output_files
 
