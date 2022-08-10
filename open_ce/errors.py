@@ -93,6 +93,7 @@ class Error(Enum):
                                        " gcc-toolset-10 and gcc-toolset-11. Also, set environment variables" +
                                        " GCC_10_HOME and GCC_11_HOME to point to the installed location." +
                                        " For e.g. GCC_10_HOME=\"/opt/rh/gcc-toolset-10/root/usr\"")
+    GIT_TAG_MISSING = (41, "git_tag attribute is missing for '{}'")
 
 class OpenCEError(Exception):
     """
