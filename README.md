@@ -125,7 +125,7 @@ For details, please see [`doc/README.open_ce_build.md`](doc/README.open_ce_build
 
 #### Running Packages
 
-These packages will work on Power9 or Power10, but not on Power8. At runtime, system GCC10 (gcc-toolset-10) needs to be present on the system. This applies to both Power9 and Power10 systems.
+These packages will work on Power9 or Power10, but not on Power8.
 
 ### Building within a container
 
