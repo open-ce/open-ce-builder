@@ -68,7 +68,6 @@ def test_check_ppc_arch_for_p9(mocker):
 
     args = parser.parse_args(["test-env.yaml", "--ppc_arch=p9"])
     _check_ppc_arch(args)    
-    assert "GCC_10_HOME" not in os.environ
     assert "GCC_11_HOME" not in os.environ
 
 def test_check_ppc_arch_for_p10(mocker):
@@ -84,9 +83,7 @@ def test_check_ppc_arch_for_p10(mocker):
 
     args = parser.parse_args(["test-env.yaml", "--ppc_arch=p10"])
     _check_ppc_arch(args)
-    assert "GCC_10_HOME" in os.environ
     assert "GCC_11_HOME" in os.environ
-    del os.environ["GCC_10_HOME"]
     del os.environ["GCC_11_HOME"]
 
 def test_check_ppc_arch_for_p10_container_build(mocker):
@@ -101,12 +98,11 @@ def test_check_ppc_arch_for_p10_container_build(mocker):
     parser = make_parser([Argument.ENV_FILE, Argument.PPC_ARCH, Argument.CONTAINER_BUILD])
     args_str = ["test-env.yaml", "--container_build", "--ppc_arch=p10"]
     parse_args(parser, args_str)
-    assert "GCC_10_HOME" not in os.environ
     assert "GCC_11_HOME" not in os.environ
 
 def test_check_ppc_arch_for_p10_with_no_gcc_path(mocker):
     '''
-    Test if GCC_10_HOME and GCC_11_HOME don't exist, an error is thrown
+    Test if GCC_11_HOME don't exist, an error is thrown
     '''
     mocker.patch(
         'os.path.exists',
@@ -119,5 +115,5 @@ def test_check_ppc_arch_for_p10_with_no_gcc_path(mocker):
 
     with pytest.raises(OpenCEError) as exc:
         _check_ppc_arch(args)
-    assert Error.GCC10_11_COMPILER_NOT_FOUND.value[1] in str(exc.value)
+    assert Error.GCC11_COMPILER_NOT_FOUND.value[1] in str(exc.value)
 
