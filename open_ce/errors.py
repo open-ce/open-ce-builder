@@ -94,6 +94,8 @@ class Error(Enum):
                                        " GCC_11_HOME to point to the installed location." +
                                        " For e.g. GCC_11_HOME=\"/opt/rh/gcc-toolset-11/root/usr\"")
 
+    GIT_TAG_MISSING = (41, "git_tag attribute is missing for '{}'")
+
 class OpenCEError(Exception):
     """
     Exception class for errors that occur in an Open-CE tool.
