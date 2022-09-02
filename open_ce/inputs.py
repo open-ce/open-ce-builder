@@ -95,7 +95,7 @@ https://github.com/open-ce/open-ce/blob/main/doc/README.yaml.md"""))
                                         type=str,
                                         default=utils.DEFAULT_PYTHON_VERS,
                                         help='Comma delimited list of python versions to build for '
-                                             ', such as "3.8" or "3.9".'))
+                                             ', such as "3.8" or "3.9" or "3.10".'))
 
     BUILD_TYPES = (lambda parser: parser.add_argument(
                                         '--build_types',
