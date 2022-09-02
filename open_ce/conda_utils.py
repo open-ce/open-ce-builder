@@ -48,6 +48,8 @@ def render_yaml(path, variants=None, variant_config_files=None, schema=None, per
     config = get_or_merge_config(None, variant=variants)
     config.variant_config_files = variant_config_files
     config.verbose = False
+    # fix for https://github.com/conda/conda-build/issues/4398
+    config.croot = " "
 
     if not os.path.isfile(path):
         metas = conda_build.api.render(path,
