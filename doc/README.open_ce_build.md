@@ -140,7 +140,7 @@ optional arguments:
                         current working directory. (default: )
   --python_versions PYTHON_VERSIONS
                         Comma delimited list of python versions to build for ,
-                        such as "3.8" or "3.9". (default: 3.9)
+                        such as "3.8" or "3.9" or "3.10". (default: 3.10)
   --build_types BUILD_TYPES
                         Comma delimited list of build types, such as "cpu" or
                         "cuda". (default: cpu,cuda)
@@ -148,8 +148,8 @@ optional arguments:
                         Comma delimited list of mpi types, such as "openmpi"
                         or "system". (default: openmpi)
   --cuda_versions CUDA_VERSIONS
-                        CUDA version to build for , such as "11.2".
-                        (default: 11.2)
+                        CUDA version to build for , such as "11.2" or "11.4".
+                        (default: 11.4)
   --skip_build_packages
                         Do not perform builds of packages. (default: False)
   --run_tests           Run Open-CE tests for each potential conda environment
@@ -271,7 +271,7 @@ optional arguments:
                         Conda channels to be used. (default: [])
   --python_versions PYTHON_VERSIONS
                         Comma delimited list of python versions to build for ,
-                        such as "3.8" or "3.9". (default: 3.9)
+                        such as "3.8" or "3.9" or "3.10". (default: 3.10)
   --build_types BUILD_TYPES
                         Comma delimited list of build types, such as "cpu" or
                         "cuda". (default: cpu,cuda)
@@ -280,7 +280,7 @@ optional arguments:
                         or "system". (default: openmpi)
   --cuda_versions CUDA_VERSIONS
                         CUDA version to build for ,
-                        such as "11.2". (default: 11.2)
+                        such as "11.4". (default: 11.4)
   --recipe-config-file RECIPE_CONFIG_FILE
                         Path to the recipe configuration YAML file. The configuration
                         file lists paths to recipes to be built within a feedstock.

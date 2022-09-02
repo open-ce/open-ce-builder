@@ -61,7 +61,7 @@ Tests can be run immediately after a build has completed by passing the `--run_t
 
 ## `open-ce test env` sub command
 
-The `open-ce test env` command can be used to run tests for every package listed within an Open-CE Environment [file](README.yaml.md). Tests will be run for every combination of build variants that are specified. For example, if `python_versions` is set to `3.8,3.9`, tests will be run for the python 3.8 packages and python 3.9 packages.
+The `open-ce test env` command can be used to run tests for every package listed within an Open-CE Environment [file](README.yaml.md). Tests will be run for every combination of build variants that are specified. For example, if `python_versions` is set to `3.8,3.9,3.10`, tests will be run for the python 3.8 packages, python 3.9 packages and python 3.10 packages.
 
 ### Command usage for `open-ce test env`
 
@@ -116,7 +116,7 @@ optional arguments:
                         current working directory. (default: )
   --python_versions PYTHON_VERSIONS
                         Comma delimited list of python versions to build for ,
-                        such as "3.8" or "3.9". (default: 3.9)
+                        such as "3.8" or "3.9" or "3.10". (default: 3.10)
   --build_types BUILD_TYPES
                         Comma delimited list of build types, such as "cpu" or
                         "cuda". (default: cpu,cuda)
