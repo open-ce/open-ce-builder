@@ -437,24 +437,22 @@ check the Dockerfile for details.
 * System: RHEL 8.5 or above
 * OS: Linux
 * Power Architecture: Power9/Power10
-* GCC Compiler: GCC10 and GCC11
+* GCC Compiler: GCC11
 
 One can build Power10 enabled packages with above system requirements. Note that Power10 is not required on your build system. The libraries can be built on Power9 as well.
-To install GCC 10 or 11, following command can be used -
+To install GCC 11, following command can be used -
 ```shell
-    yum install -y gcc-toolset-10 gcc-toolset-11
+    yum install -y gcc-toolset-11
 ```
 
-Set GCC_10_HOME and GCC_11_HOME environment variables to proceed with the builds on baremetal, if GCC10 or GCC11 is installed at a non-default location.
+Set GCC_11_HOME environment variables to proceed with the builds on baremetal, if GCC11 is installed at a non-default location.
 
 For example:
 ```shell
-    export GCC_10_HOME=/opt/rh/gcc-toolset-10/root/usr
+    export GCC_11_HOME=/opt/rh/gcc-toolset-11/root/usr
 ```
 
-Currently GCC 10 is used to build only `tensorflow-io-gcs-filesystem` [`tensorflow-io-gcs-filesystem-feedstock`](https://github.com/open-ce/tensorflow-io-gcs-filesystem-feedstock). All other Open-CE recipes can be built using GCC 11.
-
-GCC 10/11 setup is automated if the builds are done in a podman container using `--container_build` option. Please see [`Dockerfile`](https://github.com/open-ce/open-ce-builder/blob/main/open_ce/images/builder/Dockerfile-p10) used for containerized build of these packages.
+GCC 11 setup is automated if the builds are done in a podman container using `--container_build` option. Please see [`Dockerfile`](https://github.com/open-ce/open-ce-builder/blob/main/open_ce/images/builder/Dockerfile-p10) used for containerized build of these packages.
 
 #### Build packages
 Power10 MMA Optimization is applicable for cpu only builds. One has to use `--ppc_arch=p10` flag in the `open-ce build env` or `open-ce build feedstock` command to build P10 enabled packages. Another important argument which is must to build these packages is `--conda_build_config=open-ce/envs/conda_build_config.yaml,open-ce/envs/conda_build_config_p10.yaml`.[`conda_build_config_p10.yaml`](https://github.com/open-ce/open-ce/blob/main/envs/conda_build_config_p10.yaml) contains Power10 specific settings.
@@ -470,4 +468,3 @@ Open-CE also contains [`open-ce/envs/opence-p10-env.yaml`](https://github.com/op
 When using packages that were built with ppc_arch=p10, note that:
 
 * These packages will work on Power9 or Power10, but not on Power8
-* At runtime, GCC11 needs to be present on the system. Packages like TF, PyTorch, SentencePiece, ONNX Runtime, etc. require some GCC11 libraries namely libgfortran.so to be present at runtime. This applies to both Power9 and Power10 systems. It is recommended to use the libraries provided by RHEL toolchain (viz. `yum install -y gcc-toolset-11`).

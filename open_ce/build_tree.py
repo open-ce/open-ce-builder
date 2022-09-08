@@ -248,6 +248,9 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         # combine with git_location and append "-feedstock.git"
         feedstock_value = package[env_config.Key.feedstock.name]
         if any(feedstock_value.startswith(protocol) for protocol in utils.SUPPORTED_GIT_PROTOCOLS):
+            git_tag_for_package = package.get(env_config.Key.git_tag.name, None)
+            if "open-ce" not in feedstock_value and not git_tag_for_package:
+                raise OpenCEError(Error.GIT_TAG_MISSING, feedstock_value)
             git_url = feedstock_value
             if not git_url.endswith(".git"):
                 git_url += ".git"

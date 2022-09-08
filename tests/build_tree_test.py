@@ -25,7 +25,7 @@ from open_ce import graph
 import open_ce.build_tree as build_tree
 import open_ce.utils as utils
 import open_ce.env_config as env_config
-from open_ce.errors import OpenCEError
+from open_ce.errors import OpenCEError, Error
 import helpers
 
 def conda_search_result():
@@ -369,6 +369,45 @@ def test_clone_repo_failure(mocker):
     with pytest.raises(OpenCEError) as exc:
         mock_build_tree._clone_repo("https://bad_url", "/test/my_repo", None, None)
     assert "Unable to clone repository" in str(exc.value)
+
+def test_empty_git_tag_remote_feedstock(mocker):
+    '''
+    Test that the error is thrown if `git_tag` is not present for remote feedstocks
+    '''
+    env_file1 = os.path.join(test_dir, 'test-env4.yaml')
+    mock_build_tree = TestBuildTree([env_file1], utils.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
+
+    dir_tracker= helpers.DirTracker()
+    mocker.patch(
+        'os.getcwd',
+        side_effect=dir_tracker.mocked_getcwd
+    )
+    mocker.patch(
+        'os.chdir',
+        side_effect=dir_tracker.validate_chdir
+    )
+    mocker.patch(
+        'os.system',
+        return_value=0,
+        side_effect=(lambda x: helpers.validate_cli(x, possible_expect=["git clone", "git checkout"]))
+    )
+
+    possible_variants = utils.make_variants(utils.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
+    for variant in possible_variants:
+
+        # test-env4.yaml has one remote feedstock without "git_tag" and another one 
+        # is although remote feedstock but is from open-ce repo.
+        env_config_data_list = env_config.load_env_config_files([env_file1], [variant])
+        for env_config_data in env_config_data_list:
+            packages = env_config_data.get(env_config.Key.packages.name, [])
+            for package in packages:
+                if package == "package21":
+                    with pytest.raises(OpenCEError) as exc:
+                        mock_build_tree._get_repo(env_config_data, package)
+                        assert Error.GIT_TAG_MISSING.value[1] in str(exc.value)
+                elif "libsndfile" in package:
+                    mock_build_tree._get_repo(env_config_data, package)
+
 
 def test_check_runtime_package_field():
     '''
