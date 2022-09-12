@@ -48,6 +48,10 @@ def render_yaml(path, variants=None, variant_config_files=None, schema=None, per
     config = get_or_merge_config(None, variant=variants)
     config.variant_config_files = variant_config_files
     config.verbose = False
+    # issue https://github.com/conda/conda-build/issues/4398
+    # is observed with default value of croot for conda-build versions >3.21.7
+    # hence setting croot to blank here to support newer versions of conda-build
+    config.croot = " "
 
     if not os.path.isfile(path):
         metas = conda_build.api.render(path,
