@@ -1,5 +1,0 @@
-CONDA_BIN=$(dirname $(which conda))
-source ${CONDA_BIN}/../etc/profile.d/conda.sh
-conda env create -f /home/archana/builderpy310/open-ce-builder/tests/test-conda-env2.yaml -n opence-conda-env-20220826073602
-conda activate opence-conda-env-20220826073602
-conda config --env --add channels defaults
