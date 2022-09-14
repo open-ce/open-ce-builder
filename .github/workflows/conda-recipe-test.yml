@@ -18,7 +18,7 @@ jobs:
       - name: Build and install the conda package
         id: build_install
         run: |
-          conda install -y conda-build=3.21.7
+          conda install -y conda-build
           sh ./packaging_scripts/create_conda_package.sh
           conda create -y -n test_opence python=3.10
           source /home/runner/.profile

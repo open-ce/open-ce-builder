@@ -26,7 +26,7 @@ The `open-ce` tool allows a user to build collections of conda recipes described
 
 * `conda` == 4.12
   * The conda tool can either be installed through [Anaconda](https://www.anaconda.com/products/individual#Downloads) or [Miniconda](https://docs.conda.io/en/latest/miniconda.html).
-* `conda-build` == 3.21.7
+* `conda-build` >= 3.21.7
   * Once `conda` is installed, `conda-build` can be installed with the command: `conda install conda-build`
 * `networkx` >= 2.5
 * `python` >= 3.8
