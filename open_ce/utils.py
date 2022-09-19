@@ -132,16 +132,18 @@ def run_command_capture(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd
     """Run a shell command and capture the ret_code, stdout and stderr."""
     if cwd:
         os.makedirs(cwd, exist_ok=True)
-    process = subprocess.Popen(
+    with subprocess.Popen(
         cmd,
         stdout=stdout,
         stderr=stderr,
         shell=True,
         universal_newlines=True,
-        cwd=cwd)
-    std_out, std_err = process.communicate()
+        cwd=cwd) as process:
+        std_out, std_err = process.communicate()
 
-    return process.returncode == 0, std_out, std_err
+        return process.returncode == 0, std_out, std_err
+
+    return False, std_out, std_err
 
 def run_and_log(command):
     '''Print a shell command and then execute it.'''
@@ -273,11 +275,11 @@ def download_file(url, filename=None):
     '''
     retval = None
     try:
-        if not filename:
-            download_path = tempfile.NamedTemporaryFile(suffix=os.path.basename(url), delete=False).name
-        else:
-            download_path = tempfile.NamedTemporaryFile(suffix=filename, delete=False).name
-        retval, _ = urllib.request.urlretrieve(url, filename=download_path)
+        suffix = filename
+        if not suffix:
+            suffix = os.path.basename(url)
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False).name as download_path:
+            retval, _ = urllib.request.urlretrieve(url, filename=download_path)
     except Exception as exc: # pylint: disable=broad-except
         raise OpenCEError(Error.FILE_DOWNLOAD, url, str(exc)) from exc
     return retval
@@ -389,13 +391,13 @@ def run_in_parallel(function, arguments):
     Run function in parallel across all arguments.
     '''
     new_args = [tuple([function]) + x if isinstance(x, tuple) else (function, x) for x in arguments]
-    pool = mp.Pool(NUM_THREAD_POOL)
-    try:
-        retval = pool.starmap(_run_helper, new_args)
-        return retval
-    finally:
-        pool.close()
-        pool.join()
+    with mp.Pool(NUM_THREAD_POOL) as pool:
+        try:
+            retval = pool.starmap(_run_helper, new_args)
+            return retval
+        finally:
+            pool.close()
+            pool.join()
 
 def get_conda_build_configs(configs):
     '''
