@@ -385,9 +385,9 @@ def _extract(archive, destination):
     Extract the contents of an archive
     """
     if tarfile.is_tarfile(archive):
-        tar_file = tarfile.open(archive)
-        tar_file.extractall(destination)
-        tar_file.close()
+        with tarfile.open(archive) as tar_file:
+            tar_file.extractall(destination)
+            tar_file.close()
     elif zipfile.is_zipfile(archive):
         with zipfile.ZipFile(archive, 'r') as zip_stream:
             zip_stream.extractall(destination)
