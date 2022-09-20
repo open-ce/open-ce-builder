@@ -337,7 +337,11 @@ def _get_source_from_conda_package(pkg_dir):
         os.makedirs(source_folder)
 
         # Find the recipe's meta.yaml file and download the values within the "source" field.
-        with open(os.path.join(pkg_dir, "info", "recipe", "meta.yaml")) as file_stream:
+        recipe_meta_file = os.path.join(pkg_dir, "info", "recipe", "meta.yaml")
+        if not os.path.exists(recipe_meta_file):
+            return source_folder
+
+        with open(recipe_meta_file) as file_stream:
             recipe_data = open_ce.yaml_utils.load(file_stream)
 
         if not recipe_data.get("source"):
