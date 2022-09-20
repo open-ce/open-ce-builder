@@ -124,7 +124,7 @@ optional arguments:
                         Comma delimited list of mpi types, such as "openmpi"
                         or "system". (default: openmpi)
   --cuda_versions CUDA_VERSIONS
-                        CUDA version to build for , such as "11.4".
+                        CUDA version to build for , such as "11.2" or "11.4".
                         (default: 11.4)
   --container_build, --docker_build
                         Perform a build within a container. NOTE: When
