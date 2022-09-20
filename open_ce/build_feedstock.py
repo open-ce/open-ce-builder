@@ -149,7 +149,6 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
             config.channel_urls = [os.path.abspath(output_folder)]
             config.channel_urls += command.channels
             config.channel_urls += build_config_data.get('channels', [])
-            config.include_recipe = False
             _set_local_src_dir(local_src_dir, recipe, recipe_config_file)
             try:
                 if debug:
