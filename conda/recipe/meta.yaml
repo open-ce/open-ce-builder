@@ -1,5 +1,5 @@
 {% set name = "open-ce-builder" %}
-{% set version = "11.0.1" %}
+{% set version = "11.0.2" %}
 
 package:
   name: {{ name }}
@@ -19,7 +19,7 @@ requirements:
     - setuptools
   run:
     - conda-build
-    - conda 4.12
+    - conda
     - networkx
     - pyyaml
     - requests
