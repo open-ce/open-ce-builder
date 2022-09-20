@@ -280,7 +280,7 @@ optional arguments:
                         or "system". (default: openmpi)
   --cuda_versions CUDA_VERSIONS
                         CUDA version to build for ,
-                        such as "11.4". (default: 11.4)
+                        such as "11.2" or "11.4". (default: 11.4)
   --recipe-config-file RECIPE_CONFIG_FILE
                         Path to the recipe configuration YAML file. The configuration
                         file lists paths to recipes to be built within a feedstock.
