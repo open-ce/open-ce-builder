@@ -416,6 +416,8 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
                 for patch in patches:
                     if os.path.isabs(patch) and os.path.exists(patch):
                         patch_file = patch
+                    elif utils.is_url(patch):
+                        patch_file = utils.download_file(patch)
                     else:
                         # Look for patch relative to where the Open-CE environment file is
                         patch_file = os.path.join(os.path.dirname(env_config_data.get(
