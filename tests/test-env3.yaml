@@ -24,7 +24,7 @@ packages:
     - feedstock : package22
       patches:
         - package_22_fix1.patch
-        - package_22_fix2.patch
+        - https://raw.githubusercontent.com/cdeepali/open-ce-builder/main/tests/package_22_fix2.patch
     - feedstock : package222
       runtime_package : False
 
