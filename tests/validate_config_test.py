@@ -17,17 +17,12 @@
 import os
 import pathlib
 import pytest
-
-import helpers
-from importlib.util import spec_from_loader, module_from_spec
-from importlib.machinery import SourceFileLoader
+import imp
 
 test_dir = pathlib.Path(__file__).parent.absolute()
 
-spec = spec_from_loader("open_ce", SourceFileLoader("open_ce", os.path.join(test_dir, '..', 'open_ce', 'open-ce-builder')))
-opence = module_from_spec(spec)
-spec.loader.exec_module(opence)
-
+import helpers
+opence = imp.load_source('opence', os.path.join(test_dir, '..', 'open_ce', 'open-ce'))
 import open_ce.validate_config as validate_config
 from open_ce.errors import OpenCEError
 import open_ce.utils as utils

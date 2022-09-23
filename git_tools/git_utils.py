@@ -268,8 +268,9 @@ def fill_in_params(filename, params=None, **kwargs):
     for key, value in kwargs.items():
         text = text.replace("${{{}}}".format(key), value)
 
-    with tempfile.NamedTemporaryFile(suffix=os.path.basename(filename), delete=False).name as replaced_filename:
-        with open(replaced_filename,mode='w') as text_file:
-            text_file.write(text)
+    replaced_filename = tempfile.NamedTemporaryFile(suffix=os.path.basename(filename), delete=False).name
+
+    with open(replaced_filename,mode='w') as text_file:
+        text_file.write(text)
 
     return replaced_filename

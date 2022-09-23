@@ -133,9 +133,9 @@ def push_repos(repos, tag, repo_dir, continue_query=True):
             repo_path = os.path.abspath(os.path.join(repo_dir, repo["name"]))
             print("--->Pushing {}".format(repo["name"]))
             git_utils.push_branch(repo_path, tag)
-        except Exception as ex:# pylint: disable=broad-except
+        except Exception as exc:# pylint: disable=broad-except
             print("Error encountered when trying to push {}".format(repo["name"]))
-            print(ex)
+            print(exc)
             if not continue_query:
                 continue
             cont_tag = git_utils.ask_for_input("Would you like to continue tagging other repos?")
