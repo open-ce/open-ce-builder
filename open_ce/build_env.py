@@ -61,7 +61,7 @@ def _run_tests(build_tree, test_labels, conda_env_files, output_folder):
             test_result = test_feedstock.test_feedstock(conda_env_file,
                                                         test_labels=test_labels,
                                                         working_directory=feedstock)
-            if feedstock not in test_results.keys():
+            if feedstock not in test_results:
                 test_results[feedstock] = test_result
             else:
                 test_results[feedstock] += test_result

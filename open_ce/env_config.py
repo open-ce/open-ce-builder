@@ -92,7 +92,7 @@ def _validate_config_file(env_file, variants):
             raise exc
         return meta_obj
     except (Exception, SystemExit) as exc: #pylint: disable=broad-except
-        raise OpenCEError(Error.ERROR, "Error in {}:\n  {}".format(original_env_file, str(exc))) from exc
+        raise OpenCEError(Error.ERROR, f"Error in {original_env_file}:\n  {str(exc)}") from exc
 
 def load_env_config_files(config_files, variants, ignore_urls=False):
     '''

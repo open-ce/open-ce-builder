@@ -129,7 +129,7 @@ class TestCommand():
             temp_file_name = temp.name
 
         # Execute file
-        retval,stdout,stderr = utils.run_command_capture("bash {}".format(temp_file_name),
+        retval,stdout,stderr = utils.run_command_capture(f"bash {temp_file_name}",
                                                          cwd=self.working_dir)
 
         # Remove file containing bash commands
@@ -220,7 +220,7 @@ def gen_test_commands(test_file=utils.DEFAULT_TEST_CONFIG_FILE, variants=None, w
                                      conda_env=conda_env,
                                      create_env=True,
                                      working_dir=working_dir,
-                                     test_file="Prefix-{}".format(test_file)))
+                                     test_file=f"Prefix-{test_file}"))
 
     for test in test_data['tests']:
         test_commands.append(TestCommand(name=test.get('name'),
@@ -233,7 +233,7 @@ def gen_test_commands(test_file=utils.DEFAULT_TEST_CONFIG_FILE, variants=None, w
                                      conda_env=conda_env,
                                      clean_env=True,
                                      working_dir=working_dir,
-                                     test_file="Postfix-{}".format(test_file)))
+                                     test_file=f"Postfix-{test_file}"))
 
     return test_commands
 
@@ -262,7 +262,7 @@ def test_feedstock(conda_env_file, test_labels=None,
     if var_string:
         variant_dict = utils.variant_string_to_dict(var_string)
     else:
-        variant_dict = dict()
+        variant_dict = {}
     for test_label in inputs.parse_arg_list(test_labels):
         variant_dict[test_label] = True
     test_commands = gen_test_commands(working_dir=test_working_dir, variants=variant_dict)
@@ -280,8 +280,8 @@ def process_test_results(test_results, output_folder="./", test_labels=None):
     """
     label_string = ""
     if test_labels:
-        label_string = "with labels: {}".format(str(test_labels))
-    test_suites = [TestSuite("Open-CE tests for {} {}".format(feedstock, label_string), test_results[feedstock])
+        label_string = f"with labels: {str(test_labels)}"
+    test_suites = [TestSuite(f"Open-CE tests for {feedstock} {label_string}", test_results[feedstock])
                         for feedstock in test_results]
     with open(os.path.join(output_folder, utils.DEFAULT_TEST_RESULT_FILE), 'w') as outfile:
         outfile.write(to_xml_report_string(test_suites))

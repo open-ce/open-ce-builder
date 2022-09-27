@@ -124,7 +124,7 @@ class LicenseGenerator():
         # Create a conda environment from the provided file
         time_stamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         conda_env_path = os.path.join(os.getcwd(), "license_env_file_" + time_stamp)
-        cli = "conda env create -p {} -f {}".format(conda_env_path, conda_env_file)
+        cli = f"conda env create -p {conda_env_path} -f {conda_env_file}"
         ret_code, std_out, std_err = utils.run_command_capture(cli)
         if not ret_code:
             raise OpenCEError(Error.GET_LICENSES, cli, std_out, std_err)
@@ -133,7 +133,7 @@ class LicenseGenerator():
         self._add_licenses_from_environment(conda_env_path)
 
         # Delete the generated conda environment
-        cli = "conda env remove -p {}".format(conda_env_path)
+        cli = f"conda env remove -p {conda_env_path}"
         ret_code, std_out, std_err = utils.run_command_capture(cli)
         if not ret_code:
             raise OpenCEError(Error.GET_LICENSES, cli, std_out, std_err)
