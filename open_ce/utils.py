@@ -278,8 +278,8 @@ def download_file(url, filename=None):
         suffix = filename
         if not suffix:
             suffix = os.path.basename(url)
-        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False).name as download_path:
-            retval, _ = urllib.request.urlretrieve(url, filename=download_path)
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as download_path:
+            retval, _ = urllib.request.urlretrieve(url, filename=download_path.name)
     except Exception as exc: # pylint: disable=broad-except
         raise OpenCEError(Error.FILE_DOWNLOAD, url, str(exc)) from exc
     return retval
