@@ -510,7 +510,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         for dep_package in dep_packages:
             terms += [next(x.build_command.name() for x in deps if dep_package == x.packages)]
 
-        return ", ".join("'{}'".format(x) for x in terms)
+        return ", ".join(f"'{x}'" for x in terms)
 
     def remove_external_deps_from_dag(self):
         '''

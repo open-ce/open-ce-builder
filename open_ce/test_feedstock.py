@@ -283,7 +283,7 @@ def process_test_results(test_results, output_folder="./", test_labels=None):
         label_string = f"with labels: {str(test_labels)}"
     test_suites = [TestSuite(f"Open-CE tests for {feedstock} {label_string}", test_results[feedstock])
                         for feedstock in test_results]
-    with open(os.path.join(output_folder, utils.DEFAULT_TEST_RESULT_FILE), 'w') as outfile:
+    with open(os.path.join(output_folder, utils.DEFAULT_TEST_RESULT_FILE), 'w', encoding='utf8') as outfile:
         outfile.write(to_xml_report_string(test_suites))
     failed_tests = [x for key in test_results for x in test_results[key] if x.is_failure()]
     if failed_tests:
