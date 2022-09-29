@@ -71,6 +71,7 @@ def _validate_config_file(env_file, variants):
         if utils.is_url(env_file):
             env_file = utils.download_file(env_file)
 
+        # pylint: disable=no-member, invalid-sequence-index
         # First, partially render yaml to validate builder version number.
         version_check_obj = conda_utils.render_yaml(env_file, permit_undefined_jinja=True)
         if Key.builder_version.name in version_check_obj.keys():
@@ -91,6 +92,7 @@ def _validate_config_file(env_file, variants):
                 show_warning(Error.SCHEMA_VERSION_NOT_FOUND, original_env_file, Key.builder_version.name)
             raise exc
         return meta_obj
+        # pylint: enable=no-member, invalid-sequence-index
     except (Exception, SystemExit) as exc: #pylint: disable=broad-except
         raise OpenCEError(Error.ERROR, f"Error in {original_env_file}:\n  {str(exc)}") from exc
 
