@@ -95,7 +95,7 @@ def test_local_conda_channel_with_absolute_path(mocker):
     opence._main(arg_strings)
 
 def get_channel_being_modified(conda_env_file):
-    with open(conda_env_file, 'r') as file_handle:
+    with open(conda_env_file, 'r', encoding='utf8') as file_handle:
         env_info = yaml.safe_load(file_handle)
 
     channels = env_info['channels']

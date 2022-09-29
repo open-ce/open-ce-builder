@@ -122,7 +122,7 @@ def _create_version_branch(arg_strings=None):# pylint: disable=too-many-branches
         repo_path = os.path.abspath(os.path.join(args.repo_dir, repo_name))
         print("--->Making clone location: " + repo_path)
         os.makedirs(repo_path, exist_ok=True)
-        print("--->Cloning {}".format(repo_name))
+        print(f"--->Cloning {repo_name}")
         git_utils.clone_repo(repo_url, repo_path)
     elif args.repo_dir:
         repo_path = args.repo_dir
@@ -154,7 +154,7 @@ def _create_version_branch(arg_strings=None):# pylint: disable=too-many-branches
                 branch_name = "r" + current_version
 
             if git_utils.branch_exists(repo_path, branch_name):
-                print("The branch {} already exists.".format(branch_name))
+                print(f"The branch {branch_name} already exists.")
             else:
                 git_utils.create_branch(repo_path, branch_name)
                 git_utils.push_branch(repo_path, branch_name)

@@ -138,21 +138,21 @@ def test_variant_specific_env_files():
                    "https://raw.githubusercontent.com/open-ce/open-ce/open-ce-r1.7/envs/tensorflow-env.yaml"]
 
     opence._main(base_arg_strings + ["--build_types", "cuda,cpu"])
-    file = open(glob.glob(os.path.join(tmp_test.name, "output", "*cpu*.yaml"))[0],mode='r')
+    file = open(glob.glob(os.path.join(tmp_test.name, "output", "*cpu*.yaml"))[0],mode='r',encoding='utf8')
     cpu_env = file.read()
     file.close()
     assert "cuda" not in cpu_env
-    file = open(glob.glob(os.path.join(tmp_test.name, "output", "*cuda*.yaml"))[0],mode='r')
+    file = open(glob.glob(os.path.join(tmp_test.name, "output", "*cuda*.yaml"))[0],mode='r',encoding='utf8')
     cuda_env = file.read()
     file.close()
     assert "cuda" in cuda_env
 
     opence._main(base_arg_strings + ["--build_types", "cpu,cuda"])
-    file = open(glob.glob(os.path.join(tmp_test.name, "output", "*cpu*.yaml"))[0],mode='r')
+    file = open(glob.glob(os.path.join(tmp_test.name, "output", "*cpu*.yaml"))[0],mode='r',encoding='utf8')
     cpu_env = file.read()
     file.close()
     assert "cuda" not in cpu_env
-    file = open(glob.glob(os.path.join(tmp_test.name, "output", "*cuda*.yaml"))[0],mode='r')
+    file = open(glob.glob(os.path.join(tmp_test.name, "output", "*cuda*.yaml"))[0],mode='r',encoding='utf8')
     cuda_env = file.read()
     file.close()
     assert "cuda" in cuda_env

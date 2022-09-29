@@ -305,7 +305,7 @@ def validate_and_remove_conda_env_files(py_versions=utils.DEFAULT_PYTHON_VERS,
                                      utils.variant_string(variant.get('python'), variant.get('build_type'), variant.get('mpi_type'), variant.get('cudatoolkit'))))
         assert os.path.exists(conda_env_file)
         if channels:
-            with open(conda_env_file, 'r') as file_handle:
+            with open(conda_env_file, 'r', encoding='utf8') as file_handle:
                 env_info = yaml.safe_load(file_handle)
 
             env_channels = env_info['channels']

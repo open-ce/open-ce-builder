@@ -95,9 +95,9 @@ def get_all_repos(github_org, token):
     retval = []
     page_index = 1
     while True:
-        options = "sort=full_name&order=asc&page={}&per_page=100".format(page_index)
-        result = requests.get("{}/orgs/{}/repos?{}".format(GITHUB_API, github_org, options),
-                              headers={'Authorization' : 'token {}'.format(token)})
+        options = f"sort=full_name&order=asc&page={page_index}&per_page=100"
+        result = requests.get(f"{GITHUB_API}/orgs/{github_org}/repos?{options}",
+                              headers={'Authorization' : f'token {token}'})
         if result.status_code != 200:
             raise Exception("Error loading repos.")
         yaml_result = yaml.safe_load(result.content)
@@ -111,8 +111,8 @@ def create_release(github_org, repo, token, tag_name, name, body, draft):# pylin
     Use the github API to create an actual release on github.
     https://docs.github.com/en/free-pro-team@latest/rest/reference/repos#create-a-release
     '''
-    result = requests.post("{}/repos/{}/{}/releases".format(GITHUB_API, github_org, repo),
-                            headers={'Authorization' : 'token {}'.format(token)},
+    result = requests.post(f"{GITHUB_API}/repos/{github_org}/{repo}/releases",
+                            headers={'Authorization' : f'token {token}'},
                             json={
                             "tag_name": tag_name,
                             "name": name,
@@ -128,8 +128,8 @@ def rename_branch(github_org, repo, token, old_name, new_name):# pylint: disable
     Use the github API to rename a branch
     https://docs.github.com/en/rest/reference/repos#rename-a-branch
     '''
-    result = requests.post("{}/repos/{}/{}/branches/{}/rename".format(GITHUB_API, github_org, repo, old_name),
-                            headers={'Authorization' : 'token {}'.format(token)},
+    result = requests.post(f"{GITHUB_API}/repos/{github_org}/{repo}/branches/{old_name}/rename",
+                            headers={'Authorization' : f'token {token}'},
                             json={
                             "new_name": new_name
                             })
@@ -142,8 +142,8 @@ def create_pr(github_org, repo, token, title, body, head, base):# pylint: disabl
     Create a PR in the given Repo.
     https://docs.github.com/en/free-pro-team@latest/rest/reference/pulls#create-a-pull-request
     '''
-    result = requests.post("{}/repos/{}/{}/pulls".format(GITHUB_API, github_org, repo),
-                           headers={'Authorization' : 'token {}'.format(token)},
+    result = requests.post(f"{GITHUB_API}/repos/{github_org}/{repo}/pulls",
+                           headers={'Authorization' : f'token {token}'},
                            json={
                                "title": title,
                                "body": body,
@@ -163,14 +163,14 @@ def request_pr_review(github_org, repo, token, pull_number, reviewers=None, team
         reviewers = []
     if not team_reviewers:
         team_reviewers = []
-    result = requests.post("{}/repos/{}/{}/pulls/{}/requested_reviewers".format(GITHUB_API, github_org, repo, pull_number),
-                           headers={'Authorization' : 'token {}'.format(token)},
+    result = requests.post(f"{GITHUB_API}/repos/{github_org}/{repo}/pulls/{pull_number}/requested_reviewers",
+                           headers={'Authorization' : f'token {token}'},
                            json={
                                "reviewers": reviewers,
                                "team_reviewers": team_reviewers
                                })
     if result.status_code != 201:
-        raise Exception("Error requesting PR review.:\n{}".format(result.content))
+        raise Exception(f"Error requesting PR review.:\n{result.content}")
     return yaml.safe_load(result.content)
 
 def clone_repo(git_url, repo_dir, git_tag=None):
@@ -190,46 +190,46 @@ def get_tag_branch(repo_path, git_tag):
 def _execute_git_command(repo_path, git_cmd):
     saved_working_directory = os.getcwd()
     os.chdir(repo_path)
-    print("--->{}".format(git_cmd))
+    print(f"--->{git_cmd}")
     result,std_out,_ = utils.run_command_capture(git_cmd, stderr=subprocess.STDOUT)
     os.chdir(saved_working_directory)
     if not result:
-        raise Exception("Git command failed: {}\n{}".format(git_cmd, std_out))
+        raise Exception(f"Git command failed: {git_cmd}\n{std_out}")
     return std_out
 
 def create_tag(repo_path, tag_name, tag_msg):
     '''Create an annotated tag in the given repo.'''
-    _execute_git_command(repo_path, "git tag -a {} -m \"{}\"".format(tag_name, tag_msg))
+    _execute_git_command(repo_path, f"git tag -a {tag_name} -m \'{tag_msg}\'")
 
 def create_branch(repo_path, branch_name):
     '''Create a branch in the given repo.'''
-    _execute_git_command(repo_path, "git checkout -b {}".format(branch_name))
+    _execute_git_command(repo_path, f"git checkout -b {branch_name}")
 
 def branch_exists(repo_path, branch_name):
     '''Returns true if branch already exists.'''
-    return _execute_git_command(repo_path, "git ls-remote --heads origin {}".format(branch_name)) != ""
+    return _execute_git_command(repo_path, f"git ls-remote --heads origin {branch_name}") != ""
 
 def commit_changes(repo_path, commit_msg):
     '''Commit the outstanding changes in the given repo.'''
     _execute_git_command(repo_path, "git add ./*")
-    _execute_git_command(repo_path, "git commit -avm \"{}\"".format(commit_msg))
+    _execute_git_command(repo_path, f"git commit -avm \'{commit_msg}\'")
 
 def push_branch(repo_path, branch_name, remote="origin"):
     '''Push the given repo to the remote branch.'''
-    _execute_git_command(repo_path, "git push {} {}".format(remote, branch_name))
+    _execute_git_command(repo_path, f"git push {remote} {branch_name}")
 
 def checkout(repo_path, commit):
     '''Checkout a commit of a given repo.'''
-    _execute_git_command(repo_path, "git checkout {}".format(commit))
+    _execute_git_command(repo_path, f"git checkout {commit}")
 
 def ask_for_input(message, acceptable=None):
     '''Repeatedly ask for user input until an acceptable response is given.'''
     if not acceptable:
         acceptable = ["yes", "y", "no", "n"]
-    display_message = "{} ({}) > ".format(message, "/".join(acceptable))
+    display_message = f"{message} ({'/'.join(acceptable)}) > "
     user_input = input(display_message)
     while user_input.lower() not in acceptable:
-        print("{} is not a valid selection.".format(user_input))
+        print(f"{user_input} is not a valid selection.")
         user_input = input(display_message)
     return user_input.lower()
 
@@ -243,33 +243,33 @@ def get_current_commit(repo_path):
 
 def apply_patch(repo_path, patch_path):
     '''Apply a patch to the given repo.'''
-    _execute_git_command(repo_path, "cat \"{}\" | git am -3 -k".format(patch_path))
+    _execute_git_command(repo_path, f"cat \'{patch_path}\' | git am -3 -k")
 
 def get_commits(repo_path, previous_tag, current_tag="HEAD", commit_format=None):
     '''Get a list of commits between made between 2 tags.'''
     format_option = ""
     if commit_format:
-        format_option = "--pretty=format:'{}'".format(commit_format)
-    return _execute_git_command(repo_path, "git log {} {}..{}".format(format_option, previous_tag, current_tag))
+        format_option = f"--pretty=format:'{commit_format}'"
+    return _execute_git_command(repo_path, f"git log {format_option} {previous_tag}..{current_tag}")
 
 def fill_in_params(filename, params=None, **kwargs):
     '''
     Replace occurrences of `${key}` with `val`.
     '''
-    with open(filename,mode='r') as text_file:
+    with open(filename,mode='r',encoding='utf8') as text_file:
         text = text_file.read()
 
     if not params:
-        params = dict()
+        params = {}
 
     for key, value in params:
-        text = text.replace("${{{}}}".format(key), value)
+        text = text.replace(f"${{{key}}}", value)
 
     for key, value in kwargs.items():
-        text = text.replace("${{{}}}".format(key), value)
+        text = text.replace("${{{key}}}", value)
 
     with tempfile.NamedTemporaryFile(suffix=os.path.basename(filename), delete=False).name as replaced_filename:
-        with open(replaced_filename,mode='w') as text_file:
+        with open(replaced_filename,mode='w',encoding='utf8') as text_file:
             text_file.write(text)
 
     return replaced_filename
