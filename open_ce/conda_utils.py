@@ -167,7 +167,6 @@ def output_file_to_string(output_file):
     returns a string that can be used within a conda environment file to reference the package specifically.
     '''
     match_spec = MatchSpec.from_dist_str(os.path.basename(output_file))
-    #return "{} {} {}".format(match_spec.get("name", ""), match_spec.get("version", ""), match_spec.get("build", "")).strip()
     return f"{match_spec.get('name', '')} {match_spec.get('version', '')} {match_spec.get('build', '').strip()}"
 
 def output_file_exists(output_file, channels):
