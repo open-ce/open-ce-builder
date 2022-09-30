@@ -71,7 +71,7 @@ def _validate_config_file(env_file, variants):
         if utils.is_url(env_file):
             env_file = utils.download_file(env_file)
 
-        # although version_check_obj below is a dict, pylint throws a false positive thinking its a list 
+        # although version_check_obj below is a dict, pylint throws a false positive thinking its a list
         # so disabling pylint complaints.
         # pylint: disable=no-member, invalid-sequence-index
         # First, partially render yaml to validate builder version number.
