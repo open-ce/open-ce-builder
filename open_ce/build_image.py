@@ -39,7 +39,7 @@ TEMP_FILES = "temp_dir"
 
 OPENCE_USER = "opence"
 LOCAL_CONDA_CHANNEL_IN_IMG = "opence-local-conda-channel"
-TARGET_DIR = "/home/{}/{}".format(OPENCE_USER, LOCAL_CONDA_CHANNEL_IN_IMG)
+TARGET_DIR = f"/home/{OPENCE_USER}/{LOCAL_CONDA_CHANNEL_IN_IMG}"
 
 def build_image(local_conda_channel, conda_env_file, container_tool, image_version, container_build_args=""):
     """
@@ -116,7 +116,7 @@ def build_runtime_container_image(args):
         conda_env_runtime_filename = os.path.splitext(os.path.basename(conda_env_file))[0]+'-runtime.yaml'
         conda_env_runtime_file = os.path.join(local_conda_channel, TEMP_FILES, conda_env_runtime_filename)
         create_copy(conda_env_file, conda_env_runtime_file)
-        utils.replace_conda_env_channels(conda_env_runtime_file, r'file:.*', "file:/{}".format(TARGET_DIR))
+        utils.replace_conda_env_channels(conda_env_runtime_file, r'file:.*', f"file:/{TARGET_DIR}")
 
         image_version = utils.get_open_ce_version(conda_env_file)
         image_name = build_image(args.local_conda_channel, os.path.basename(conda_env_runtime_file),

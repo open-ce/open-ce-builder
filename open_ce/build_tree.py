@@ -52,7 +52,7 @@ class DependencyNode():
         return str(self)
 
     def __str__(self):
-        return "({} : {})".format(self.packages, self.build_command)
+        return f"({self.packages} : {self.build_command})"
 
     def __hash__(self):
         return self._hash_val
@@ -191,9 +191,9 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         self._git_tag_for_env = git_tag_for_env
         self._git_up_to_date = git_up_to_date
         self._conda_build_config = conda_build_config if conda_build_config else []
-        self._external_dependencies = dict()
-        self._conda_env_files = dict()
-        self._test_feedstocks = dict()
+        self._external_dependencies = {}
+        self._conda_env_files = {}
+        self._test_feedstocks = {}
         self._initial_nodes = []
 
         # Create a dependency tree that includes recipes for every combination
@@ -256,7 +256,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
                 git_url += ".git"
             repository = os.path.splitext(os.path.basename(git_url))[0]
         else:
-            git_url = "{}/{}-feedstock.git".format(self._git_location, feedstock_value)
+            git_url = f"{self._git_location}/{feedstock_value}-feedstock.git"
 
             repository = feedstock_value + "-feedstock"
 
@@ -424,7 +424,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
                                                   env_config.Key.opence_env_file_path.name)), patch)
                         if utils.is_url(patch_file):
                             patch_file = utils.download_file(patch_file)
-                    patch_apply_cmd = "git apply {}".format(patch_file)
+                    patch_apply_cmd = f"git apply {patch_file}"
                     log.info("Patch apply command: %s", patch_apply_cmd)
                     patch_apply_res = os.system(patch_apply_cmd)
                     if patch_apply_res != 0:
@@ -468,7 +468,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         """
         Write a conda environment file for each variant.
         """
-        conda_env_files = dict()
+        conda_env_files = {}
         for variant, conda_env_file in self._conda_env_files.items():
             conda_env_files[variant] = conda_env_file.write_conda_env_file(variant,
                                                                    output_folder, env_file_prefix,
@@ -510,7 +510,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         for dep_package in dep_packages:
             terms += [next(x.build_command.name() for x in deps if dep_package == x.packages)]
 
-        return ", ".join("'{}'".format(x) for x in terms)
+        return ", ".join(f"'{x}'" for x in terms)
 
     def remove_external_deps_from_dag(self):
         '''

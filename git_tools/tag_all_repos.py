@@ -101,16 +101,16 @@ def clone_repos(repos, branch, repo_dir, prev_tag):
         repo_path = os.path.abspath(os.path.join(repo_dir, repo["name"]))
         print("--->Making clone location: " + repo_path)
         os.makedirs(repo_path, exist_ok=True)
-        print("--->Cloning {}".format(repo["name"]))
+        print(f"--->Cloning {repo['name']}")
         git_utils.clone_repo(repo["ssh_url"], repo_path)
         if branch and git_utils.branch_exists(repo_path, branch):
-            print("--->Branch '{}' exists, checking it out.".format(branch))
+            print(f"--->Branch '{branch}' exists, checking it out.")
             git_utils.checkout(repo_path, branch)
         elif prev_tag:
             repo_branch = git_utils.get_tag_branch(repo_path, prev_tag)
-            print("-->Repo branch is: {}".format(repo_branch))
+            print(f"-->Repo branch is: {repo_branch}")
             if git_utils.branch_exists(repo_path, os.path.basename(repo_branch)):
-                print("--->Checking out branch '{}' which contains tag '{}'.".format(repo_branch, prev_tag))
+                print(f"--->Checking out branch '{repo_branch}' which contains tag '{prev_tag}'.")
                 git_utils.checkout(repo_path, repo_branch)
 
 def tag_repos(repos, tag, tag_msg, repo_dir):
@@ -120,7 +120,7 @@ def tag_repos(repos, tag, tag_msg, repo_dir):
     print("---------------------------Tagging all Repos")
     for repo in repos:
         repo_path = os.path.abspath(os.path.join(repo_dir, repo["name"]))
-        print("--->Tagging {}".format(repo["name"]))
+        print(f"--->Tagging {repo['name']}")
         git_utils.create_tag(repo_path, tag, tag_msg)
 
 def push_repos(repos, tag, repo_dir, continue_query=True):
@@ -131,11 +131,11 @@ def push_repos(repos, tag, repo_dir, continue_query=True):
     for repo in repos:
         try:
             repo_path = os.path.abspath(os.path.join(repo_dir, repo["name"]))
-            print("--->Pushing {}".format(repo["name"]))
+            print(f"--->Pushing {repo['name']}")
             git_utils.push_branch(repo_path, tag)
-        except Exception as exc:# pylint: disable=broad-except
-            print("Error encountered when trying to push {}".format(repo["name"]))
-            print(exc)
+        except Exception as ex:# pylint: disable=broad-except
+            print(f"Error encountered when trying to push {repo['name']}")
+            print(ex)
             if not continue_query:
                 continue
             cont_tag = git_utils.ask_for_input("Would you like to continue tagging other repos?")

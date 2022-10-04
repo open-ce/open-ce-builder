@@ -67,7 +67,7 @@ class CondaEnvFileGenerator():
             # git_tag_for_env will be None in the case open-ce's main branch is used.
             # And, main branch means the latest code, hence open-ce version string should be `latest`.
             git_tag_for_env = "latest"
-        with open(conda_env_file, 'w') as outfile:
+        with open(conda_env_file, 'w', encoding='utf8') as outfile:
             outfile.write("#" + utils.OPEN_CE_VARIANT + ":" + variant_string + "\n")
             outfile.write("#" + utils.OPEN_CE_VERSION_STRING + ":" + git_tag_for_env + "\n" )
             open_ce.yaml_utils.dump(data, outfile, default_flow_style=False)
@@ -80,7 +80,7 @@ def get_variant_string(conda_env_file):
     Return the variant string from a conda environment file that was added by CondaEnvFileGenerator.
     If a variant string was not added to the conda environment file, None will be returned.
     """
-    with open(conda_env_file, 'r') as stream:
+    with open(conda_env_file, 'r', encoding='utf8') as stream:
         first_line = stream.readline().strip()[1:]
         values = first_line.split(':')
         if values[0] == utils.OPEN_CE_VARIANT:
@@ -95,7 +95,7 @@ def get_channels(conda_env_file):
     #pylint: disable=import-outside-toplevel
     import open_ce.yaml_utils
 
-    with open(conda_env_file, 'r') as file_handle:
+    with open(conda_env_file, 'r', encoding='utf8') as file_handle:
         env_info = open_ce.yaml_utils.load(file_handle)
 
     return env_info.get('channels')

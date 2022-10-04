@@ -57,7 +57,7 @@ class Argument(Enum):
                                         dest='channels_list',
                                         action='append',
                                         type=str,
-                                        default=list(),
+                                        default=[],
                                         help='Conda channels to be used.'))
 
     ENV_FILE = (lambda parser: parser.add_argument(
@@ -282,7 +282,7 @@ path of \"recipe\"."""))
                                      '-v',
                                      '--version',
                                      action='version',
-                                     version="Open-CE Builder {}".format(open_ce_version)))
+                                     version=f"Open-CE Builder {open_ce_version}"))
 
     CONDA_PKG_FORMAT = (lambda parser: parser.add_argument(
                                         '--conda_pkg_format',
@@ -367,8 +367,8 @@ def _create_env_config_paths(args):
                 else:
                     file_name = file_name + extension
 
-                new_url = "https://raw.githubusercontent.com/{}/{}/{}/envs/{}".format(
-                                                  organization, utils.DEFAULT_ENVS_REPO, branch, file_name)
+                new_url = f"https://raw.githubusercontent.com/{organization}/" \
+                          f"{utils.DEFAULT_ENVS_REPO}/{branch}/envs/{file_name}"
 
                 log.info("Unable to find '%s' locally. Attempting to use '%s'.", config_file, new_url)
                 args.env_config_file[index] = new_url
@@ -383,7 +383,7 @@ def _check_ppc_arch(args):
             if "GCC_11_HOME" not in os.environ:
                 os.environ["GCC_11_HOME"] = utils.DEFAULT_GCC_11_HOME_DIR
                 PATH = os.environ["PATH"]
-                os.environ["PATH"] = "{0}:{1}".format(os.path.join(os.environ["GCC_11_HOME"], "bin"), PATH)
+                os.environ["PATH"] = f"{os.path.join(os.environ['GCC_11_HOME'], 'bin')}:{PATH}"
                 print("Path variable set to : ", os.environ["PATH"])
             if not os.path.exists(utils.DEFAULT_GCC_11_HOME_DIR):
                 raise OpenCEError(Error.GCC11_COMPILER_NOT_FOUND)
@@ -422,4 +422,4 @@ def parse_arg_list(arg_list):
     ''' Turn a comma delimited string into a python list'''
     if isinstance(arg_list, list):
         return arg_list
-    return arg_list.split(",") if not arg_list is None else list()
+    return arg_list.split(",") if not arg_list is None else []

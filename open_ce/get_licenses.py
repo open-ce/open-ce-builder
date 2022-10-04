@@ -98,11 +98,11 @@ class LicenseGenerator():
             self.copyrights = copyrights if copyrights else []
 
         def __str__(self):
-            return "{}\t{}\t{}\t{}\t{}".format(self.name,
-                                               self.version,
-                                               ", ".join(self.url),
-                                               ", ".join(self.license_type),
-                                               ", ".join(self.copyrights))
+            return f"{self.name}\t" \
+                   f"{self.version}\t" \
+                   f"{', '.join(self.url)}\t" \
+                   f"{', '.join(self.license_type)}\t" \
+                   f"{', '.join(self.copyrights)}"
 
         def __lt__(self, other):
             return self.name + str(self.version) < other.name + str(other.version)
@@ -124,7 +124,7 @@ class LicenseGenerator():
         # Create a conda environment from the provided file
         time_stamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         conda_env_path = os.path.join(os.getcwd(), "license_env_file_" + time_stamp)
-        cli = "conda env create -p {} -f {}".format(conda_env_path, conda_env_file)
+        cli = f"conda env create -p {conda_env_path} -f {conda_env_file}"
         ret_code, std_out, std_err = utils.run_command_capture(cli)
         if not ret_code:
             raise OpenCEError(Error.GET_LICENSES, cli, std_out, std_err)
@@ -133,7 +133,7 @@ class LicenseGenerator():
         self._add_licenses_from_environment(conda_env_path)
 
         # Delete the generated conda environment
-        cli = "conda env remove -p {}".format(conda_env_path)
+        cli = f"conda env remove -p {conda_env_path}"
         ret_code, std_out, std_err = utils.run_command_capture(cli)
         if not ret_code:
             raise OpenCEError(Error.GET_LICENSES, cli, std_out, std_err)
@@ -195,7 +195,7 @@ class LicenseGenerator():
 
         licenses_file = os.path.join(output_folder, utils.DEFAULT_LICENSES_FILE)
 
-        with open(licenses_file, 'w') as file_stream:
+        with open(licenses_file, 'w', encoding='utf8') as file_stream:
             file_stream.write(result)
 
         log.info("Licenses file generated: %s", licenses_file)
@@ -204,7 +204,7 @@ class LicenseGenerator():
         """
         Import a licenses file from the provided path.
         """
-        with open(licenses_file) as csv_stream:
+        with open(licenses_file, encoding='utf8') as csv_stream:
             reader = csv.reader(csv_stream, delimiter='\t')
             for row in reader:
                 self._licenses.add(LicenseGenerator.LicenseInfo(row[0],
@@ -233,7 +233,7 @@ class LicenseGenerator():
         output = jinja_template.render(licenseInfo=license_dict)
 
         output_name = os.path.splitext(os.path.basename(template))[0] + ".txt"
-        with open(os.path.join(output_folder, output_name), 'w') as stream:
+        with open(os.path.join(output_folder, output_name), 'w', encoding='utf8') as stream:
             stream.write(output)
 
         log.info("%s generated from %s", os.path.join(output_folder, output_name), template)
@@ -250,14 +250,14 @@ class LicenseGenerator():
 
     def _add_licenses_from_environment_helper(self, meta_file, conda_env):
         # Find the extracted_package_dir
-        with open(os.path.join(conda_env, "conda-meta", meta_file)) as file_stream:
+        with open(os.path.join(conda_env, "conda-meta", meta_file), encoding='utf8') as file_stream:
             meta_data = open_ce.yaml_utils.load(file_stream)
 
         if LicenseGenerator.LicenseInfo(meta_data["name"], meta_data["version"]) in self._licenses:
             return (None, [])
 
         package_info_dir = os.path.join(meta_data["extracted_package_dir"], "info")
-        with open(os.path.join(package_info_dir, "about.json")) as file_stream:
+        with open(os.path.join(package_info_dir, "about.json"), encoding='utf8') as file_stream:
             about_data = open_ce.yaml_utils.load(file_stream)
 
         open_ce_info = os.path.join(package_info_dir, "recipe", utils.OPEN_CE_INFO_FILE)
@@ -280,7 +280,7 @@ def _get_info_file_packages(open_ce_info):
     if not os.path.exists(open_ce_info):
         return []
 
-    with open(open_ce_info) as file_stream:
+    with open(open_ce_info, encoding='utf8') as file_stream:
         license_data = open_ce.yaml_utils.load(file_stream)
 
     utils.validate_dict_schema(license_data, _OPEN_CE_INFO_SCHEMA)
@@ -341,7 +341,7 @@ def _get_source_from_conda_package(pkg_dir):
         if not os.path.exists(recipe_meta_file):
             return source_folder
 
-        with open(recipe_meta_file) as file_stream:
+        with open(recipe_meta_file, encoding='utf8') as file_stream:
             recipe_data = open_ce.yaml_utils.load(file_stream)
 
         if not recipe_data.get("source"):
@@ -385,9 +385,9 @@ def _extract(archive, destination):
     Extract the contents of an archive
     """
     if tarfile.is_tarfile(archive):
-        tar_file = tarfile.open(archive)
-        tar_file.extractall(destination)
-        tar_file.close()
+        with tarfile.open(archive) as tar_file:
+            tar_file.extractall(destination)
+            tar_file.close()
     elif zipfile.is_zipfile(archive):
         with zipfile.ZipFile(archive, 'r') as zip_stream:
             zip_stream.extractall(destination)
@@ -423,7 +423,7 @@ def _get_copyrights_from_files(license_files):
         if license_file.endswith(".d.ts"):
             copyright_notices += _get_copyrights_from_ts(license_file)
             continue
-        with open(license_file, 'r', errors='ignore') as file_stream:
+        with open(license_file, 'r', errors='ignore', encoding='utf8') as file_stream:
             just_found = False
             for line in file_stream.readlines():
                 if any(copyright in line for copyright in COPYRIGHT_STRINGS) and \
@@ -454,7 +454,7 @@ def _get_copyrights_from_ts(ts_file):
     ts_start = "// Definitions by:"
     ts_end = "// Definitions:"
     copyrights = []
-    with open(ts_file, 'r') as file_stream:
+    with open(ts_file, 'r', encoding='utf8') as file_stream:
         for line in file_stream.readlines():
             if line.startswith(ts_start):
                 copyrights.append("Copyright " + line[len(ts_start):].strip())

@@ -54,7 +54,7 @@ DEFAULT_LICENSES_FILE = "licenses.csv"
 TMP_LICENSE_DIR = "tmp_license_src"
 OPEN_CE_INFO_FILE = "open-ce-info.yaml"
 CONTAINER_TOOLS = ["podman", "docker"]
-DEFAULT_CONTAINER_TOOL = next(filter(lambda tool: os.system("which {} &> /dev/null".format(tool))
+DEFAULT_CONTAINER_TOOL = next(filter(lambda tool: os.system(f"which {tool} &> /dev/null")
                                       == 0, CONTAINER_TOOLS), None)
 DEFAULT_PKG_FORMAT = "conda"  # use .conda output format
 NUM_THREAD_POOL = 16
@@ -108,14 +108,14 @@ def validate_type(value, schema_type):
         validate_dict_schema(value, schema_type)
     else:
         if not isinstance(value, schema_type):
-            raise OpenCEError(Error.ERROR, "{} is not of expected type {}".format(value, schema_type))
+            raise OpenCEError(Error.ERROR, f"{value} is not of expected type {schema_type}")
 
 def validate_dict_schema(dictionary, schema):
     '''Recursively validate a dictionary's schema.'''
     for k, (schema_type, required) in schema.items():
         if k not in dictionary:
             if required:
-                raise OpenCEError(Error.ERROR, "Required key {} was not found in {}".format(k, dictionary))
+                raise OpenCEError(Error.ERROR, f"Required key {k} was not found in {dictionary}")
             continue
         if isinstance(schema_type, list):
             if dictionary[k] is not None: #Handle if the yaml file has an empty list for this key.
@@ -126,22 +126,24 @@ def validate_dict_schema(dictionary, schema):
             validate_type(dictionary[k], schema_type)
     for k in dictionary:
         if not k in schema:
-            raise OpenCEError(Error.ERROR, "Unexpected key {} was found in {}".format(k, dictionary))
+            raise OpenCEError(Error.ERROR, f"Unexpected key {k} was found in {dictionary}")
 
 def run_command_capture(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=None):
     """Run a shell command and capture the ret_code, stdout and stderr."""
     if cwd:
         os.makedirs(cwd, exist_ok=True)
-    process = subprocess.Popen(
+    with subprocess.Popen(
         cmd,
         stdout=stdout,
         stderr=stderr,
         shell=True,
         universal_newlines=True,
-        cwd=cwd)
-    std_out, std_err = process.communicate()
+        cwd=cwd) as process:
+        std_out, std_err = process.communicate()
 
-    return process.returncode == 0, std_out, std_err
+        return process.returncode == 0, std_out, std_err
+
+    return False, std_out, std_err
 
 def run_and_log(command):
     '''Print a shell command and then execute it.'''
@@ -273,11 +275,11 @@ def download_file(url, filename=None):
     '''
     retval = None
     try:
-        if not filename:
-            download_path = tempfile.NamedTemporaryFile(suffix=os.path.basename(url), delete=False).name
-        else:
-            download_path = tempfile.NamedTemporaryFile(suffix=filename, delete=False).name
-        retval, _ = urllib.request.urlretrieve(url, filename=download_path)
+        suffix = filename
+        if not suffix:
+            suffix = os.path.basename(url)
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as download_path:
+            retval, _ = urllib.request.urlretrieve(url, filename=download_path.name)
     except Exception as exc: # pylint: disable=broad-except
         raise OpenCEError(Error.FILE_DOWNLOAD, url, str(exc)) from exc
     return retval
@@ -290,12 +292,12 @@ def replace_conda_env_channels(conda_env_file, original_channel, new_channel):
     #pylint: disable=import-outside-toplevel
     import open_ce.yaml_utils
 
-    with open(conda_env_file, 'r') as file_handle:
+    with open(conda_env_file, 'r', encoding='utf8') as file_handle:
         env_info = open_ce.yaml_utils.load(file_handle)
 
     env_info['channels'] = [re.sub(original_channel, new_channel, channel) for channel in env_info['channels']]
 
-    with open(conda_env_file, 'w') as file_handle:
+    with open(conda_env_file, 'w', encoding='utf8') as file_handle:
         open_ce.yaml_utils.dump(env_info, file_handle)
 
 def get_branch_of_tag(git_tag):
@@ -363,7 +365,7 @@ def get_open_ce_version(conda_env_file):
     conda_file = None
     version = "open-ce"
     try:
-        with open(conda_env_file, 'r') as conda_file:
+        with open(conda_env_file, 'r', encoding='utf8') as conda_file:
             lines = conda_file.readlines()
             for line in lines:
                 matched = re.match(r'(#'+OPEN_CE_VERSION_STRING+':(.*))', line)
@@ -389,13 +391,13 @@ def run_in_parallel(function, arguments):
     Run function in parallel across all arguments.
     '''
     new_args = [tuple([function]) + x if isinstance(x, tuple) else (function, x) for x in arguments]
-    pool = mp.Pool(NUM_THREAD_POOL)
-    try:
-        retval = pool.starmap(_run_helper, new_args)
-        return retval
-    finally:
-        pool.close()
-        pool.join()
+    with mp.Pool(NUM_THREAD_POOL) as pool:
+        try:
+            retval = pool.starmap(_run_helper, new_args)
+            return retval
+        finally:
+            pool.close()
+            pool.join()
 
 def get_conda_build_configs(configs):
     '''

@@ -72,14 +72,14 @@ def _main(arg_strings=None):
             repo_path = os.path.abspath(os.path.join(args.repo_dir, repo["name"]))
             print("--->Making clone location: " + repo_path)
             os.makedirs(repo_path, exist_ok=True)
-            print("--->Cloning {}".format(repo["name"]))
+            print(f"--->Cloning {repo['name']}")
             git_utils.clone_repo(repo["ssh_url"], repo_path)
             head_branch = git_utils.get_current_branch(repo_path)
             git_utils.create_branch(repo_path, args.branch)
 
             for patch in patches:
                 replaced_patch = git_utils.fill_in_params(patch, param_dict, default_branch=head_branch)
-                print("--->Applying Patch {}".format(replaced_patch))
+                print(f"--->Applying Patch {replaced_patch}")
                 git_utils.apply_patch(repo_path, replaced_patch)
 
             print("--->Pushing Branch")
@@ -104,7 +104,7 @@ def _main(arg_strings=None):
 
             print("---------------------------" + "Finished " + repo["name"])
         except Exception as exc:# pylint: disable=broad-except
-            print("Error encountered when trying to patch {}".format(repo["name"]))
+            print(f"Error encountered when trying to patch {repo['name']}")
             print(exc)
             cont = git_utils.ask_for_input("Would you like to continue applying patches to other repos?")
             if cont.startswith("y"):

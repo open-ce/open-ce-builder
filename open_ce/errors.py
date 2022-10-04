@@ -105,7 +105,7 @@ class OpenCEError(Exception):
         if isinstance(error, str):
             msg = error
         else:
-            msg = "[OPEN-CE-ERROR]-{} {}".format(error.value[0], error.value[1].format(*additional_args))
+            msg = f"[OPEN-CE-ERROR]-{error.value[0]} {error.value[1].format(*additional_args)}"
         super().__init__(msg, **kwargs)
         self.msg = msg
 
@@ -113,5 +113,5 @@ def show_warning(warning, *additional_args, **kwargs):
     """
     Prints an Open-CE Warning.
     """
-    msg = "-{} {}".format(warning.value[0], warning.value[1].format(*additional_args))
+    msg = f"-{warning.value[0]} {warning.value[1].format(*additional_args)}"
     log.warning(msg, **kwargs)

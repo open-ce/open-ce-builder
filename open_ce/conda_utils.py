@@ -123,7 +123,7 @@ def get_latest_package_info(channels, package):
         # Parsing the normal output from "conda search --info" instead of using the json flag. Using the json
         # flag adds a lot of extra time due to a slow regex in the conda code that is attempting to parse out
         # URL tokens
-        entries = list()
+        entries = []
         for entry in std_out.split("\n\n"):
             _, file_name, rest = entry.partition("file name")
             if file_name:
@@ -157,7 +157,7 @@ def version_matches_spec(spec_string, version=open_ce_version):
     version_matches_spec(">=1.2,<1.3", "1.2.1") -> True
     version_matches_spec(">=1.2,<1.3", "1.3.0") -> False
     '''
-    match_spec = MatchSpec("test[version='{}']".format(spec_string))
+    match_spec = MatchSpec(f"test[version='{spec_string}']")
     query_pkg = {"name": "test", "version": version, "build": "", "build_number": 0}
     return match_spec.match(query_pkg)
 
@@ -167,7 +167,7 @@ def output_file_to_string(output_file):
     returns a string that can be used within a conda environment file to reference the package specifically.
     '''
     match_spec = MatchSpec.from_dist_str(os.path.basename(output_file))
-    return "{} {} {}".format(match_spec.get("name", ""), match_spec.get("version", ""), match_spec.get("build", "")).strip()
+    return f"{match_spec.get('name', '')} {match_spec.get('version', '')} {match_spec.get('build', '').strip()}"
 
 def output_file_exists(output_file, channels):
     '''

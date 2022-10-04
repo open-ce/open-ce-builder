@@ -45,7 +45,7 @@ def test_get_licenses(mocker):
 
     output_file = os.path.join(output_folder, utils.DEFAULT_LICENSES_FILE)
     assert os.path.exists(output_file)
-    with open(output_file) as file_stream:
+    with open(output_file, encoding='utf8') as file_stream:
         license_contents = file_stream.read()
 
     print(license_contents)
@@ -54,7 +54,7 @@ def test_get_licenses(mocker):
 
     template_output_file = os.path.join(output_folder, os.path.splitext(os.path.basename(template_file))[0] + ".txt")
     assert os.path.exists(template_output_file)
-    with open(template_output_file) as file_stream:
+    with open(template_output_file, encoding='utf8') as file_stream:
         template_contents = file_stream.read()
 
     print(template_contents)
@@ -71,7 +71,7 @@ def test_get_licenses_licenses_file_arg():
 
     template_output_file = os.path.join(output_folder, os.path.splitext(os.path.basename(template_file))[0] + ".txt")
     assert os.path.exists(template_output_file)
-    with open(template_output_file) as file_stream:
+    with open(template_output_file, encoding='utf8') as file_stream:
         template_contents = file_stream.read()
 
     print(template_contents)
@@ -131,7 +131,7 @@ def test_add_licenses_from_info_file(mocker, capfd):
 
     output_file = os.path.join(output_folder, utils.DEFAULT_LICENSES_FILE)
     assert os.path.exists(output_file)
-    with open(output_file) as file_stream:
+    with open(output_file, encoding='utf8') as file_stream:
         license_contents = file_stream.read()
 
     print(license_contents)
@@ -157,7 +157,7 @@ def test_no_info_file():
 
     output_file = os.path.join(output_folder, utils.DEFAULT_LICENSES_FILE)
     assert os.path.exists(output_file)
-    with open(output_file) as file_stream:
+    with open(output_file, encoding='utf8') as file_stream:
         license_contents = file_stream.read()
 
     assert license_contents == ""
