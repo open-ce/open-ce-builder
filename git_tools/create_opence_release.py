@@ -90,8 +90,12 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals, too-many-stateme
     release_name = f"v{version}"
 
     tf_serving_env = os.path.abspath(os.path.join(primary_repo_path, "envs", "tensorflow-serving-env.yaml"))
-    env_file_contents = env_config.load_env_config_files([open_ce_env_file, tf_serving_env],
-                                                          utils.ALL_VARIANTS(), ignore_urls=True)
+    variants = utils.ALL_VARIANTS()
+    print("Variants: ", variants)
+    env_file_contents = []
+    for variant in variants:
+        env_file_contents += env_config.load_env_config_files([open_ce_env_file, tf_serving_env],
+                                                          [variant], ignore_urls=True)
     for env_file_content in env_file_contents:
         env_file_tag = env_file_content.get(env_config.Key.git_tag_for_env.name, None)
         if env_file_tag != current_tag:
