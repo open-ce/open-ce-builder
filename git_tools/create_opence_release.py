@@ -64,7 +64,7 @@ def _make_parser():
 
     return parser
 
-def _main(arg_strings=None): # pylint: disable=too-many-locals, too-many-statements
+def _main(arg_strings=None): # pylint: disable=too-many-locals, too-many-statements, too-many-branches
     parser = _make_parser()
     args = parser.parse_args(arg_strings)
 
@@ -91,7 +91,6 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals, too-many-stateme
 
     tf_serving_env = os.path.abspath(os.path.join(primary_repo_path, "envs", "tensorflow-serving-env.yaml"))
     variants = utils.ALL_VARIANTS()
-    print("Variants: ", variants)
     env_file_contents = []
     for variant in variants:
         env_file_contents += env_config.load_env_config_files([open_ce_env_file, tf_serving_env],
