@@ -31,14 +31,6 @@ while a similar build for pytorch may look like this:
     open-ce build env pytorch-env.yaml
 ```
 
-Note that `bazel` is used to build `TensorFlow`. By default, `bazel` caches the files/source code it downloads during the build to ~/.cache/bazel. In case the home directory is low in memory, the packages using bazel as a build tool might fail.
-One can change the cache directory location used by bazel by setting `$TEST_TMPDIR` in the `build.sh` of the respective feedstock like this:
-
-```shell
-    export TEST_TMPDIR=/dev/shm/.cache
-    bazel build ...
-```
-
 Other environment files for other packages can also be found in the `envs`
 directory; simply specify the file for whichever package environment you want.
 
@@ -48,6 +40,27 @@ directory; simply specify the file for whichever package environment you want.
 > You do not need to execute `open-ce build feedstock` directly yourself, although
 > you may do so if you wish to perform an individual build of your own
 > for any given Open-CE feedstock repository.
+
+#### Tips for bazel builds ####
+
+Note that `bazel` is used to build `TensorFlow`. By default, `bazel` caches the files/source code it downloads during the build to ~/.cache/bazel. In case the home directory is low in memory, the packages using bazel as a build tool might fail.
+One can change the cache directory location used by bazel in two ways as follows -
+
+1. By setting `$TEST_TMPDIR` in the `build.sh` of the respective feedstock like this:
+
+```shell
+    export TEST_TMPDIR=/dev/shm/.cache
+    bazel build ...
+```
+
+2. By making a global change in user specific `~/.bazelrc` for all packages that use bazel as a build tool. This way one doesn't need to modify every feedstock:
+
+```shell
+    echo "startup --output_user_root=/dev/shm/.cache" >> ~/.bazelrc
+```
+
+Also, in case the build fails, many a times, a stale process remains alive. And this could slow down subsequent builds.
+Make sure to kill this stale bazel process before retrying the builds.
 
 ### Container build
 
@@ -455,14 +468,14 @@ For example:
 GCC 11 setup is automated if the builds are done in a podman container using `--container_build` option. Please see [`Dockerfile`](https://github.com/open-ce/open-ce-builder/blob/main/open_ce/images/builder/Dockerfile-p10) used for containerized build of these packages.
 
 #### Build packages
-Power10 MMA Optimization is applicable for cpu only builds. One has to use `--ppc_arch=p10` flag in the `open-ce build env` or `open-ce build feedstock` command to build P10 enabled packages. Another important argument which is must to build these packages is `--conda_build_config=open-ce/envs/conda_build_config.yaml,open-ce/envs/conda_build_config_p10.yaml`.[`conda_build_config_p10.yaml`](https://github.com/open-ce/open-ce/blob/main/envs/conda_build_config_p10.yaml) contains Power10 specific settings.
+Power10 MMA Optimization is applicable for cpu only builds. To build Power10 packages, use one of the following options:
 
-For example:
-```shell
-    open-ce build env --build_type=cpu --ppc_arch=p10 --conda_build_config=open-ce/envs/conda_build_config.yaml,open-ce/envs/conda_build_config_p10.yaml tensorflow-env.yaml
-```
+1. To build an individual environment: open-ce build env --ppc_arch=p10 --build_type=cpu --conda_build_config=open-ce/envs/conda_build_config.yaml,open-ce/envs/conda_build_config_p10.yaml <environment yaml>.
 
-Open-CE also contains [`open-ce/envs/opence-p10-env.yaml`](https://github.com/open-ce/open-ce/blob/main/envs/opence-p10-env.yaml) which builds all the Power10 enabled packages in one go.
+2. To build an individual feedstock: open-ce build feedstock --ppc_arch=p10 --build_type=cpu --conda_build_config=../open-ce/envs/conda_build_config.yaml,../open-ce/envs/conda_build_config_p10.yaml
+
+3. To build all Power10 enabled packages in one go: open-ce build env --ppc_arch=p10 --build_type=cpu opence-p10-env.yaml
+
 
 #### Using packages with Power10 MMA optimization
 When using packages that were built with ppc_arch=p10, note that:
