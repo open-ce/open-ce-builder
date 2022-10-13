@@ -470,7 +470,7 @@ For example:
     open-ce build env --build_type=cpu --ppc_arch=p10 --conda_build_config=open-ce/envs/conda_build_config.yaml,open-ce/envs/conda_build_config_p10.yaml tensorflow-env.yaml
 ```
 
-Open-CE also contains [`open-ce/envs/opence-p10-env.yaml`](https://github.com/open-ce/open-ce/blob/main/envs/opence-p10-env.yaml) which builds all the Power10 enabled packages in one go. If P10 packages are built using `opence-p10-env.yaml`, one can skip specifying argument `--conda_build_config=open-ce/envs/conda_build_config.yaml,open-ce/envs/conda_build_config_p10.yaml` as these conda build config files are imported in `opence-p10-env.yaml` by default. But with individual environment files like `tensorflow-env.yaml`, one must provide this argument.
+Open-CE also contains [`open-ce/envs/opence-p10-env.yaml`](https://github.com/open-ce/open-ce/blob/main/envs/opence-p10-env.yaml) which builds all the Power10 enabled packages in one go. If Power10 packages are built using `opence-p10-env.yaml`, one can skip specifying argument `--conda_build_config=open-ce/envs/conda_build_config.yaml,open-ce/envs/conda_build_config_p10.yaml` as these conda build config files are imported in `opence-p10-env.yaml` by default. But with individual environment files like `tensorflow-env.yaml`, one must provide this argument.
 
 #### Using packages with Power10 MMA optimization
 When using packages that were built with ppc_arch=p10, note that:
