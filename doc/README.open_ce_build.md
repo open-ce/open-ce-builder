@@ -31,6 +31,18 @@ while a similar build for pytorch may look like this:
     open-ce build env pytorch-env.yaml
 ```
 
+Other environment files for other packages can also be found in the `envs`
+directory; simply specify the file for whichever package environment you want.
+
+> Note: that the `open-ce build env` command executes the `open-ce build feedstock` command
+> as needed, behind the scenes.  This script builds each individual feedstock
+> component dependency using the build recipe within its own repository.
+> You do not need to execute `open-ce build feedstock` directly yourself, although
+> you may do so if you wish to perform an individual build of your own
+> for any given Open-CE feedstock repository.
+
+#### Tips for bazel builds ####
+
 Note that `bazel` is used to build `TensorFlow`. By default, `bazel` caches the files/source code it downloads during the build to ~/.cache/bazel. In case the home directory is low in memory, the packages using bazel as a build tool might fail.
 One can change the cache directory location used by bazel in two ways as follows -
 
@@ -47,15 +59,8 @@ One can change the cache directory location used by bazel in two ways as follows
     echo "startup --output_user_root=/dev/shm/.cache" >> ~/.bazelrc
 ```
 
-Other environment files for other packages can also be found in the `envs`
-directory; simply specify the file for whichever package environment you want.
-
-> Note: that the `open-ce build env` command executes the `open-ce build feedstock` command
-> as needed, behind the scenes.  This script builds each individual feedstock
-> component dependency using the build recipe within its own repository.
-> You do not need to execute `open-ce build feedstock` directly yourself, although
-> you may do so if you wish to perform an individual build of your own
-> for any given Open-CE feedstock repository.
+Also, in case the build fails, many a times, a stale process remains alive. And this could slow down subsequent builds.
+Make sure to kill this stale bazel process before retrying the builds.
 
 ### Container build
 
