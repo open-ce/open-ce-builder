@@ -63,6 +63,8 @@ def test_check_ppc_arch_for_p9(mocker):
         'os.path.exists',
         return_value=True
     )
+    if 'GCC_11_HOME' in os.environ:
+        del os.environ["GCC_11_HOME"]
 
     parser = make_parser([Argument.ENV_FILE, Argument.PPC_ARCH])
 
