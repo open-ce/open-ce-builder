@@ -64,6 +64,8 @@ DEFAULT_TEST_RESULT_FILE = "test_results.xml"
 DEFAULT_PPC_ARCH = "p9"
 DEFAULT_GCC_11_HOME_DIR = "/opt/rh/gcc-toolset-11/root/usr"
 
+global PPC_ARCH_VARIANT        # pylint: disable=global-at-module-level
+PPC_ARCH_VARIANT = DEFAULT_PPC_ARCH
 def make_variants(python_versions=DEFAULT_PYTHON_VERS,
                   build_types=DEFAULT_BUILD_TYPES,
                   mpi_types=DEFAULT_MPI_TYPES,

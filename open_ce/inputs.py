@@ -379,6 +379,7 @@ def _check_ppc_arch(args):
     needed environment variables for GCC_11_HOME
     '''
     if "ppc_arch" in vars(args).keys() and args.ppc_arch:
+        utils.PPC_ARCH_VARIANT = args.ppc_arch
         if args.ppc_arch == "p10":
             if "GCC_11_HOME" not in os.environ:
                 os.environ["GCC_11_HOME"] = utils.DEFAULT_GCC_11_HOME_DIR

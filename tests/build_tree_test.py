@@ -426,9 +426,30 @@ def test_check_runtime_package_field():
                 if package.get(env_config.Key.feedstock.name) == "package222":
                     assert package.get(env_config.Key.runtime_package.name) == False
 
+def test_check_ppc_arch_filter():
+    '''
+    Test if `ppc_arch` filter works and envs are loaded conditionally
+    '''
+    env_file = os.path.join(test_dir, 'test-env2.yaml')
+    utils.PPC_ARCH_VARIANT = "p10"
+    possible_variants = utils.make_variants(utils.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
+    for variant in possible_variants:
+
+        # test-env2.yaml imports test-env5.yaml only if ppc_arch is p10 and test-env5.yaml
+        # has listed package51 and package52.
+
+        env_config_data_list = env_config.load_env_config_files([env_file], [variant])
+        for env_config_data in env_config_data_list:
+            packages = env_config_data.get(env_config.Key.packages.name, [])
+            for package in packages:
+                if package.get(env_config.Key.feedstock.name) == "package51":
+                    assert True
+                elif package.get(env_config.Key.feedstock.name) == "package52":
+                    assert True
+
 def test_check_recipe_path_package_field():
     '''
-    Test for `runtime_package` field
+    Test for `recipe_path` field
     '''
     env_file = os.path.join(test_dir, 'test-env1.yaml')
 

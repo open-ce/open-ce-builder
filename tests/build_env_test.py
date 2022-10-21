@@ -544,3 +544,18 @@ def test_build_env_conda_pkg_format(mocker):
     arg_strings = ["build", build_env.COMMAND,
                   "--conda_pkg_format", pkg_format, "tests/test-env1.yaml"]
     opence._main(arg_strings)
+
+def test_ppc_arch_filter_in_env(mocker):
+    '''
+    Test if envs are loaded correctly when ppc_arch filter is present in them
+    '''
+    mocker.patch(
+        'os.path.exists',
+        return_value=True
+    )
+    mocker.patch(
+        'open_ce.build_tree.BuildTree',
+    )
+
+    arg_strings = ["build", build_env.COMMAND, "--ppc_arch=p10", "tests/test-env2.yaml"]
+    opence._main(arg_strings)
