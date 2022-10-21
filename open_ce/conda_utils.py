@@ -45,6 +45,11 @@ def render_yaml(path, variants=None, variant_config_files=None, schema=None, per
     Call conda-build's render tool to get a list of dictionaries of the
     rendered YAML file for each variant that will be built.
     """
+
+    # We need to support `ppc_arch` as a filter in open-ce env yaml files. For that
+    # `ppc_arch` must be added as a variant, but we don't want it to be variant globally.
+    # So, just adding it here while rendering the yamls.
+
     mod_variants = {}
     if variants:
         mod_variants = variants
