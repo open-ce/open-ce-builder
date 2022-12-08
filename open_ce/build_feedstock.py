@@ -20,7 +20,7 @@ import os
 import traceback
 
 from open_ce import utils, constants
-from open_ce import inputs, conda_utils
+from open_ce import inputs
 from open_ce.inputs import Argument
 from open_ce.errors import OpenCEError, Error, log
 from open_ce.build_command import BuildCommand
@@ -53,6 +53,8 @@ def load_package_config(config_file=None, variants=None, recipe_path=None, permi
     file as an argument, it will be assumed that there is only one
     recipe to build, and it is in the directory called 'recipe'.
     '''
+    # pylint: disable=import-outside-toplevel
+    from open_ce import conda_utils
 
     if recipe_path:
         recipe_name = os.path.basename(os.getcwd())
@@ -109,6 +111,7 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
 
     # pylint: disable=import-outside-toplevel
     import conda_build.api
+    from open_ce import conda_utils  # pylint: disable=import-outside-toplevel
 
     saved_working_directory = None
     if command.repository:
