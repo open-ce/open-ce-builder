@@ -21,7 +21,7 @@ import datetime
 import argparse
 import glob
 
-from open_ce import utils
+from open_ce import utils, constants
 from open_ce.errors import OpenCEError, Error
 from open_ce.inputs import Argument
 
@@ -60,7 +60,7 @@ def _home_path(container_tool):
 
 #pylint: disable=too-many-arguments
 def build_image(build_image_path, dockerfile, container_tool, cuda_version=None,
-                container_build_args="", ppc_arch=utils.DEFAULT_PPC_ARCH):
+                container_build_args="", ppc_arch=constants.DEFAULT_PPC_ARCH):
 
     """
     Build a container image from the Dockerfile in BUILD_IMAGE_PATH.
@@ -118,7 +118,7 @@ def _create_container(container_name, image_name, output_folder, env_folders, co
 
     # Add output folder
     container_cmd += _add_volume(os.path.abspath(output_folder),
-                              os.path.abspath(os.path.join(home_path, utils.DEFAULT_OUTPUT_FOLDER)))
+                              os.path.abspath(os.path.join(home_path, constants.DEFAULT_OUTPUT_FOLDER)))
 
     if container_tool == "docker":
         # Store temporary data in an anonymous volume
@@ -213,7 +213,7 @@ def build_in_container(image_name, args, arg_strings):
         # Cleanup
         _stop_container(container_name, args.container_tool)
 
-def _generate_dockerfile_name(build_types, cuda_version, ppc_arch=utils.DEFAULT_PPC_ARCH):
+def _generate_dockerfile_name(build_types, cuda_version, ppc_arch=constants.DEFAULT_PPC_ARCH):
     '''
     Ensure we have valid combinations.  I.e. Specify a valid cuda version
     '''
@@ -258,7 +258,7 @@ def build_with_container_tool(args, arg_strings):
     parser = make_parser()
     _, unused_args = parser.parse_known_args(arg_strings[1:])
     if not args.ppc_arch:
-        args.ppc_arch = utils.DEFAULT_PPC_ARCH
+        args.ppc_arch = constants.DEFAULT_PPC_ARCH
 
     build_image_path, dockerfile = _generate_dockerfile_name(args.build_types, args.cuda_versions, args.ppc_arch)
 
@@ -275,5 +275,5 @@ def build_with_container_tool(args, arg_strings):
         for conda_env_file in glob.glob(os.path.join(args.output_folder, "*.yaml")):
             utils.replace_conda_env_channels(conda_env_file,
                                              os.path.abspath(os.path.join(_home_path(args.container_tool),
-                                                                          utils.DEFAULT_OUTPUT_FOLDER)),
+                                                                          constants.DEFAULT_OUTPUT_FOLDER)),
                                                  os.path.abspath(args.output_folder))

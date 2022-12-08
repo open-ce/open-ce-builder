@@ -18,9 +18,9 @@
 
 import os
 import shutil
-from open_ce import utils
+from open_ce import utils, constants
 from open_ce import __version__ as open_ce_version
-from open_ce.inputs import Argument, parse_arg_list
+from open_ce.inputs import Argument
 from open_ce.errors import OpenCEError, Error, show_warning, log
 
 COMMAND = 'image'
@@ -46,7 +46,7 @@ def build_image(local_conda_channel, conda_env_file, container_tool, image_versi
     Build a container image from the Dockerfile in RUNTIME_IMAGE_PATH.
     Returns a result code and the name of the new image.
     """
-    variant = os.path.splitext(conda_env_file)[0].replace(utils.CONDA_ENV_FILENAME_PREFIX, "", 1)
+    variant = os.path.splitext(conda_env_file)[0].replace(constants.CONDA_ENV_FILENAME_PREFIX, "", 1)
     variant = variant.replace("-runtime", "")
     image_name = REPO_NAME + ":" + image_version + "-" + variant
     # Docker version on ppc64le rhel7 doesn't allow Dockerfiles to be out of build context.
@@ -106,7 +106,7 @@ def build_runtime_container_image(args):
 
     os.makedirs(os.path.join(local_conda_channel, TEMP_FILES), exist_ok=True)
 
-    for conda_env_file in parse_arg_list(args.conda_env_files):
+    for conda_env_file in utils.parse_arg_list(args.conda_env_files):
         conda_env_file = os.path.abspath(conda_env_file)
         if not os.path.exists(conda_env_file):
             raise OpenCEError(Error.INCORRECT_INPUT_PATHS)

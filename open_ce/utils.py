@@ -27,67 +27,30 @@ import multiprocessing as mp
 from distutils.version import LooseVersion
 import pkg_resources
 from open_ce.errors import OpenCEError, Error, show_warning, log
-from open_ce import inputs
+from open_ce import constants
 
-DEFAULT_BUILD_TYPES = "cpu,cuda"
-SUPPORTED_BUILD_TYPES = DEFAULT_BUILD_TYPES
-DEFAULT_PYTHON_VERS = "3.10"
-SUPPORTED_PYTHON_VERS = "3.8,3.9,3.10"
-DEFAULT_MPI_TYPES = "openmpi"
-SUPPORTED_MPI_TYPES = "system,openmpi"
-DEFAULT_CUDA_VERS = "11.4"
-SUPPORTED_CUDA_VERS = "11.2,11.4"
-CONDA_BUILD_CONFIG_FILE = "conda_build_config.yaml"
-DEFAULT_CONDA_BUILD_CONFIG = os.path.abspath(os.path.join(os.getcwd(), CONDA_BUILD_CONFIG_FILE))
-DEFAULT_GIT_LOCATION = "https://github.com/open-ce"
-DEFAULT_ENVS_REPO = "open-ce"
-SUPPORTED_GIT_PROTOCOLS = ["https:", "http:", "git@"]
-DEFAULT_RECIPE_CONFIG_FILE = "config/build-config.yaml"
-CONDA_ENV_FILENAME_PREFIX = "opence-conda-env-"
-DEFAULT_OUTPUT_FOLDER = "condabuild"
-DEFAULT_TEST_CONFIG_FILE = "tests/open-ce-tests.yaml"
-DEFAULT_GIT_TAG = None
-OPEN_CE_VARIANT = "open-ce-variant"
-DEFAULT_TEST_WORKING_DIRECTORY = "./"
-KNOWN_VARIANT_PACKAGES = ["python", "cudatoolkit"]
-DEFAULT_LICENSES_FILE = "licenses.csv"
-TMP_LICENSE_DIR = "tmp_license_src"
-OPEN_CE_INFO_FILE = "open-ce-info.yaml"
-CONTAINER_TOOLS = ["podman", "docker"]
-DEFAULT_CONTAINER_TOOL = next(filter(lambda tool: os.system(f"which {tool} &> /dev/null")
-                                      == 0, CONTAINER_TOOLS), None)
-DEFAULT_PKG_FORMAT = "conda"  # use .conda output format
-NUM_THREAD_POOL = 16
-OPEN_CE_VERSION_STRING = "Open-CE Version"
-DEFAULT_GRAPH_FILE = "graph.png"
-DEFAULT_TEST_RESULT_FILE = "test_results.xml"
-DEFAULT_PPC_ARCH = "p9"
-DEFAULT_GCC_11_HOME_DIR = "/opt/rh/gcc-toolset-11/root/usr"
-
-global PPC_ARCH_VARIANT        # pylint: disable=global-at-module-level
-PPC_ARCH_VARIANT = DEFAULT_PPC_ARCH
-def make_variants(python_versions=DEFAULT_PYTHON_VERS,
-                  build_types=DEFAULT_BUILD_TYPES,
-                  mpi_types=DEFAULT_MPI_TYPES,
-                  cuda_versions=DEFAULT_CUDA_VERS):
+def make_variants(python_versions=constants.DEFAULT_PYTHON_VERS,
+                  build_types=constants.DEFAULT_BUILD_TYPES,
+                  mpi_types=constants.DEFAULT_MPI_TYPES,
+                  cuda_versions=constants.DEFAULT_CUDA_VERS):
     '''Create a cross product of possible variant combinations.'''
     results = []
-    for build_type in inputs.parse_arg_list(build_types):
-        variants = { 'python' : inputs.parse_arg_list(python_versions),
+    for build_type in parse_arg_list(build_types):
+        variants = { 'python' : parse_arg_list(python_versions),
                      'build_type' : [build_type],
-                     'mpi_type' :  inputs.parse_arg_list(mpi_types)}
+                     'mpi_type' :  parse_arg_list(mpi_types)}
         if build_type == "cuda":
-            variants["cudatoolkit"] = inputs.parse_arg_list(cuda_versions)
+            variants["cudatoolkit"] = parse_arg_list(cuda_versions)
         results += [dict(zip(variants,y)) for y in product(*variants.values())]
 
     return results
 
 def ALL_VARIANTS():
     '''Returns a list of all possible variant combinations.'''
-    return make_variants(SUPPORTED_PYTHON_VERS,
-                         SUPPORTED_BUILD_TYPES,
-                         SUPPORTED_MPI_TYPES,
-                         SUPPORTED_CUDA_VERS)
+    return make_variants(constants.SUPPORTED_PYTHON_VERS,
+                         constants.SUPPORTED_BUILD_TYPES,
+                         constants.SUPPORTED_MPI_TYPES,
+                         constants.SUPPORTED_CUDA_VERS)
 
 def remove_version(package):
     '''Remove conda version from dependency.'''
@@ -292,7 +255,7 @@ def replace_conda_env_channels(conda_env_file, original_channel, new_channel):
     Regex 'original_channel' is replaced with 'new_channel'
     '''
     #pylint: disable=import-outside-toplevel
-    import open_ce.yaml_utils
+    import open_ce.yaml_utils     #pylint: disable=cyclic-import
 
     with open(conda_env_file, 'r', encoding='utf8') as file_handle:
         env_info = open_ce.yaml_utils.load(file_handle)
@@ -370,7 +333,7 @@ def get_open_ce_version(conda_env_file):
         with open(conda_env_file, 'r', encoding='utf8') as conda_file:
             lines = conda_file.readlines()
             for line in lines:
-                matched = re.match(r'(#'+OPEN_CE_VERSION_STRING+':(.*))', line)
+                matched = re.match(r'(#'+constants.OPEN_CE_VERSION_STRING+':(.*))', line)
                 if matched:
                     version = matched.group(2)
                     break
@@ -393,7 +356,7 @@ def run_in_parallel(function, arguments):
     Run function in parallel across all arguments.
     '''
     new_args = [tuple([function]) + x if isinstance(x, tuple) else (function, x) for x in arguments]
-    with mp.Pool(NUM_THREAD_POOL) as pool:
+    with mp.Pool(constants.NUM_THREAD_POOL) as pool:
         try:
             retval = pool.starmap(_run_helper, new_args)
             return retval
@@ -410,7 +373,7 @@ def get_conda_build_configs(configs):
     result = []
     for config in configs:
         if is_url(config):
-            result.append(download_file(config, filename=CONDA_BUILD_CONFIG_FILE))
+            result.append(download_file(config, filename=constants.CONDA_BUILD_CONFIG_FILE))
         elif os.path.exists(config):
             result.append(os.path.abspath(config))
 
@@ -433,3 +396,9 @@ def expanded_path(path, relative_to=None):
         result = os.path.join(os.path.dirname(relative_to), result)
 
     return result
+
+def parse_arg_list(arg_list):
+    ''' Turn a comma delimited string into a python list'''
+    if isinstance(arg_list, list):
+        return arg_list
+    return arg_list.split(",") if not arg_list is None else []

@@ -18,7 +18,7 @@
 
 import os
 
-from open_ce import utils
+from open_ce import constants
 
 #pylint: disable=too-few-public-methods
 class CondaEnvFileGenerator():
@@ -38,9 +38,9 @@ class CondaEnvFileGenerator():
     def write_conda_env_file(self,
                              variant_string,
                              output_folder=None,
-                             env_file_prefix=utils.CONDA_ENV_FILENAME_PREFIX,
-                             path=utils.DEFAULT_OUTPUT_FOLDER,
-                             git_tag_for_env=utils.DEFAULT_GIT_TAG):
+                             env_file_prefix=constants.CONDA_ENV_FILENAME_PREFIX,
+                             path=constants.DEFAULT_OUTPUT_FOLDER,
+                             git_tag_for_env=constants.DEFAULT_GIT_TAG):
         """
         This function writes conda environment files using the dependency dictionary
         created from all the buildcommands.
@@ -68,8 +68,8 @@ class CondaEnvFileGenerator():
             # And, main branch means the latest code, hence open-ce version string should be `latest`.
             git_tag_for_env = "latest"
         with open(conda_env_file, 'w', encoding='utf8') as outfile:
-            outfile.write("#" + utils.OPEN_CE_VARIANT + ":" + variant_string + "\n")
-            outfile.write("#" + utils.OPEN_CE_VERSION_STRING + ":" + git_tag_for_env + "\n" )
+            outfile.write("#" + constants.OPEN_CE_VARIANT + ":" + variant_string + "\n")
+            outfile.write("#" + constants.OPEN_CE_VERSION_STRING + ":" + git_tag_for_env + "\n" )
             open_ce.yaml_utils.dump(data, outfile, default_flow_style=False)
             file_name = conda_env_file
 
@@ -83,7 +83,7 @@ def get_variant_string(conda_env_file):
     with open(conda_env_file, 'r', encoding='utf8') as stream:
         first_line = stream.readline().strip()[1:]
         values = first_line.split(':')
-        if values[0] == utils.OPEN_CE_VARIANT:
+        if values[0] == constants.OPEN_CE_VARIANT:
             return values[1]
 
     return None

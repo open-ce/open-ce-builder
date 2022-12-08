@@ -21,12 +21,11 @@ from logging import ERROR, getLogger
 from datetime import datetime
 import functools
 
-# Disabling pylint warning "cyclic-import" locally here doesn't work. So, added it in .pylintrc
-# according to https://github.com/PyCQA/pylint/issues/59
-from open_ce.utils import validate_dict_schema, check_if_package_exists, generalize_version, PPC_ARCH_VARIANT # pylint: disable=cyclic-import
+from open_ce.utils import validate_dict_schema, check_if_package_exists, generalize_version
 from open_ce.errors import OpenCEError, Error
 import open_ce.yaml_utils
 from open_ce import __version__ as open_ce_version
+from open_ce import opence_globals
 
 check_if_package_exists('conda-build')
 
@@ -40,12 +39,10 @@ from conda.models.version import VersionOrder
 from conda.api import SubdirData
 # pylint: enable=wrong-import-position,wrong-import-order
 
-def render_yaml(path, variants=None, variant_config_files=None, schema=None, permit_undefined_jinja=False):
+def get_conda_config(variants):
     """
-    Call conda-build's render tool to get a list of dictionaries of the
-    rendered YAML file for each variant that will be built.
+    Get conda config for given variant and ppc_arch global variable
     """
-
     # We need to support `ppc_arch` as a filter in open-ce env yaml files. For that
     # `ppc_arch` must be added as a variant, but we don't want it to be variant globally.
     # So, just adding it here while rendering the yamls.
@@ -53,9 +50,18 @@ def render_yaml(path, variants=None, variant_config_files=None, schema=None, per
     mod_variants = {}
     if variants:
         mod_variants = variants
-        mod_variants["ppc_arch"] = PPC_ARCH_VARIANT
+        mod_variants["ppc_arch"] = opence_globals.PPC_ARCH_VARIANT
 
     config = get_or_merge_config(None, variant=mod_variants)
+    return config
+
+def render_yaml(path, variants=None, variant_config_files=None, schema=None, permit_undefined_jinja=False):
+    """
+    Call conda-build's render tool to get a list of dictionaries of the
+    rendered YAML file for each variant that will be built.
+    """
+
+    config = get_conda_config(variants)
     config.variant_config_files = variant_config_files
     config.verbose = False
     # issue https://github.com/conda/conda-build/issues/4398

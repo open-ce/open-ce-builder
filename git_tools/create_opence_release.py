@@ -32,16 +32,17 @@ import tag_all_repos
 from create_version_branch import _get_repo_version
 
 sys.path.append(os.path.join(pathlib.Path(__file__).parent.absolute(), '..'))
-from open_ce import inputs # pylint: disable=wrong-import-position
+from open_ce.inputs import Argument, make_parser # pylint: disable=wrong-import-position
+from open_ce.utils import parse_arg_list # pylint: disable=wrong-import-position
 from open_ce import env_config # pylint: disable=wrong-import-position
-from open_ce import utils # pylint: disable=wrong-import-position
+from open_ce import utils, constants # pylint: disable=wrong-import-position
 from open_ce.conda_utils import render_yaml # pylint: disable=wrong-import-position
 
 def _make_parser():
     ''' Parser input arguments '''
-    parser = inputs.make_parser([git_utils.Argument.PUBLIC_ACCESS_TOKEN, git_utils.Argument.REPO_DIR,
+    parser = make_parser([git_utils.Argument.PUBLIC_ACCESS_TOKEN, git_utils.Argument.REPO_DIR,
                                     git_utils.Argument.BRANCH, git_utils.Argument.SKIPPED_REPOS,
-                                    git_utils.Argument.NOT_DRY_RUN, inputs.Argument.CONDA_BUILD_CONFIG],
+                                    git_utils.Argument.NOT_DRY_RUN, Argument.CONDA_BUILD_CONFIG],
                                     description = 'A script that can be used to cut an open-ce release.')
 
     parser.add_argument(
@@ -122,7 +123,7 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals, too-many-stateme
     repos = _get_all_feedstocks(env_files=env_file_contents,
                                 github_org=args.github_org,
                                 pat=args.pat,
-                                skipped_repos=[args.primary_repo, ".github"] + inputs.parse_arg_list(args.skipped_repos))
+                                skipped_repos=[args.primary_repo, ".github"] + parse_arg_list(args.skipped_repos))
 
     repos.sort(key=lambda repo: repo["name"])
 
@@ -258,7 +259,7 @@ def _create_release_notes(repos, version, release_number, bug_fix, current_tag, 
         print("Error trying to get package versions: ", exc)
     retval += "\n"
     retval += "This release of Open-CE supports NVIDIA's CUDA "
-    retval += f"versions {utils.SUPPORTED_CUDA_VERS} as well as Python {utils.SUPPORTED_PYTHON_VERS}.\n"
+    retval += f"versions {constants.SUPPORTED_CUDA_VERS} as well as Python {constants.SUPPORTED_PYTHON_VERS}.\n"
     retval += "\n"
     retval += "## Getting Started"
     retval += "\n"

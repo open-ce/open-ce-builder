@@ -23,7 +23,7 @@ test_dir = pathlib.Path(__file__).parent.absolute()
 
 import helpers
 import open_ce.container_build as container_build
-import open_ce.utils as utils
+import open_ce.constants as constants
 from open_ce.errors import OpenCEError
 
 def test_build_image(mocker):
@@ -126,8 +126,8 @@ def make_args(command="build",
               build_types="cuda",
               cuda_versions="11.2",
               container_build_args="",
-              container_tool=utils.DEFAULT_CONTAINER_TOOL,
-              ppc_arch=utils.DEFAULT_PPC_ARCH,
+              container_tool=constants.DEFAULT_CONTAINER_TOOL,
+              ppc_arch=constants.DEFAULT_PPC_ARCH,
               **kwargs):
     return Namespace(command = command,
                      sub_command = sub_command,
