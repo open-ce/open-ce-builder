@@ -40,6 +40,7 @@ from open_ce import inputs
 from open_ce import conda_utils
 from open_ce import build_feedstock
 from open_ce import utils
+
 def _make_parser():
     ''' Parser input arguments '''
     parser = inputs.make_parser([git_utils.Argument.REPO_DIR, inputs.Argument.CONDA_BUILD_CONFIG],

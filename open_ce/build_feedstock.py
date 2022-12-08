@@ -109,7 +109,6 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
 
     # pylint: disable=import-outside-toplevel
     import conda_build.api
-    #from conda_build.config import get_or_merge_config
 
     saved_working_directory = None
     if command.repository:
