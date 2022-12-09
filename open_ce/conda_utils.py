@@ -89,7 +89,7 @@ def get_output_file_paths(meta, variants):
     """
     Get the paths of all of the generated packages for a recipe.
     """
-    config = get_or_merge_config(None, variant=variants)
+    config = get_conda_config(variants)
     config.verbose = False
 
     out_files = conda_build.api.get_output_file_paths(meta, config=config)
