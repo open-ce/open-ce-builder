@@ -31,7 +31,7 @@ REQUIRED_PACKAGES = [
     "jinja2",
     "networkx",
     "junit-xml",
-    "matplotlib",
+    "matplotlib==3.5",
 ]
 
 setup(
