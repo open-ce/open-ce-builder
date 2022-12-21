@@ -36,8 +36,6 @@ REQUIRED_PACKAGES = [
 
 if platform.machine() == 'x86_64':
   REQUIRED_PACKAGES.append("matplotlib==3.5.0")
-elif  platform.machine() == 'ppc64le':
-  REQUIRED_PACKAGES.append("matplotlib")
 
 setup(
     name="open-ce-builder",
