@@ -17,6 +17,7 @@
 # limitations under the License.
 # *****************************************************************
 """
+import platform
 from setuptools import find_packages, setup
 import open_ce
 
@@ -31,8 +32,12 @@ REQUIRED_PACKAGES = [
     "jinja2",
     "networkx",
     "junit-xml",
-    "matplotlib==3.5.0",
 ]
+
+if platform.machine() == 'x86_64':
+  REQUIRED_PACKAGES.append("matplotlib==3.5.0")
+elif  platform.machine() == 'ppc64le':
+  REQUIRED_PACKAGES.append("matplotlib")
 
 setup(
     name="open-ce-builder",
