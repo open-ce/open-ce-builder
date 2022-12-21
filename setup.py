@@ -17,6 +17,7 @@
 # limitations under the License.
 # *****************************************************************
 """
+import platform
 from setuptools import find_packages, setup
 import open_ce
 
@@ -31,8 +32,13 @@ REQUIRED_PACKAGES = [
     "jinja2",
     "networkx",
     "junit-xml",
-    "matplotlib==3.5.0",
 ]
+
+# We are installing matplotlib only on x86. It is needed for one of the pytests (get_graph_test.py)
+# which is run in the PR check and it runs on x86. On ppc, matplotlib's pip package isn't working.
+
+if platform.machine() == 'x86_64':
+  REQUIRED_PACKAGES.append("matplotlib==3.5.0")
 
 setup(
     name="open-ce-builder",
