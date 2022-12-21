@@ -24,9 +24,11 @@ test_dir = pathlib.Path(__file__).parent.absolute()
 from open_ce import graph
 import open_ce.build_tree as build_tree
 import open_ce.utils as utils
+import open_ce.constants as constants
 import open_ce.env_config as env_config
 from open_ce.errors import OpenCEError, Error
 import helpers
+from open_ce import opence_globals
 
 def conda_search_result():
     output = '''
@@ -90,10 +92,10 @@ class TestBuildTree(build_tree.BuildTree):
                  cuda_versions,
                  repository_folder="./",
                  channels=None,
-                 git_location=utils.DEFAULT_GIT_LOCATION,
-                 git_tag_for_env=utils.DEFAULT_GIT_TAG,
+                 git_location=constants.DEFAULT_GIT_LOCATION,
+                 git_tag_for_env=constants.DEFAULT_GIT_TAG,
                  git_up_to_date = False,
-                 conda_build_config=utils.DEFAULT_CONDA_BUILD_CONFIG):
+                 conda_build_config=constants.DEFAULT_CONDA_BUILD_CONFIG):
         self._env_config_files = env_config_files
         self._repository_folder = repository_folder
         self._channels = channels if channels else []
@@ -134,7 +136,7 @@ def test_create_commands(mocker):
                                                                            "/test/starting_dir"])) # And then changed back to the starting directory.
     )
 
-    build_commands = [x.build_command for x in build_tree._create_commands("/test/my_repo", "True", "my_recipe_path", None, "main", {'python' : utils.DEFAULT_PYTHON_VERS, 'build_type' : 'cuda', 'mpi_type' : 'openmpi', 'cudatoolkit' : '10.2'}, []).nodes()]
+    build_commands = [x.build_command for x in build_tree._create_commands("/test/my_repo", "True", "my_recipe_path", None, "main", {'python' : constants.DEFAULT_PYTHON_VERS, 'build_type' : 'cuda', 'mpi_type' : 'openmpi', 'cudatoolkit' : '10.2'}, []).nodes()]
     assert build_commands[0].packages == ['horovod']
     assert build_commands[0].recipe_path == "my_recipe_path"
     for dep in {'build_req1', 'build_req2            1.2'}:
@@ -182,9 +184,9 @@ def test_clone_repo(mocker):
     '''
     Simple positive test for `_clone_repo`.
     '''
-    git_location = utils.DEFAULT_GIT_LOCATION
+    git_location = constants.DEFAULT_GIT_LOCATION
 
-    mock_build_tree = TestBuildTree([], utils.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2", git_tag_for_env="main")
+    mock_build_tree = TestBuildTree([], constants.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2", git_tag_for_env="main")
 
     dir_tracker= helpers.DirTracker()
     mocker.patch(
@@ -210,7 +212,7 @@ def test_get_repo_git_tag_options(mocker, caplog):
     Test for `_get_repo` that verifies `git_tag` and `git_tag_for_env` priorities.
     '''
     env_file1 = os.path.join(test_dir, 'test-env1.yaml')
-    mock_build_tree = TestBuildTree([env_file1], utils.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
+    mock_build_tree = TestBuildTree([env_file1], constants.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
 
     dir_tracker= helpers.DirTracker()
     mocker.patch(
@@ -227,7 +229,7 @@ def test_get_repo_git_tag_options(mocker, caplog):
         side_effect=(lambda x: helpers.validate_cli(x, possible_expect=["git clone", "git checkout"]))
     )
 
-    possible_variants = utils.make_variants(utils.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
+    possible_variants = utils.make_variants(constants.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
     for variant in possible_variants:
 
         # test-env1.yaml has defined "git_tag" and "git_tag_for_env".
@@ -269,7 +271,7 @@ def test_get_repo_with_patches(mocker, caplog):
     Test for `_get_repo` that verifies `patches` field
     '''
     env_file = os.path.join(test_dir, 'test-env3.yaml')
-    mock_build_tree = TestBuildTree([env_file], utils.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
+    mock_build_tree = TestBuildTree([env_file], constants.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
 
     dir_tracker= helpers.DirTracker()
     mocker.patch(
@@ -287,7 +289,7 @@ def test_get_repo_with_patches(mocker, caplog):
         side_effect=(lambda x: helpers.validate_cli(x, expect=["git apply"], ignore=["git clone", "git checkout"]))
     )
 
-    possible_variants = utils.make_variants(utils.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
+    possible_variants = utils.make_variants(constants.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
     for variant in possible_variants:
         # test-env3.yaml has specified "patches".
         env_config_data_list = env_config.load_env_config_files([env_file], [variant])
@@ -305,7 +307,7 @@ def test_get_repo_for_nonexisting_patch(mocker):
     Test for `_get_repo` that verifies exception is thrown when patch application fails
     '''
     env_file = os.path.join(test_dir, 'test-env3.yaml')
-    mock_build_tree = TestBuildTree([env_file], utils.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
+    mock_build_tree = TestBuildTree([env_file], constants.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
 
     dir_tracker= helpers.DirTracker()
     mocker.patch(
@@ -325,7 +327,7 @@ def test_get_repo_for_nonexisting_patch(mocker):
         return_value=None
     )
 
-    possible_variants = utils.make_variants(utils.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
+    possible_variants = utils.make_variants(constants.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
     for variant in possible_variants:
         # test-env3.yaml has defined "patches".
         env_config_data_list = env_config.load_env_config_files([env_file], [variant])
@@ -359,7 +361,7 @@ def test_clone_repo_failure(mocker):
     '''
     Simple negative test for `_clone_repo`.
     '''
-    mock_build_tree = TestBuildTree([], utils.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
+    mock_build_tree = TestBuildTree([], constants.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
 
     mocker.patch(
         'os.system',
@@ -375,7 +377,7 @@ def test_empty_git_tag_remote_feedstock(mocker):
     Test that the error is thrown if `git_tag` is not present for remote feedstocks
     '''
     env_file1 = os.path.join(test_dir, 'test-env4.yaml')
-    mock_build_tree = TestBuildTree([env_file1], utils.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
+    mock_build_tree = TestBuildTree([env_file1], constants.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
 
     dir_tracker= helpers.DirTracker()
     mocker.patch(
@@ -392,7 +394,7 @@ def test_empty_git_tag_remote_feedstock(mocker):
         side_effect=(lambda x: helpers.validate_cli(x, possible_expect=["git clone", "git checkout"]))
     )
 
-    possible_variants = utils.make_variants(utils.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
+    possible_variants = utils.make_variants(constants.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
     for variant in possible_variants:
 
         # test-env4.yaml has one remote feedstock without "git_tag" and another one 
@@ -415,7 +417,7 @@ def test_check_runtime_package_field():
     '''
     env_file = os.path.join(test_dir, 'test-env3.yaml')
 
-    possible_variants = utils.make_variants(utils.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
+    possible_variants = utils.make_variants(constants.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
     for variant in possible_variants:
 
         # test-env3.yaml has defined "runtime_package" for "package222".
@@ -431,8 +433,8 @@ def test_check_ppc_arch_filter():
     Test if `ppc_arch` filter works and envs are loaded conditionally
     '''
     env_file = os.path.join(test_dir, 'test-env2.yaml')
-    utils.PPC_ARCH_VARIANT = "p10"
-    possible_variants = utils.make_variants(utils.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
+    opence_globals.PPC_ARCH_VARIANT = "p10"
+    possible_variants = utils.make_variants(constants.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
     for variant in possible_variants:
 
         # test-env2.yaml imports test-env5.yaml only if ppc_arch is p10 and test-env5.yaml
@@ -453,7 +455,7 @@ def test_check_recipe_path_package_field():
     '''
     env_file = os.path.join(test_dir, 'test-env1.yaml')
 
-    possible_variants = utils.make_variants(utils.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
+    possible_variants = utils.make_variants(constants.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
     for variant in possible_variants:
 
         # test-env1.yaml has defined "recipe_path" as "package11_recipe_path" for "package11".
@@ -510,7 +512,7 @@ def test_get_dependency_names():
     '''
     Tests that the dependency names can be retrieved for each item in a BuildTree
     '''
-    mock_build_tree = TestBuildTree([], utils.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
+    mock_build_tree = TestBuildTree([], constants.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
     mock_build_tree._tree = sample_build_commands()
 
     output = ""
@@ -525,7 +527,7 @@ def test_build_tree_len():
     '''
     Tests that the __len__ function works for BuildTree
     '''
-    mock_build_tree = TestBuildTree([], utils.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
+    mock_build_tree = TestBuildTree([], constants.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
     mock_build_tree._tree = sample_build_commands()
 
     assert len(mock_build_tree) == 3
@@ -564,7 +566,7 @@ def test_build_tree_cycle_fail():
     cycle_build_commands.add_edge(node2, node1)
     cycle_build_commands.add_edge(node3, node2)
 
-    mock_build_tree = TestBuildTree([], utils.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
+    mock_build_tree = TestBuildTree([], constants.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
     mock_build_tree._tree = sample_build_commands()
 
     mock_build_tree._detect_cycle() #Make sure there isn't a false positive.
@@ -657,7 +659,7 @@ def test_get_installable_package_with_no_duplicates():
     assert Counter(packages) == Counter(expected_packages)
 
 def test_get_build_copmmand_dependencies():
-    mock_build_tree = TestBuildTree([], utils.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
+    mock_build_tree = TestBuildTree([], constants.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
     mock_build_tree._initial_nodes = []
     mock_build_tree._tree = sample_build_commands()
     results = [mock_build_tree.build_command_dependencies(node) for node in mock_build_tree.BuildNodes()]
@@ -682,7 +684,7 @@ def test_dag_cleanup():
     '''
     Test that external packages are removed during cleanup.
     '''
-    mock_build_tree = TestBuildTree([], utils.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
+    mock_build_tree = TestBuildTree([], constants.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2")
     mock_build_tree._tree = sample_build_commands()
 
     external_node = build_tree.DependencyNode(packages=["external_package"])
@@ -703,7 +705,7 @@ def test_search_channels(mocker):
     '''
     Test that recipe specific channels are used for remote dependency discovery.
     '''
-    mock_build_tree = TestBuildTree([], utils.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2", channels=["defaults"])
+    mock_build_tree = TestBuildTree([], constants.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2", channels=["defaults"])
     dep_graph = sample_build_commands()
 
     external_node = build_tree.DependencyNode(packages=["external_package"])
@@ -770,7 +772,7 @@ def test_search_package_priority(mocker):
     '''
     Test remote package priority.
     '''
-    mock_build_tree = TestBuildTree([], utils.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2", channels=["defaults"])
+    mock_build_tree = TestBuildTree([], constants.DEFAULT_PYTHON_VERS, "cpu", "openmpi", "10.2", channels=["defaults"])
     dep_graph = sample_build_commands()
 
     external_node = build_tree.DependencyNode(packages=["external_package"])

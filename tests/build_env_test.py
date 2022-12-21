@@ -31,6 +31,7 @@ spec.loader.exec_module(opence)
 import helpers
 import open_ce.build_env as build_env
 import open_ce.utils as utils
+import open_ce.constants as constants
 from open_ce.errors import OpenCEError
 from build_tree_test import TestBuildTree
 import open_ce.test_feedstock as test_feedstock
@@ -292,16 +293,16 @@ def test_build_env(mocker, caplog):
     opence._main(["build", build_env.COMMAND, env_file])
     validate_and_remove_conda_env_files()
 
-def validate_and_remove_conda_env_files(py_versions=utils.DEFAULT_PYTHON_VERS,
-                                        build_types=utils.DEFAULT_BUILD_TYPES,
-                                        mpi_types=utils.DEFAULT_MPI_TYPES,
-                                        cuda_versions=utils.DEFAULT_CUDA_VERS,
+def validate_and_remove_conda_env_files(py_versions=constants.DEFAULT_PYTHON_VERS,
+                                        build_types=constants.DEFAULT_BUILD_TYPES,
+                                        mpi_types=constants.DEFAULT_MPI_TYPES,
+                                        cuda_versions=constants.DEFAULT_CUDA_VERS,
                                         channels=None):
     # Check if conda env files are created for given python versions and build variants
     variants = utils.make_variants(py_versions, build_types, mpi_types, cuda_versions)
     for variant in variants:
-        conda_env_file = os.path.join(os.getcwd(), utils.DEFAULT_OUTPUT_FOLDER,
-                                     "{}{}.yaml".format(utils.CONDA_ENV_FILENAME_PREFIX,
+        conda_env_file = os.path.join(os.getcwd(), constants.DEFAULT_OUTPUT_FOLDER,
+                                     "{}{}.yaml".format(constants.CONDA_ENV_FILENAME_PREFIX,
                                      utils.variant_string(variant.get('python'), variant.get('build_type'), variant.get('mpi_type'), variant.get('cudatoolkit'))))
         assert os.path.exists(conda_env_file)
         if channels:
@@ -464,7 +465,7 @@ def test_run_tests(mocker):
     Test that the _run_tests function works properly.
     '''
     dirTracker = helpers.DirTracker()
-    mock_build_tree = TestBuildTree([], utils.DEFAULT_PYTHON_VERS, "cpu,cuda", "openmpi", "10.2")
+    mock_build_tree = TestBuildTree([], constants.DEFAULT_PYTHON_VERS, "cpu,cuda", "openmpi", "10.2")
     mock_test_commands = [test_feedstock.TestCommand("Test1",
                                                       conda_env="test-conda-env2.yaml",
                                                       bash_command="echo Test1"),

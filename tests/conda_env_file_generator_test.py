@@ -33,7 +33,7 @@ spec.loader.exec_module(opence)
 import open_ce.build_env as build_env
 import open_ce.build_tree as build_tree
 import open_ce.conda_env_file_generator as conda_env_file_generator
-import open_ce.utils as utils
+import open_ce.constants as constants
 
 external_deps = ["external_pac1    1.2", "external_pack2", "external_pack3=1.2.3"]
 
@@ -117,7 +117,7 @@ def test_create_channels():
 
 def test_get_variant_string(mocker):
     var_str = "py3.8-cuda-openmpi-10.2"
-    test_env_file = "#" + utils.OPEN_CE_VARIANT + ":" + var_str + "\nsomething else"
+    test_env_file = "#" + constants.OPEN_CE_VARIANT + ":" + var_str + "\nsomething else"
     mocker.patch('builtins.open', mocker.mock_open(read_data=test_env_file))
 
     assert conda_env_file_generator.get_variant_string("some_file.yaml") == var_str
@@ -131,7 +131,7 @@ def test_get_variant_string_no_string(mocker):
 def test_variant_specific_env_files():
     tmp_test = tempfile.TemporaryDirectory()
     base_arg_strings = ["build", build_env.COMMAND, "--skip_build",
-                   "--python_versions", utils.DEFAULT_PYTHON_VERS,
+                   "--python_versions", constants.DEFAULT_PYTHON_VERS,
                    "--cuda_versions", "11.4",
                    "--repository_folder", os.path.join(tmp_test.name, "repos"),
                    "--output_folder", os.path.join(tmp_test.name, "output"),

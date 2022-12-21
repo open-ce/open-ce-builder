@@ -29,7 +29,8 @@ opence = module_from_spec(spec)
 spec.loader.exec_module(opence)
 
 import open_ce.get_licenses as get_licenses
-import open_ce.utils as utils
+import open_ce.constants as constants
+
 from open_ce.errors import OpenCEError
 
 def test_get_licenses(mocker):
@@ -43,7 +44,7 @@ def test_get_licenses(mocker):
     template_file = "tests/open-ce-licenses.template"
     opence._main(["get", get_licenses.COMMAND, "--conda_env_file", "tests/test-conda-env3.yaml", "--output_folder", output_folder, "--template_files", template_file])
 
-    output_file = os.path.join(output_folder, utils.DEFAULT_LICENSES_FILE)
+    output_file = os.path.join(output_folder, constants.DEFAULT_LICENSES_FILE)
     assert os.path.exists(output_file)
     with open(output_file, encoding='utf8') as file_stream:
         license_contents = file_stream.read()
@@ -129,7 +130,7 @@ def test_add_licenses_from_info_file(mocker, capfd):
 
     gen.write_licenses_file(output_folder)
 
-    output_file = os.path.join(output_folder, utils.DEFAULT_LICENSES_FILE)
+    output_file = os.path.join(output_folder, constants.DEFAULT_LICENSES_FILE)
     assert os.path.exists(output_file)
     with open(output_file, encoding='utf8') as file_stream:
         license_contents = file_stream.read()
@@ -143,7 +144,7 @@ def test_add_licenses_from_info_file(mocker, capfd):
     # Make sure google-test only appears once
     assert license_contents.count("google-test\t1.7.0") == 1
     shutil.rmtree(output_folder)
-    shutil.rmtree(utils.TMP_LICENSE_DIR)
+    shutil.rmtree(constants.TMP_LICENSE_DIR)
 
 def test_no_info_file():
     '''
@@ -155,7 +156,7 @@ def test_no_info_file():
     gen.add_licenses_from_info_files(license_info)
     gen.write_licenses_file(output_folder)
 
-    output_file = os.path.join(output_folder, utils.DEFAULT_LICENSES_FILE)
+    output_file = os.path.join(output_folder, constants.DEFAULT_LICENSES_FILE)
     assert os.path.exists(output_file)
     with open(output_file, encoding='utf8') as file_stream:
         license_contents = file_stream.read()

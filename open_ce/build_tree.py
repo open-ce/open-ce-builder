@@ -21,18 +21,17 @@ import shutil
 
 import networkx
 
-from open_ce import utils
+from open_ce import utils, constants
 utils.check_if_package_exists('conda-build')
 
 # pylint: disable=wrong-import-position,wrong-import-order
 from open_ce import graph
 from open_ce import env_config
-from open_ce import validate_config
+from open_ce import validate_config     #pylint: disable=cyclic-import
 from open_ce import build_feedstock
 from open_ce.errors import OpenCEError, Error, log
 from open_ce.conda_env_file_generator import CondaEnvFileGenerator
 from open_ce.build_command import BuildCommand
-from open_ce import inputs
 # pylint: enable=wrong-import-position,wrong-import-order
 
 class DependencyNode():
@@ -178,8 +177,8 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
                  cuda_versions,
                  repository_folder="./",
                  channels=None,
-                 git_location=utils.DEFAULT_GIT_LOCATION,
-                 git_tag_for_env=utils.DEFAULT_GIT_TAG,
+                 git_location=constants.DEFAULT_GIT_LOCATION,
+                 git_tag_for_env=constants.DEFAULT_GIT_TAG,
                  git_up_to_date=False,
                  conda_build_config=None,
                  packages=None):
@@ -247,7 +246,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
         # If the feedstock value starts with any of the SUPPORTED_GIT_PROTOCOLS, treat it as a url. Otherwise
         # combine with git_location and append "-feedstock.git"
         feedstock_value = package[env_config.Key.feedstock.name]
-        if any(feedstock_value.startswith(protocol) for protocol in utils.SUPPORTED_GIT_PROTOCOLS):
+        if any(feedstock_value.startswith(protocol) for protocol in constants.SUPPORTED_GIT_PROTOCOLS):
             git_tag_for_package = package.get(env_config.Key.git_tag.name, None)
             if "open-ce" not in feedstock_value and not git_tag_for_package:
                 raise OpenCEError(Error.GIT_TAG_MISSING, feedstock_value)
@@ -463,7 +462,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
 
     def write_conda_env_files(self,
                               output_folder=None,
-                              env_file_prefix=utils.CONDA_ENV_FILENAME_PREFIX,
+                              env_file_prefix=constants.CONDA_ENV_FILENAME_PREFIX,
                               path=os.getcwd()):
         """
         Write a conda environment file for each variant.
@@ -688,14 +687,14 @@ def construct_build_tree(args):
 
     # Create the build tree
     return BuildTree(env_config_files=args.env_config_file,
-                     python_versions=inputs.parse_arg_list(args.python_versions),
-                     build_types=inputs.parse_arg_list(args.build_types),
-                     mpi_types=inputs.parse_arg_list(args.mpi_types),
-                     cuda_versions=inputs.parse_arg_list(args.cuda_versions),
+                     python_versions=utils.parse_arg_list(args.python_versions),
+                     build_types=utils.parse_arg_list(args.build_types),
+                     mpi_types=utils.parse_arg_list(args.mpi_types),
+                     cuda_versions=utils.parse_arg_list(args.cuda_versions),
                      repository_folder=args.repository_folder,
                      channels=args.channels_list,
                      git_location=args.git_location,
                      git_tag_for_env=args.git_tag_for_env,
                      git_up_to_date=args.git_up_to_date,
                      conda_build_config=args.conda_build_configs,
-                     packages=inputs.parse_arg_list(args.packages))
+                     packages=utils.parse_arg_list(args.packages))

@@ -22,7 +22,6 @@ import sys
 from open_ce import build_feedstock
 from open_ce import container_build
 from open_ce import utils
-from open_ce import inputs
 from open_ce.inputs import Argument, ENV_BUILD_ARGS
 from open_ce import test_feedstock
 from open_ce.errors import OpenCEError, Error, log
@@ -104,6 +103,6 @@ def build_env(args):
                 log.info("Skipping build of %s because it already exists.", build_command.recipe)
 
     if args.run_tests:
-        _run_tests(build_tree, inputs.parse_arg_list(args.test_labels), conda_env_files, os.path.abspath(args.output_folder))
+        _run_tests(build_tree, utils.parse_arg_list(args.test_labels), conda_env_files, os.path.abspath(args.output_folder))
 
 ENTRY_FUNCTION = build_env

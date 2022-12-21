@@ -19,10 +19,11 @@
 import os
 import traceback
 
-from open_ce import utils
+from open_ce import utils, constants
 from open_ce import inputs
 from open_ce.inputs import Argument
 from open_ce.errors import OpenCEError, Error, log
+from open_ce.build_command import BuildCommand
 
 COMMAND = 'feedstock'
 
@@ -58,12 +59,12 @@ def load_package_config(config_file=None, variants=None, recipe_path=None, permi
     if recipe_path:
         recipe_name = os.path.basename(os.getcwd())
         build_config_data = {'recipes':[{'name':recipe_name, 'path':recipe_path}]}
-    elif not config_file and not os.path.exists(utils.DEFAULT_RECIPE_CONFIG_FILE):
+    elif not config_file and not os.path.exists(constants.DEFAULT_RECIPE_CONFIG_FILE):
         recipe_name = os.path.basename(os.getcwd())
         build_config_data = {'recipes':[{'name':recipe_name, 'path':'recipe'}]}
     else:
         if not config_file:
-            config_file = utils.DEFAULT_RECIPE_CONFIG_FILE
+            config_file = constants.DEFAULT_RECIPE_CONFIG_FILE
         if not os.path.exists(config_file):
             raise OpenCEError(Error.CONFIG_FILE, config_file)
 
@@ -98,9 +99,9 @@ def _set_local_src_dir(local_src_dir_arg, recipe, recipe_config_file):
 
 def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, too-many-locals
                                  recipe_config_file=None,
-                                 output_folder=utils.DEFAULT_OUTPUT_FOLDER,
+                                 output_folder=constants.DEFAULT_OUTPUT_FOLDER,
                                  local_src_dir=None,
-                                 pkg_format=utils.DEFAULT_PKG_FORMAT,
+                                 pkg_format=constants.DEFAULT_PKG_FORMAT,
                                  debug=None,
                                  debug_output_id=None):
     '''
@@ -110,14 +111,14 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
 
     # pylint: disable=import-outside-toplevel
     import conda_build.api
-    from conda_build.config import get_or_merge_config
+    from open_ce import conda_utils  # pylint: disable=import-outside-toplevel
 
     saved_working_directory = None
     if command.repository:
         saved_working_directory = os.getcwd()
         os.chdir(os.path.abspath(command.repository))
 
-    recipes_to_build = inputs.parse_arg_list(command.recipe)
+    recipes_to_build = utils.parse_arg_list(command.recipe)
 
     for variant in utils.make_variants(command.python, command.build_type, command.mpi_type, command.cudatoolkit):
         build_config_data, recipe_config_file  = load_package_config(recipe_config_file, variant, command.recipe_path)
@@ -130,7 +131,7 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
             if recipes_to_build and recipe['name'] not in recipes_to_build:
                 continue
 
-            config = get_or_merge_config(None, variant=variant)
+            config = conda_utils.get_conda_config(variant)
             config.skip_existing = False
             config.prefix_length = 225
             config.output_folder = output_folder
@@ -176,10 +177,7 @@ def build_feedstock_from_command(command, # pylint: disable=too-many-arguments, 
 
 def build_feedstock(args):
     '''Entry Function'''
-    # Here, importing BuildCommand is intentionally done here to avoid circular import.
-
-    from open_ce.build_tree import BuildCommand   # pylint: disable=import-outside-toplevel
-    command = BuildCommand(recipe=inputs.parse_arg_list(args.recipe_list),
+    command = BuildCommand(recipe=utils.parse_arg_list(args.recipe_list),
                            repository=args.working_directory,
                            packages=[],
                            python=args.python_versions,

@@ -27,7 +27,7 @@ opence = module_from_spec(spec)
 spec.loader.exec_module(opence)
 
 import open_ce.get_graph as get_graph
-import open_ce.utils as utils
+import open_ce.constants as constants
 
 def test_get_graph(caplog):
     '''
@@ -44,7 +44,7 @@ def test_get_graph(caplog):
 
     assert "Build graph successfully output" in caplog.text
 
-    output_file = os.path.join(output_folder, utils.DEFAULT_GRAPH_FILE)
+    output_file = os.path.join(output_folder, constants.DEFAULT_GRAPH_FILE)
     assert os.path.exists(output_file)
 
     tmp_test.cleanup()

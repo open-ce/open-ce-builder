@@ -30,7 +30,7 @@ opence = module_from_spec(spec)
 spec.loader.exec_module(opence)
 
 import open_ce.test_feedstock as test_feedstock
-import open_ce.utils as utils
+import open_ce.constants as constants
 from open_ce.errors import OpenCEError
 
 orig_load_test_file = test_feedstock.load_test_file
@@ -40,7 +40,7 @@ def mock_load_test_file(x, y):
 def validate_junit(required_test_results,
                    excluded_test_results,
                    expected_test_cases,
-                   junit_file=os.path.join("./", utils.DEFAULT_TEST_RESULT_FILE),
+                   junit_file=os.path.join("./", constants.DEFAULT_TEST_RESULT_FILE),
                    expected_failures=None):
     '''
     Used to validate the contents of a junit file.
@@ -71,13 +71,13 @@ def test_test_feedstock_complete(mocker, caplog):
     mocker.patch('open_ce.test_feedstock.load_test_file', side_effect=(lambda x, y: mock_load_test_file(os.path.join(test_dir, "open-ce-tests1.yaml"), y)))
 
     opence._main(["test", test_feedstock.COMMAND, "--conda_env_file", "tests/test-conda-env2.yaml"])
-    assert "Running: Create conda environment " + utils.CONDA_ENV_FILENAME_PREFIX in caplog.text
+    assert "Running: Create conda environment " + constants.CONDA_ENV_FILENAME_PREFIX in caplog.text
     assert "Running: Test 1" in caplog.text
     assert not "Running: Test 2" in caplog.text
-    assert "Running: Remove conda environment " + utils.CONDA_ENV_FILENAME_PREFIX in caplog.text
-    validate_junit([[{"name": "Create conda environment " + utils.CONDA_ENV_FILENAME_PREFIX},
+    assert "Running: Remove conda environment " + constants.CONDA_ENV_FILENAME_PREFIX in caplog.text
+    validate_junit([[{"name": "Create conda environment " + constants.CONDA_ENV_FILENAME_PREFIX},
                      {"name": "Test 1"},
-                     {"name": "Remove conda environment " + utils.CONDA_ENV_FILENAME_PREFIX}]],
+                     {"name": "Remove conda environment " + constants.CONDA_ENV_FILENAME_PREFIX}]],
                    [[{"name": "Test 2"}]],
                    [3])
 
@@ -95,11 +95,11 @@ def test_test_feedstock_failed_tests(mocker, caplog):
     assert "Failed test: Test 1" in caplog.text
     assert "Failed test: Test 3" in caplog.text
     assert not "Failed test: Test 2" in caplog.text
-    validate_junit([[{"name": "Create conda environment " + utils.CONDA_ENV_FILENAME_PREFIX},
+    validate_junit([[{"name": "Create conda environment " + constants.CONDA_ENV_FILENAME_PREFIX},
                      {"name": "Test 1"},
                      {"name": "Test 2"},
                      {"name": "Test 3"},
-                     {"name": "Remove conda environment " + utils.CONDA_ENV_FILENAME_PREFIX}]],
+                     {"name": "Remove conda environment " + constants.CONDA_ENV_FILENAME_PREFIX}]],
                    [[]],
                    [5],
                    expected_failures = [2])
@@ -118,10 +118,10 @@ def test_test_feedstock_working_dir(mocker, caplog):
     opence._main(["test", test_feedstock.COMMAND, "--conda_env_file", "tests/test-conda-env2.yaml", "--test_working_dir", working_dir])
     assert os.path.exists(working_dir)
     shutil.rmtree(working_dir)
-    assert "Running: Create conda environment " + utils.CONDA_ENV_FILENAME_PREFIX in caplog.text
+    assert "Running: Create conda environment " + constants.CONDA_ENV_FILENAME_PREFIX in caplog.text
     assert "Running: Test 1" in caplog.text
     assert "Running: Test 2" in caplog.text
-    assert "Running: Remove conda environment " + utils.CONDA_ENV_FILENAME_PREFIX in caplog.text
+    assert "Running: Remove conda environment " + constants.CONDA_ENV_FILENAME_PREFIX in caplog.text
 
 def test_test_feedstock_labels(mocker, caplog):
     '''
@@ -131,50 +131,50 @@ def test_test_feedstock_labels(mocker, caplog):
     mocker.patch('open_ce.test_feedstock.load_test_file', side_effect=(lambda x, y: mock_load_test_file(os.path.join(test_dir, "open-ce-tests3.yaml"), y)))
 
     opence._main(["test", test_feedstock.COMMAND, "--conda_env_file", "tests/test-conda-env2.yaml"])
-    assert not "Running: Create conda environment " + utils.CONDA_ENV_FILENAME_PREFIX in caplog.text
+    assert not "Running: Create conda environment " + constants.CONDA_ENV_FILENAME_PREFIX in caplog.text
     assert not "Running: Test Long" in caplog.text
     assert not "Running: Test Distributed" in caplog.text
     assert not "Running: Test Long and Distributed" in caplog.text
-    assert not "Running: Remove conda environment " + utils.CONDA_ENV_FILENAME_PREFIX in caplog.text
+    assert not "Running: Remove conda environment " + constants.CONDA_ENV_FILENAME_PREFIX in caplog.text
     validate_junit([[]],
                    [[]],
                    [0])
     caplog.clear()
     opence._main(["test", test_feedstock.COMMAND, "--conda_env_file", "tests/test-conda-env2.yaml", "--test_labels", "long"])
-    assert "Running: Create conda environment " + utils.CONDA_ENV_FILENAME_PREFIX in caplog.text
+    assert "Running: Create conda environment " + constants.CONDA_ENV_FILENAME_PREFIX in caplog.text
     assert "Running: Test Long" in caplog.text
     assert not "Running: Test Distributed" in caplog.text
     assert not "Running: Test Long and Distributed" in caplog.text
-    assert "Running: Remove conda environment " + utils.CONDA_ENV_FILENAME_PREFIX in caplog.text
-    validate_junit([[{"name": "Create conda environment " + utils.CONDA_ENV_FILENAME_PREFIX},
+    assert "Running: Remove conda environment " + constants.CONDA_ENV_FILENAME_PREFIX in caplog.text
+    validate_junit([[{"name": "Create conda environment " + constants.CONDA_ENV_FILENAME_PREFIX},
                      {"name": "Test Long"},
-                     {"name": "Remove conda environment " + utils.CONDA_ENV_FILENAME_PREFIX}]],
+                     {"name": "Remove conda environment " + constants.CONDA_ENV_FILENAME_PREFIX}]],
                    [[{"name": "Test Distributed"},
                      {"name": "Test Long and Distributed"}]],
                    [3])
     caplog.clear()
     opence._main(["test", test_feedstock.COMMAND, "--conda_env_file", "tests/test-conda-env2.yaml", "--test_labels", "distributed"])
-    assert "Running: Create conda environment " + utils.CONDA_ENV_FILENAME_PREFIX in caplog.text
+    assert "Running: Create conda environment " + constants.CONDA_ENV_FILENAME_PREFIX in caplog.text
     assert not "Running: Test Long" in caplog.text
     assert "Running: Test Distributed" in caplog.text
     assert not "Running: Test Long and Distributed" in caplog.text
-    assert "Running: Remove conda environment " + utils.CONDA_ENV_FILENAME_PREFIX in caplog.text
-    validate_junit([[{"name": "Create conda environment " + utils.CONDA_ENV_FILENAME_PREFIX},
+    assert "Running: Remove conda environment " + constants.CONDA_ENV_FILENAME_PREFIX in caplog.text
+    validate_junit([[{"name": "Create conda environment " + constants.CONDA_ENV_FILENAME_PREFIX},
                      {"name": "Test Distributed"},
-                     {"name": "Remove conda environment " + utils.CONDA_ENV_FILENAME_PREFIX}]],
+                     {"name": "Remove conda environment " + constants.CONDA_ENV_FILENAME_PREFIX}]],
                    [[{"name": "Test Long"},
                      {"name": "Test Long and Distributed"}]],
                    [3])
     caplog.clear()
     opence._main(["test", test_feedstock.COMMAND, "--conda_env_file", "tests/test-conda-env2.yaml", "--test_labels", "long,distributed"])
-    assert "Running: Create conda environment " + utils.CONDA_ENV_FILENAME_PREFIX in caplog.text
+    assert "Running: Create conda environment " + constants.CONDA_ENV_FILENAME_PREFIX in caplog.text
     assert "Running: Test Long" in caplog.text
     assert "Running: Test Distributed" in caplog.text
     assert "Running: Test Long and Distributed" in caplog.text
-    assert "Running: Remove conda environment " + utils.CONDA_ENV_FILENAME_PREFIX in caplog.text
-    validate_junit([[{"name": "Create conda environment " + utils.CONDA_ENV_FILENAME_PREFIX},
+    assert "Running: Remove conda environment " + constants.CONDA_ENV_FILENAME_PREFIX in caplog.text
+    validate_junit([[{"name": "Create conda environment " + constants.CONDA_ENV_FILENAME_PREFIX},
                      {"name": "Test Distributed"},
-                     {"name": "Remove conda environment " + utils.CONDA_ENV_FILENAME_PREFIX},
+                     {"name": "Remove conda environment " + constants.CONDA_ENV_FILENAME_PREFIX},
                      {"name": "Test Long"},
                      {"name": "Test Long and Distributed"}]],
                    [[]],

@@ -23,6 +23,7 @@ from enum import Enum, unique
 from open_ce import utils
 from open_ce.errors import OpenCEError, Error, show_warning, log
 from open_ce import __version__ as open_ce_version
+from open_ce import opence_globals, constants
 
 class OpenCEFormatter(argparse.ArgumentDefaultsHelpFormatter):
     """
@@ -49,7 +50,7 @@ class Argument(Enum):
     OUTPUT_FOLDER = (lambda parser: parser.add_argument(
                                         '--output_folder',
                                         type=str,
-                                        default=utils.DEFAULT_OUTPUT_FOLDER,
+                                        default=constants.DEFAULT_OUTPUT_FOLDER,
                                         help='Path where built conda packages will be saved.'))
 
     CHANNELS = (lambda parser: parser.add_argument(
@@ -93,26 +94,26 @@ https://github.com/open-ce/open-ce/blob/main/doc/README.yaml.md"""))
     PYTHON_VERSIONS = (lambda parser: parser.add_argument(
                                         '--python_versions',
                                         type=str,
-                                        default=utils.DEFAULT_PYTHON_VERS,
+                                        default=constants.DEFAULT_PYTHON_VERS,
                                         help='Comma delimited list of python versions to build for '
                                              ', such as "3.8" or "3.9" or "3.10".'))
 
     BUILD_TYPES = (lambda parser: parser.add_argument(
                                         '--build_types',
                                         type=str,
-                                        default=utils.DEFAULT_BUILD_TYPES,
+                                        default=constants.DEFAULT_BUILD_TYPES,
                                         help='Comma delimited list of build types, such as "cpu" or "cuda".'))
 
     MPI_TYPES = (lambda parser: parser.add_argument(
                                         '--mpi_types',
                                         type=str,
-                                        default=utils.DEFAULT_MPI_TYPES,
+                                        default=constants.DEFAULT_MPI_TYPES,
                                         help='Comma delimited list of mpi types, such as "openmpi" or "system".'))
 
     CUDA_VERSIONS = (lambda parser: parser.add_argument(
                                         '--cuda_versions',
                                         type=str,
-                                        default=utils.DEFAULT_CUDA_VERS,
+                                        default=constants.DEFAULT_CUDA_VERS,
                                         help='CUDA version to build for '
                                              ', such as "11.2" or "11.4".'))
 
@@ -149,7 +150,7 @@ https://github.com/open-ce/open-ce/blob/main/doc/README.yaml.md"""))
     PPC_ARCH = (lambda parser: parser.add_argument(
                                         '--ppc_arch',
                                         type=str,
-                                        default=utils.DEFAULT_PPC_ARCH,
+                                        default=constants.DEFAULT_PPC_ARCH,
                                         help="""R|Power Architecture to build for. Values: p9 or p10.
 p9: Libraries can be used on Power8, Power9 and Power 10,
     but do not use MMA acceleration.
@@ -160,13 +161,13 @@ p10: Libraries can be used on Power9 and Power10, and use
     LOCAL_CONDA_CHANNEL = (lambda parser: parser.add_argument(
                                         '--local_conda_channel',
                                         type=str,
-                                        default=utils.DEFAULT_OUTPUT_FOLDER,
+                                        default=constants.DEFAULT_OUTPUT_FOLDER,
                                         help='Path where built conda packages are present.'))
 
     TEST_WORKING_DIRECTORY = (lambda parser: parser.add_argument(
                                         '--test_working_dir',
                                         type=str,
-                                        default=utils.DEFAULT_TEST_WORKING_DIRECTORY,
+                                        default=constants.DEFAULT_TEST_WORKING_DIRECTORY,
                                         help="Directory where tests will be executed."))
 
     RECIPE_CONFIG_FILE = (lambda parser: parser.add_argument(
@@ -212,7 +213,7 @@ path of \"recipe\"."""))
     GIT_LOCATION = (lambda parser: parser.add_argument(
                                         '--git_location',
                                         type=str,
-                                        default=utils.DEFAULT_GIT_LOCATION,
+                                        default=constants.DEFAULT_GIT_LOCATION,
                                         help='The default location to clone git repositories from.'))
 
     GIT_TAG_FOR_ENV = (lambda parser: parser.add_argument(
@@ -257,7 +258,7 @@ path of \"recipe\"."""))
     CONTAINER_TOOL = (lambda parser: parser.add_argument(
                                         '--container_tool',
                                         type=str,
-                                        default=utils.DEFAULT_CONTAINER_TOOL,
+                                        default=constants.DEFAULT_CONTAINER_TOOL,
                                         help="Container tool to be used. Default is taken from the "
                                              " system, podman has preference over docker. "))
 
@@ -287,7 +288,7 @@ path of \"recipe\"."""))
     CONDA_PKG_FORMAT = (lambda parser: parser.add_argument(
                                         '--conda_pkg_format',
                                         type=str,
-                                        default=utils.DEFAULT_PKG_FORMAT,
+                                        default=constants.DEFAULT_PKG_FORMAT,
                                         help='Conda package format to be used, such as "tarball" or "conda".'))
     WIDTH = (lambda parser: parser.add_argument(
                                      '--width',
@@ -368,7 +369,7 @@ def _create_env_config_paths(args):
                     file_name = file_name + extension
 
                 new_url = f"https://raw.githubusercontent.com/{organization}/" \
-                          f"{utils.DEFAULT_ENVS_REPO}/{branch}/envs/{file_name}"
+                          f"{constants.DEFAULT_ENVS_REPO}/{branch}/envs/{file_name}"
 
                 log.info("Unable to find '%s' locally. Attempting to use '%s'.", config_file, new_url)
                 args.env_config_file[index] = new_url
@@ -379,14 +380,14 @@ def _check_ppc_arch(args):
     needed environment variables for GCC_11_HOME
     '''
     if "ppc_arch" in vars(args).keys() and args.ppc_arch:
-        utils.PPC_ARCH_VARIANT = args.ppc_arch
+        opence_globals.PPC_ARCH_VARIANT = args.ppc_arch
         if args.ppc_arch == "p10":
             if "GCC_11_HOME" not in os.environ:
-                os.environ["GCC_11_HOME"] = utils.DEFAULT_GCC_11_HOME_DIR
+                os.environ["GCC_11_HOME"] = constants.DEFAULT_GCC_11_HOME_DIR
                 PATH = os.environ["PATH"]
                 os.environ["PATH"] = f"{os.path.join(os.environ['GCC_11_HOME'], 'bin')}:{PATH}"
                 print("Path variable set to : ", os.environ["PATH"])
-            if not os.path.exists(utils.DEFAULT_GCC_11_HOME_DIR):
+            if not os.path.exists(constants.DEFAULT_GCC_11_HOME_DIR):
                 raise OpenCEError(Error.GCC11_COMPILER_NOT_FOUND)
 
 
@@ -407,20 +408,14 @@ def parse_args(parser, arg_strings=None):
         if args.conda_build_configs is None:
             if "env_config_file" in vars(args).keys() and args.env_config_file:
                 args.conda_build_configs = os.path.join(os.path.dirname(args.env_config_file[0]),
-                                                       utils.CONDA_BUILD_CONFIG_FILE)
+                                                       constants.CONDA_BUILD_CONFIG_FILE)
             else:
-                args.conda_build_configs = utils.DEFAULT_CONDA_BUILD_CONFIG
+                args.conda_build_configs = constants.DEFAULT_CONDA_BUILD_CONFIG
 
-        configs = utils.get_conda_build_configs(parse_arg_list(args.conda_build_configs))
+        configs = utils.get_conda_build_configs(utils.parse_arg_list(args.conda_build_configs))
         args.conda_build_configs = configs
 
         if not configs:
-            show_warning(Error.CONDA_BUILD_CONFIG_NOT_FOUND, utils.CONDA_BUILD_CONFIG_FILE)
+            show_warning(Error.CONDA_BUILD_CONFIG_NOT_FOUND, constants.CONDA_BUILD_CONFIG_FILE)
 
     return args
-
-def parse_arg_list(arg_list):
-    ''' Turn a comma delimited string into a python list'''
-    if isinstance(arg_list, list):
-        return arg_list
-    return arg_list.split(",") if not arg_list is None else []

@@ -32,9 +32,9 @@ from collections import defaultdict
 import requests
 from jinja2 import Environment, FileSystemLoader
 
-from open_ce import utils
+from open_ce import utils, constants
 from open_ce.errors import OpenCEError, Error, show_warning, log
-from open_ce.inputs import Argument, parse_arg_list
+from open_ce.inputs import Argument
 import open_ce.yaml_utils
 
 COMMAND = 'licenses'
@@ -149,7 +149,7 @@ class LicenseGenerator():
         if info in self._licenses:
             return None
 
-        source_folder = os.path.join(utils.TMP_LICENSE_DIR,
+        source_folder = os.path.join(constants.TMP_LICENSE_DIR,
                                      info.name + "-" + str(info.version))
         if not os.path.exists(source_folder):
             os.makedirs(source_folder)
@@ -193,7 +193,7 @@ class LicenseGenerator():
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
 
-        licenses_file = os.path.join(output_folder, utils.DEFAULT_LICENSES_FILE)
+        licenses_file = os.path.join(output_folder, constants.DEFAULT_LICENSES_FILE)
 
         with open(licenses_file, 'w', encoding='utf8') as file_stream:
             file_stream.write(result)
@@ -260,7 +260,7 @@ class LicenseGenerator():
         with open(os.path.join(package_info_dir, "about.json"), encoding='utf8') as file_stream:
             about_data = open_ce.yaml_utils.load(file_stream)
 
-        open_ce_info = os.path.join(package_info_dir, "recipe", utils.OPEN_CE_INFO_FILE)
+        open_ce_info = os.path.join(package_info_dir, "recipe", constants.OPEN_CE_INFO_FILE)
         info_file_packages = _get_info_file_packages(open_ce_info)
 
         copyright_strings, license_files = _get_copyrights_from_conda_package(meta_data["extracted_package_dir"])
@@ -332,7 +332,7 @@ def _get_source_from_conda_package(pkg_dir):
     """
     #pylint: disable=import-outside-toplevel
     import conda_build.source
-    source_folder = os.path.join(utils.TMP_LICENSE_DIR, os.path.basename(pkg_dir))
+    source_folder = os.path.join(constants.TMP_LICENSE_DIR, os.path.basename(pkg_dir))
     if not os.path.exists(source_folder):
         os.makedirs(source_folder)
 
@@ -539,7 +539,7 @@ def get_licenses(args):
     gen = LicenseGenerator()
 
     if not args.licenses_file:
-        for conda_env_file in parse_arg_list(args.conda_env_files):
+        for conda_env_file in utils.parse_arg_list(args.conda_env_files):
             gen.add_licenses(conda_env_file)
 
         gen.write_licenses_file(args.output_folder)
@@ -547,10 +547,10 @@ def get_licenses(args):
         gen.import_licenses_file(args.licenses_file)
 
     if args.template_files:
-        for template_file in parse_arg_list(args.template_files):
+        for template_file in utils.parse_arg_list(args.template_files):
             gen.gen_file_from_template(template_file, args.output_folder)
 
-    if os.path.exists(utils.TMP_LICENSE_DIR):
-        shutil.rmtree(utils.TMP_LICENSE_DIR)
+    if os.path.exists(constants.TMP_LICENSE_DIR):
+        shutil.rmtree(constants.TMP_LICENSE_DIR)
 
 ENTRY_FUNCTION = get_licenses

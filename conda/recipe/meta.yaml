@@ -26,7 +26,7 @@ requirements:
     - jinja2
     - python
     - git
-    - matplotlib
+    - matplotlib 3.5.*
     - junit-xml
 
 test:

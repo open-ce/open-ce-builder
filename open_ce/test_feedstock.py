@@ -23,9 +23,8 @@ from enum import Enum, unique, auto
 import time
 from junit_xml import TestSuite, TestCase, to_xml_report_string
 
-from open_ce import utils
+from open_ce import utils, constants
 from open_ce import conda_env_file_generator
-from open_ce import inputs
 from open_ce.inputs import Argument
 from open_ce.errors import OpenCEError, Error, log
 
@@ -199,7 +198,7 @@ def load_test_file(test_file, variants):
 
     return test_file_data
 
-def gen_test_commands(test_file=utils.DEFAULT_TEST_CONFIG_FILE, variants=None, working_dir=os.getcwd()):
+def gen_test_commands(test_file=constants.DEFAULT_TEST_CONFIG_FILE, variants=None, working_dir=os.getcwd()):
     """
     Generate a list of test commands from the provided test file.
 
@@ -211,7 +210,7 @@ def gen_test_commands(test_file=utils.DEFAULT_TEST_CONFIG_FILE, variants=None, w
         return []
 
     time_stamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-    conda_env = utils.CONDA_ENV_FILENAME_PREFIX + time_stamp
+    conda_env = constants.CONDA_ENV_FILENAME_PREFIX + time_stamp
 
     test_commands = []
 
@@ -248,7 +247,7 @@ def run_test_commands(conda_env_file, test_commands):
     return [x.run(conda_env_file) for x in test_commands]
 
 def test_feedstock(conda_env_file, test_labels=None,
-                   test_working_dir=utils.DEFAULT_TEST_WORKING_DIRECTORY, working_directory=None):
+                   test_working_dir=constants.DEFAULT_TEST_WORKING_DIRECTORY, working_directory=None):
     """
     Test a particular feedstock, provided by the working_directory argument.
     """
@@ -263,7 +262,7 @@ def test_feedstock(conda_env_file, test_labels=None,
         variant_dict = utils.variant_string_to_dict(var_string)
     else:
         variant_dict = {}
-    for test_label in inputs.parse_arg_list(test_labels):
+    for test_label in utils.parse_arg_list(test_labels):
         variant_dict[test_label] = True
     test_commands = gen_test_commands(working_dir=test_working_dir, variants=variant_dict)
     test_results = run_test_commands(conda_env_file, test_commands)
@@ -283,7 +282,7 @@ def process_test_results(test_results, output_folder="./", test_labels=None):
         label_string = f"with labels: {str(test_labels)}"
     test_suites = [TestSuite(f"Open-CE tests for {feedstock} {label_string}", test_results[feedstock])
                         for feedstock in test_results]
-    with open(os.path.join(output_folder, utils.DEFAULT_TEST_RESULT_FILE), 'w', encoding='utf8') as outfile:
+    with open(os.path.join(output_folder, constants.DEFAULT_TEST_RESULT_FILE), 'w', encoding='utf8') as outfile:
         outfile.write(to_xml_report_string(test_suites))
     failed_tests = [x for key in test_results for x in test_results[key] if x.is_failure()]
     if failed_tests:
@@ -300,7 +299,7 @@ def test_feedstock_entry(args):
     else:
         feedstock = os.path.basename(os.getcwd())
     test_results = {feedstock: []}
-    for conda_env_file in inputs.parse_arg_list(args.conda_env_files):
+    for conda_env_file in utils.parse_arg_list(args.conda_env_files):
         test_results[feedstock] += test_feedstock(conda_env_file,
                                        args.test_labels,
                                        args.test_working_dir,
