@@ -18,7 +18,7 @@ RUN export ARCH="$(uname -m)" && \
     # Adduser Builder
     useradd -b /home --non-unique --create-home --gid ${GROUP_ID} --groups wheel \
     --uid ${BUILD_ID} --comment "User for Building" ${BUILD_USER} && \
-    curl -o /tmp/anaconda.sh https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-${ARCH}.sh && \
+    curl -o /tmp/anaconda.sh https://repo.anaconda.com/miniconda/Miniconda3-py310_22.11.1-1-Linux-${ARCH}.sh && \
     chmod +x /tmp/anaconda.sh && \
     /bin/bash /tmp/anaconda.sh -f -b -p /opt/conda && \
     rm -f /tmp/anaconda.sh && \
