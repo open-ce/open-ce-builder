@@ -23,7 +23,7 @@ ENV NVIDIA_REQUIRE_CUDA "cuda>=10.2"
 
 # Install basic requirements.
 RUN export ARCH="$(uname -m)" && \
-    yum repolist && yum install -y \
+    yum repolist && yum install -y psmisc \
     sudo openssh && \
     groupadd --non-unique --gid ${GROUP_ID} ${OPENCE_GROUP} && \
     # Adduser
