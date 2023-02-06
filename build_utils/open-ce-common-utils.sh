@@ -1,6 +1,5 @@
-"""
 # *****************************************************************
-# (C) Copyright IBM Corp. 2021, 2023. All Rights Reserved.
+# (C) Copyright IBM Corp. 2023. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,5 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # *****************************************************************
-"""
-__version__ = "11.0.4"
+
+# This script can contain common functions needed by feedstocks during the builds.
+
+function cleanup_bazel {
+    ARCH=`uname -m`
+    if [[ $ARCH == "x86_64" ]]; then
+        kill -9 $1
+    else
+        bazel clean --expunge
+        bazel shutdown
+    fi
+  
+}

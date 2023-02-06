@@ -49,7 +49,7 @@ setup(
     author="Open-CE Dev Team",
     author_email="",
     packages = find_packages(),
-    scripts = ["open_ce/open-ce", "open_ce/open-ce-builder"],
+    scripts = ["open_ce/open-ce", "open_ce/open-ce-builder", "build_utils/open-ce-common-utils.sh"],
     include_package_data=True,
     package_data={
         "open_ce": [
