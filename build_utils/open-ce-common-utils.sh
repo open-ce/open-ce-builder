@@ -21,7 +21,7 @@ function cleanup_bazel {
     if [[ $? -eq 0 ]]; then
         echo "bazel shutdown completed successfully"
     else
-        echo "bazel shutdown failed, now trying to kill bazel process ID"
+        echo "bazel shutdown failed, now trying to kill bazel process ID: $1"
         kill -9 $1 && wait $!
     fi
 }
