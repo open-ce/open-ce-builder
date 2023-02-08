@@ -17,5 +17,11 @@
 # This script can contain common functions needed by feedstocks during the builds.
 
 function cleanup_bazel {
-    (echo "Trying bazel shutdown" && bazel clean --expunge && bazel shutdown) || (echo "Trying to kill bazel process ID" && kill -9 $1 && wait $!)
+    bazel clean --expunge && bazel shutdown
+    if [[ $? -eq 0 ]]; then
+        echo "bazel shutdown completed successfully"
+    else
+        echo "bazel shutdown failed, now trying to kill bazel process ID"
+        kill -9 $1 && wait $!
+    fi
 }
