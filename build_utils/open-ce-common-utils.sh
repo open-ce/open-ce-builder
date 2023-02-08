@@ -17,12 +17,11 @@
 # This script can contain common functions needed by feedstocks during the builds.
 
 function cleanup_bazel {
-    ARCH=`uname -m`
-    if [[ $ARCH == "x86_64" ]]; then
-        kill -9 $1
+    bazel clean --expunge && bazel shutdown
+    if [[ $? -eq 0 ]]; then
+        echo "bazel shutdown completed successfully"
     else
-        bazel clean --expunge
-        bazel shutdown
+        echo "bazel shutdown failed, now trying to kill bazel process ID: $1"
+        kill -9 $1 && wait $!
     fi
-  
 }
