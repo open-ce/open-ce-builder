@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 # *****************************************************************
-# (C) Copyright IBM Corp. 2020, 2021. All Rights Reserved.
+# (C) Copyright IBM Corp. 2020, 2023. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,9 +25,11 @@ from enum import Enum, unique
 import tempfile
 import yaml
 import requests
+from create_version_branch import _get_repo_version   #pylint: disable=cyclic-import
 
 sys.path.append(os.path.join(pathlib.Path(__file__).parent.absolute(), '..'))
-from open_ce import utils # pylint: disable=wrong-import-position
+from open_ce import utils, env_config # pylint: disable=wrong-import-position
+from open_ce.conda_utils import render_yaml # pylint: disable=wrong-import-position
 
 GITHUB_API = "https://api.github.com"
 
@@ -273,3 +275,95 @@ def fill_in_params(filename, params=None, **kwargs):
             text_file.write(text)
 
     return replaced_filename
+
+def get_git_tag_from_env_file(env_file):
+    '''
+    The way this function copies the env_file to a new location before it reads the env file
+    is to get around an issue with the python jinja library used by conda build which seems
+    to cache the file the first time it is read, even if the file is changed by checking out
+    a new git commit.
+    '''
+    with open(env_file, mode='r', encoding='utf8') as file:
+        file_contents = file.read()
+    with tempfile.NamedTemporaryFile(suffix=os.path.basename(env_file), delete=True, mode='w') as renamed_env_file:
+        renamed_env_file.write(file_contents)
+        renamed_env_file.flush()
+        rendered_env_file = render_yaml(renamed_env_file.name, permit_undefined_jinja=True)
+    return rendered_env_file.get(env_config.Key.git_tag_for_env.name, None)
+
+def get_previous_git_tag_from_env_file(repo_path, previous_branch, env_file):
+    '''
+    This function returns git tag from previous branch of given repo, specified in env_file
+    '''
+    current_commit = get_current_commit(repo_path)
+
+    checkout(repo_path, previous_branch)
+    previous_tag = get_git_tag_from_env_file(env_file)
+
+    checkout(repo_path, current_commit)
+
+    return previous_tag
+
+def has_git_tag_changed(repo_path, previous_branch, env_file):
+    '''
+    This function returns boolean value if git_tag has changed
+    '''
+    current_commit = get_current_commit(repo_path)
+
+    checkout(repo_path, previous_branch)
+    previous_tag = get_git_tag_from_env_file(env_file)
+
+    checkout(repo_path, current_commit)
+    current_tag = get_git_tag_from_env_file(env_file)
+    return (current_tag is not None) and previous_tag != current_tag
+
+def get_all_feedstocks(env_files, github_org, skipped_repos, pat=None):
+    '''
+    This function returns all the feedstocks specified in env_files
+    '''
+    feedstocks = set()
+    for env in env_files:
+        packages = env.get(env_config.Key.packages.name, [])
+        if packages is None:
+            packages = []
+        for package in packages:
+            feedstock = package.get(env_config.Key.feedstock.name, "")
+            if not utils.is_url(feedstock):
+                feedstocks.add(feedstock)
+
+    org_repos = [{"name": f"{feedstock}-feedstock",
+                  "ssh_url": f"https://{pat + '@' if pat else ''}github.com/{github_org}/{feedstock}-feedstock.git"}
+                     for feedstock in feedstocks]
+
+    org_repos = [repo for repo in org_repos if repo["name"] not in skipped_repos]
+
+    return org_repos
+
+def get_bug_fix_changes(repos, current_tag, previous_tag, repo_dir="./"):
+    '''
+    This function returns the list of bug fix changes
+    '''
+    retval = ""
+    for repo in repos:
+        repo_path = os.path.abspath(os.path.join(repo_dir, repo["name"]))
+        print(f"--->Retrieving bug_fix_changes for {repo}")
+        changes = get_commits(repo_path, previous_tag, current_tag, commit_format="* %s")
+        if changes:
+            retval += f"### Changes For {repo['name']}\n"
+            retval += "\n"
+            retval +=  changes
+            retval += "\n"
+            retval += "\n"
+    return retval
+
+def get_package_versions(repos, repo_dir, variants, config_file):
+    '''
+    This function returns package versions of repos
+    '''
+    retval = ""
+    for repo in repos:
+        repo_path = os.path.abspath(os.path.join(repo_dir, repo["name"]))
+        print(f"--->Getting version info for {repo}")
+        version, name = _get_repo_version(repo_path, variants, config_file)
+        retval += f"| {name} | {version} |\n"
+    return retval

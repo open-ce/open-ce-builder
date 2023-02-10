@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # *****************************************************************
-# (C) Copyright IBM Corp. 2020, 2023. All Rights Reserved.
+# (C) Copyright IBM Corp. 2023. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 
 """
 *******************************************************************************
-Script: create_opence_release.py
-A script that can be used to cut an open-ce release.
+Script: create_opence_python_release.py
+A script that can be used to cut an open-ce-python release.
 *******************************************************************************
 """
 
@@ -33,26 +33,26 @@ sys.path.append(os.path.join(pathlib.Path(__file__).parent.absolute(), '..'))
 from open_ce.inputs import Argument, make_parser # pylint: disable=wrong-import-position
 from open_ce.utils import parse_arg_list # pylint: disable=wrong-import-position
 from open_ce import env_config # pylint: disable=wrong-import-position
-from open_ce import utils, constants # pylint: disable=wrong-import-position
+from open_ce import utils # pylint: disable=wrong-import-position
 
 def _make_parser():
     ''' Parser input arguments '''
     parser = make_parser([git_utils.Argument.PUBLIC_ACCESS_TOKEN, git_utils.Argument.REPO_DIR,
                                     git_utils.Argument.BRANCH, git_utils.Argument.SKIPPED_REPOS,
                                     git_utils.Argument.NOT_DRY_RUN, Argument.CONDA_BUILD_CONFIG],
-                                    description = 'A script that can be used to cut an open-ce release.')
+                                    description = 'A script that can be used to cut an open-ce-python release.')
 
     parser.add_argument(
         '--github-org',
         type=str,
         default="open-ce",
-        help="""Org to cut an Open-CE release in.""")
+        help="""Org to cut an Open-CE Python release in.""")
 
     parser.add_argument(
         '--primary-repo',
         type=str,
-        default="open-ce",
-        help="""Primary open-ce repo.""")
+        default="open-ce-python",
+        help="""Primary open-ce-python repo.""")
 
     parser.add_argument(
         '--code-name',
@@ -72,26 +72,25 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals, too-many-stateme
 
     primary_repo_path = "./"
 
-    open_ce_env_file = os.path.abspath(os.path.join(primary_repo_path, "envs", "opence-env.yaml"))
-    if not git_utils.has_git_tag_changed(primary_repo_path, args.branch, open_ce_env_file):
-        print("--->The opence-env git_tag has not changed.")
+    open_ce_py_env_file = os.path.abspath(os.path.join(primary_repo_path, "envs", "python-env.yaml"))
+    if not git_utils.has_git_tag_changed(primary_repo_path, args.branch, open_ce_py_env_file):
+        print("--->The python-env git_tag has not changed.")
         print("--->No release is needed.")
         return
-    print("--->The opence-env git_tag has changed!")
-    current_tag = git_utils.get_git_tag_from_env_file(open_ce_env_file)
-    previous_tag = git_utils.get_previous_git_tag_from_env_file(primary_repo_path, args.branch, open_ce_env_file)
+    print("--->The python-env git_tag has changed!")
+    current_tag = git_utils.get_git_tag_from_env_file(open_ce_py_env_file)
+    previous_tag = git_utils.get_previous_git_tag_from_env_file(primary_repo_path, args.branch, open_ce_py_env_file)
     version = _git_tag_to_version(current_tag)
     release_number = ".".join(version.split(".")[:-1])
     bug_fix = version.split(".")[-1]
-    branch_name = f"open-ce-r{release_number}"
-    version_msg = f"Open-CE Version {version}"
+    branch_name = f"open-ce-python-r{release_number}"
+    version_msg = f"Open-CE Python Version {version}"
     release_name = f"v{version}"
 
-    tf_serving_env = os.path.abspath(os.path.join(primary_repo_path, "envs", "tensorflow-serving-env.yaml"))
     variants = utils.ALL_VARIANTS()
     env_file_contents = []
     for variant in variants:
-        env_file_contents += env_config.load_env_config_files([open_ce_env_file, tf_serving_env],
+        env_file_contents += env_config.load_env_config_files([open_ce_py_env_file],
                                                           [variant], ignore_urls=True)
     for env_file_content in env_file_contents:
         env_file_tag = env_file_content.get(env_config.Key.git_tag_for_env.name, None)
@@ -165,49 +164,41 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals, too-many-stateme
         print("--->Skipping release creation for dry run.")
 
 def _git_tag_to_version(git_tag):
-    version_regex = re.compile("open-ce-v(.+)")
+    version_regex = re.compile("open-ce-python-v(.+)")
     match = version_regex.match(git_tag)
     return match.groups()[0]
 
 def _create_release_notes(repos, version, release_number, bug_fix, current_tag, # pylint: disable=too-many-arguments
                           previous_tag, variants, config_file, repo_dir="./"):
-    retval = f"# Open-CE Version {version}\n"
+    retval = f"# Open-CE Python Version {version}\n"
     retval += "\n"
     if previous_tag:
         retval += f"This is bug fix {bug_fix} of [release {release_number} of Open Cognitive Environment "
-        retval += f"(Open-CE)](https://github.com/open-ce/open-ce/releases/tag/open-ce-v{release_number}.0).\n"
+        retval += f"(Open-CE)](https://github.com/open-ce/open-ce-python/releases/tag/open-ce-python-v{release_number}.0).\n"
     else:
-        retval += f"This is release {version} of Open Cognitive Environment (Open-CE).\n"
+        retval += f"This is release {version} of Open-CE Python.\n"
     retval += "\n"
     if previous_tag:
         retval += "## Bug Fix Changes\n"
         retval += "\n"
         try:
-            retval += git_utils.get_bug_fix_changes([{"name": "open-ce"}], current_tag, previous_tag, "../")
+            retval += git_utils.get_bug_fix_changes([{"name": "open-ce-python"}], current_tag, previous_tag, "../")
             retval += git_utils.get_bug_fix_changes(repos, current_tag, previous_tag, repo_dir)
         except Exception as exc:# pylint: disable=broad-except
             print("Error trying to find bug fix changes: ", exc)
         retval += "\n"
-    retval += "## Package Versions\n"
+    retval += "## Python Versions\n"
     retval += "\n"
-    retval += "A release of Open-CE consists of the environment files within the `open-ce` repository and a collection of "
-    retval += "feedstock repositories. The feedstock repositories contain recipes for various python packages. The "
-    retval += "following packages (among others) are part of this release:\n"
+    retval += "A release of Open-CE Python consists of python which is optimized for Power10."
+    retval += "The following python versions are part of this release:\n"
     retval += "\n"
-    retval += "| Package          | Version |\n"
-    retval += "| :--------------- | :-------- |\n"
+    retval += "| Python Version |\n"
+    retval += "| :------------- |\n"
     try:
         retval += git_utils.get_package_versions(repos, repo_dir, variants, config_file)
     except Exception as exc:# pylint: disable=broad-except
         print("Error trying to get package versions: ", exc)
     retval += "\n"
-    retval += "This release of Open-CE supports NVIDIA's CUDA "
-    retval += f"versions {constants.SUPPORTED_CUDA_VERS} as well as Python {constants.SUPPORTED_PYTHON_VERS}.\n"
-    retval += "\n"
-    retval += "## Getting Started"
-    retval += "\n"
-    retval += "To get started with this release, see [the main readme]"
-    retval += f"(https://github.com/open-ce/open-ce/blob/{current_tag}/README.md)\n"
     return retval
 
 if __name__ == '__main__':
