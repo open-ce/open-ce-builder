@@ -25,12 +25,11 @@ from enum import Enum, unique
 import tempfile
 import yaml
 import requests
+from create_version_branch import _get_repo_version   #pylint: disable=cyclic-import
 
 sys.path.append(os.path.join(pathlib.Path(__file__).parent.absolute(), '..'))
-from open_ce import utils # pylint: disable=wrong-import-position
-from create_version_branch import _get_repo_version
+from open_ce import utils, env_config # pylint: disable=wrong-import-position
 from open_ce.conda_utils import render_yaml # pylint: disable=wrong-import-position
-from open_ce import env_config # pylint: disable=wrong-import-position
 
 GITHUB_API = "https://api.github.com"
 
@@ -293,6 +292,9 @@ def get_git_tag_from_env_file(env_file):
     return rendered_env_file.get(env_config.Key.git_tag_for_env.name, None)
 
 def get_previous_git_tag_from_env_file(repo_path, previous_branch, env_file):
+    '''
+    This function returns git tag from previous branch of given repo, specified in env_file
+    '''
     current_commit = get_current_commit(repo_path)
 
     checkout(repo_path, previous_branch)
@@ -303,6 +305,9 @@ def get_previous_git_tag_from_env_file(repo_path, previous_branch, env_file):
     return previous_tag
 
 def has_git_tag_changed(repo_path, previous_branch, env_file):
+    '''
+    This function returns boolean value if git_tag has changed
+    '''
     current_commit = get_current_commit(repo_path)
 
     checkout(repo_path, previous_branch)
@@ -313,6 +318,9 @@ def has_git_tag_changed(repo_path, previous_branch, env_file):
     return (current_tag is not None) and previous_tag != current_tag
 
 def get_all_feedstocks(env_files, github_org, skipped_repos, pat=None):
+    '''
+    This function returns all the feedstocks specified in env_files
+    '''
     feedstocks = set()
     for env in env_files:
         packages = env.get(env_config.Key.packages.name, [])
@@ -332,6 +340,9 @@ def get_all_feedstocks(env_files, github_org, skipped_repos, pat=None):
     return org_repos
 
 def get_bug_fix_changes(repos, current_tag, previous_tag, repo_dir="./"):
+    '''
+    This function returns the list of bug fix changes
+    '''
     retval = ""
     for repo in repos:
         repo_path = os.path.abspath(os.path.join(repo_dir, repo["name"]))
@@ -346,6 +357,9 @@ def get_bug_fix_changes(repos, current_tag, previous_tag, repo_dir="./"):
     return retval
 
 def get_package_versions(repos, repo_dir, variants, config_file):
+    '''
+    This function returns package versions of repos
+    '''
     retval = ""
     for repo in repos:
         repo_path = os.path.abspath(os.path.join(repo_dir, repo["name"]))
@@ -353,4 +367,3 @@ def get_package_versions(repos, repo_dir, variants, config_file):
         version, name = _get_repo_version(repo_path, variants, config_file)
         retval += f"| {name} | {version} |\n"
     return retval
-

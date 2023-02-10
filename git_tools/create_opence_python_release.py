@@ -26,7 +26,6 @@ import sys
 import pathlib
 import os
 import re
-import tempfile
 import git_utils
 import tag_all_repos
 
@@ -34,7 +33,7 @@ sys.path.append(os.path.join(pathlib.Path(__file__).parent.absolute(), '..'))
 from open_ce.inputs import Argument, make_parser # pylint: disable=wrong-import-position
 from open_ce.utils import parse_arg_list # pylint: disable=wrong-import-position
 from open_ce import env_config # pylint: disable=wrong-import-position
-from open_ce import utils, constants # pylint: disable=wrong-import-position
+from open_ce import utils # pylint: disable=wrong-import-position
 
 def _make_parser():
     ''' Parser input arguments '''

@@ -26,7 +26,6 @@ import sys
 import pathlib
 import os
 import re
-import tempfile
 import git_utils
 import tag_all_repos
 
