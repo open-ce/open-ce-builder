@@ -29,7 +29,7 @@ from open_ce import graph
 from open_ce import env_config
 from open_ce import validate_config     #pylint: disable=cyclic-import
 from open_ce import build_feedstock
-from open_ce.errors import OpenCEError, Error, log
+from open_ce.errors import OpenCEError, Error, log, show_warning
 from open_ce.conda_env_file_generator import CondaEnvFileGenerator
 from open_ce.build_command import BuildCommand
 # pylint: enable=wrong-import-position,wrong-import-order
@@ -490,7 +490,7 @@ class BuildTree(): #pylint: disable=too-many-instance-attributes
                 cycle_print += " -> ".join(node.build_command.recipe if node.build_command else str(node.packages)
                                                         for node in cycle + [cycle[0]]) + "\n"
         if cycle_print:
-            raise OpenCEError(Error.BUILD_TREE_CYCLE, cycle_print)
+            show_warning(Error.BUILD_TREE_CYCLE, cycle_print)
 
     def build_command_dependencies(self, node):
         '''
