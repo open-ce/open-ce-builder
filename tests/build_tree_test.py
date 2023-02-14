@@ -532,7 +532,7 @@ def test_build_tree_len():
 
     assert len(mock_build_tree) == 3
 
-def test_build_tree_cycle_fail(_mocker, caplog):
+def test_build_tree_cycle_fail(mocker, caplog): #pylint: disable=unused-argument
     '''
     Tests that a cycle is detected in a build_tree.
     '''
