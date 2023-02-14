@@ -532,7 +532,7 @@ def test_build_tree_len():
 
     assert len(mock_build_tree) == 3
 
-def test_build_tree_cycle_fail():
+def test_build_tree_cycle_fail(mocker, caplog): #pylint: disable=unused-argument
     '''
     Tests that a cycle is detected in a build_tree.
     '''
@@ -573,15 +573,14 @@ def test_build_tree_cycle_fail():
 
     mock_build_tree._tree = cycle_build_commands
 
-    with pytest.raises(OpenCEError) as exc:
-        mock_build_tree._detect_cycle()
+    mock_build_tree._detect_cycle()
 
-    assert "Build dependencies should form a Directed Acyclic Graph." in str(exc.value)
-    assert any(["recipe1 -> recipe2 -> recipe1" in str(exc.value),
-                "recipe2 -> recipe1 -> recipe2" in str(exc.value),
-                "recipe1 -> recipe3 -> recipe2 -> recipe1" in str(exc.value),
-                "recipe2 -> recipe1 -> recipe3 -> recipe2" in str(exc.value),
-                "recipe3 -> recipe2 -> recipe1 -> recipe2" in str(exc.value)])
+    assert "Build dependencies should form a Directed Acyclic Graph." in caplog.text
+    assert any(["recipe1 -> recipe2 -> recipe1" in caplog.text,
+                "recipe2 -> recipe1 -> recipe2" in caplog.text,
+                "recipe1 -> recipe3 -> recipe2 -> recipe1" in caplog.text,
+                "recipe2 -> recipe1 -> recipe3 -> recipe2" in caplog.text,
+                "recipe3 -> recipe2 -> recipe1 -> recipe2" in caplog.text])
 
 def test_get_installable_package_for_non_runtime_package():
     '''
