@@ -450,5 +450,5 @@ def _check_and_create_fips_packages(args, arg_strings):
         cmd = f"open-ce " \
               f"{args.command} {args.sub_command} {' '.join(fips_arg_strings[3:])}"
 
-        if not os.system(cmd):
+        if os.system(cmd):
             raise OpenCEError(Error.FIPS_PACKAGES_NOT_BUILT, cmd)
