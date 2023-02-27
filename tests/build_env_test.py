@@ -559,4 +559,26 @@ def test_ppc_arch_filter_in_env(mocker):
     )
 
     arg_strings = ["build", build_env.COMMAND, "--ppc_arch=p10", "tests/test-env2.yaml"]
+
     opence._main(arg_strings)
+
+def test_build_env_fips_packages(mocker):
+    '''
+    Test that passing --fips argument works correctly.
+    '''
+
+    mocker.patch(
+        'open_ce.build_tree.BuildTree',
+    )
+
+    mocker.patch(
+        'os.path.exists',
+        return_value=True
+    )
+
+    arg_strings = ["build", build_env.COMMAND,
+                  "--fips", os.path.join(test_dir, 'test-env2.yaml')]
+    opence._main(arg_strings)
+
+#    assert "--fips" not in arg_strings
+
