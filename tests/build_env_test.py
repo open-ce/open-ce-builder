@@ -575,7 +575,10 @@ def test_build_env_fips_packages(mocker):
         'os.path.exists',
         return_value=True
     )
-    constants.OPENSSL_ENV_FILE = "test-env3.yaml"
+    mocker.patch(
+        'os.system',
+        return_value=0
+    )
     arg_strings = ["build", build_env.COMMAND,
                   "--fips", os.path.join(test_dir, 'test-env2.yaml')]
     opence._main(arg_strings)

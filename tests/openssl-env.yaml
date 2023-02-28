@@ -19,5 +19,4 @@ channels:
     - defaults
 
 packages:
-    - feedstock: https://github.com/cdeepali/openssl-feedstock
-      git_tag : dc-recipe
+    - feedstock: openssl-package
