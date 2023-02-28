@@ -1,6 +1,6 @@
 """
 # *****************************************************************
-# (C) Copyright IBM Corp. 2020, 2022. All Rights Reserved.
+# (C) Copyright IBM Corp. 2020, 2023. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -433,10 +433,11 @@ def _check_and_create_fips_packages(args, arg_strings):
     Checks if `--fips` is specified in the command, if so, build `openssl-env` silently
     '''
     if "fips" in vars(args).keys() and args.fips:
+        if arg_strings is None:
+            arg_strings = sys.argv[1:]
         arg_strings = [arg for arg in arg_strings if arg != "--fips"]
         fips_arg_strings = arg_strings
         fips_args = args
-        print(fips_arg_strings)
         if "env_config_file" in vars(fips_args).keys():
             for env_file in fips_args.env_config_file:
                 if env_file in fips_arg_strings:
@@ -448,7 +449,6 @@ def _check_and_create_fips_packages(args, arg_strings):
         fips_args.__dict__["env_config_file"] = [openssl_env_file]
         fips_args.__dict__["provided_env_files"] = [openssl_env_file]
 
-        cmd = f"open-ce " f"{' '.join(fips_arg_strings[:])}"
-        print("Cmd: ", cmd)
+        cmd = f"open-ce " f"{args.command} {args.sub_command} {' '.join(fips_arg_strings[2:])}"
         if os.system(cmd):
             raise OpenCEError(Error.FIPS_PACKAGES_NOT_BUILT, cmd)
