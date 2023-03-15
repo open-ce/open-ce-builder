@@ -18,6 +18,7 @@
 
 import os
 import sys
+import copy
 
 import argparse
 from enum import Enum, unique
@@ -436,8 +437,8 @@ def _check_and_create_fips_packages(args, arg_strings):
         if arg_strings is None:
             arg_strings = sys.argv[1:]
         arg_strings = [arg for arg in arg_strings if arg != "--fips"]
-        fips_arg_strings = arg_strings
-        fips_args = args
+        fips_arg_strings = copy.deepcopy(arg_strings)
+        fips_args = copy.deepcopy(args)
         if "env_config_file" in vars(fips_args).keys():
             for env_file in fips_args.env_config_file:
                 if env_file in fips_arg_strings:

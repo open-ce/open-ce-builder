@@ -126,10 +126,16 @@ For details, please see [`doc/README.open_ce_build.md`](doc/README.open_ce_build
 
 These packages will work on Power9 or Power10, but not on Power8.
 
-### Building FIPS Compliant Packages
+### FIPS Compliant Packages
+#### Building FIPS Compliant Packages
 
 One can build Open-CE packages that are FIPS compliant by providing `--fips` option to `open-ce build env` command. When this option is provided, Open-CE Builder builds [`envs/openssl-env.yaml`](https://github.com/open-ce/open-ce/blob/main/envs/openssl-env.yaml) internally and then builds the provided Open-CE environment file for which the build is requested. FIPS compliant `openssl` and `cryptography` conda packages are built by `openssl-env.yaml` and then other Open-CE packages are built using these two packages.
 
+#### Installing FIPS Compliant Packages
+
+The system where FIPS compliant packages are to be installed must have Redhat's `openssl` and `openssl-libs` packages installed. These can be installed using `yum install openssl openssl-libs openssl-devel`.
+
+Once FIPS complaint Open-CE packages are installed in a conda environment, ensure that the conda environment contains  `openssl` and `cryptography` also from the same conda channel.
 
 ### Building within a container
 
