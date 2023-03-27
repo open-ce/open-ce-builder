@@ -559,4 +559,52 @@ def test_ppc_arch_filter_in_env(mocker):
     )
 
     arg_strings = ["build", build_env.COMMAND, "--ppc_arch=p10", "tests/test-env2.yaml"]
+
     opence._main(arg_strings)
+
+def test_build_env_fips_packages(mocker):
+    '''
+    Test that passing --fips argument works correctly.
+    '''
+
+    mocker.patch(
+        'open_ce.build_tree.BuildTree',
+    )
+
+    mocker.patch(
+        'os.path.exists',
+        return_value=True
+    )
+    mocker.patch(
+        'os.system',
+        return_value=0
+    )
+    arg_strings = ["build", build_env.COMMAND,
+                  "--fips", os.path.join(test_dir, 'test-env2.yaml')]
+    opence._main(arg_strings)
+
+def test_build_env_fips_packages_failed_build(mocker):
+    '''
+    Test that an error is thrown if openssl-env build fails
+    '''
+
+    mocker.patch(
+        'open_ce.build_tree.BuildTree',
+    )
+
+    mocker.patch(
+        'os.path.exists',
+        return_value=True
+    )
+    mocker.patch(
+        'os.system',
+        return_value=1
+    )
+    arg_strings = ["build", build_env.COMMAND,
+                  "--fips", os.path.join(test_dir, 'test-env2.yaml')]
+
+    with pytest.raises(OpenCEError) as exc:
+        opence._main(arg_strings)
+
+    assert "FIPS Compliant OpenSSL env failed to build" in str(exc.value)
+
