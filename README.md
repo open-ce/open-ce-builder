@@ -6,7 +6,7 @@
 
 [![Installation Options](https://img.shields.io/badge/Install%20with-conda%20%7C%20pip-brightgreen)](#installing-the-open-ce-build-tools)
 [![Python Support](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C3.10-blue.svg)](#requirements)
-[![Cuda Support](https://img.shields.io/badge/cuda-11.2%20%7C%2011.4-blue)](doc/README.cuda_support.md)
+[![Cuda Support](https://img.shields.io/badge/cuda-11.2%20%7C%2011.8%20-blue)](doc/README.cuda_support.md)
 
 [![Builder Unit Tests](https://github.com/open-ce/open-ce/workflows/Open-CE%20Builder%20Unit%20Tests/badge.svg)](https://github.com/open-ce/open-ce-builder/actions?query=workflow%3A%22Open-CE+Builder+Unit+Tests%22+branch%3Amain)
 [![Builder Unit Test Coverage](https://codecov.io/gh/open-ce/open-ce-builder/branch/main/graph/badge.svg)](https://codecov.io/gh/open-ce/open-ce-builder)
@@ -38,7 +38,7 @@ The `open-ce` tool allows a user to build collections of conda recipes described
 
 ### CUDA Requirements
 
-Currently CUDA 11.2 and 11.4 are supported by the recipes in Open-CE. Please see [`doc/README.cuda_support.md`](doc/README.cuda_support.md) for details on setting
+Currently CUDA 11.2 and 11.8 are supported by the recipes in Open-CE. Please see [`doc/README.cuda_support.md`](doc/README.cuda_support.md) for details on setting
 up a proper build enviornment for CUDA support.
 
 Open-CE expects the `CUDA_HOME` environment variable to be set to the location of the CUDA installation. Note that not all recipes work when `CUDA_HOME` references a non-standard CUDA installation location. Reference the [cuda README](doc/README.cuda_support.md) for more information.

@@ -161,8 +161,8 @@ optional arguments:
                         Comma delimited list of mpi types, such as "openmpi"
                         or "system". (default: openmpi)
   --cuda_versions CUDA_VERSIONS
-                        CUDA version to build for , such as "11.2" or "11.4".
-                        (default: 11.4)
+                        CUDA version to build for , such as "11.2" or "11.8".
+                        (default: 11.8)
   --skip_build_packages
                         Do not perform builds of packages. (default: False)
   --fips                Build FIPS compliant packages (default: False)
