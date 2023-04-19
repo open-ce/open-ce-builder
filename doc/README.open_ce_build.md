@@ -153,7 +153,7 @@ optional arguments:
                         current working directory. (default: )
   --python_versions PYTHON_VERSIONS
                         Comma delimited list of python versions to build for ,
-                        such as "3.8" or "3.9" or "3.10". (default: 3.10)
+                        such as "3.8" or "3.9" or "3.10". (default: 3.10 when --build_types=cuda 11.8 or cpu) (default: 3.9 when --build_types=cuda 11.2) 
   --build_types BUILD_TYPES
                         Comma delimited list of build types, such as "cpu" or
                         "cuda". (default: cpu,cuda)
