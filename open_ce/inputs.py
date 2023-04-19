@@ -117,7 +117,7 @@ https://github.com/open-ce/open-ce/blob/main/doc/README.yaml.md"""))
                                         type=str,
                                         default=constants.DEFAULT_CUDA_VERS,
                                         help='CUDA version to build for '
-                                             ', such as "11.2" or "11.4".'))
+                                             ', such as "11.2" or "11.8".'))
 
     CONTAINER_BUILD = (lambda parser: parser.add_argument(
                                         '--container_build',
