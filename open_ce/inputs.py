@@ -422,9 +422,10 @@ def parse_args(parser, arg_strings=None):
 
     _check_and_create_fips_packages(args, arg_strings)
 
+    _check_cuda_versions(args)
+
     if "container_build" not in vars(args).keys() or not args.container_build:
         _check_ppc_arch(args)
-        _check_cuda_versions(args)
 
     if "conda_build_configs" in vars(args).keys():
         if args.conda_build_configs is None:
