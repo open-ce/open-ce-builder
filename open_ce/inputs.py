@@ -385,9 +385,9 @@ def _check_cuda_versions(args):
     if "build_types" in vars(args).keys() and args.build_types:
         if "cuda_versions" in vars(args).keys() and args.cuda_versions:
             if args.cuda_versions == "11.2":
-               if args.python_versions == "3.10":
-                   opence_globals.DEFAULT_PYTHON_VERS = "3.9"
-                   args.python_versions = "3.9" 
+                if args.python_versions == "3.10":
+                    opence_globals.DEFAULT_PYTHON_VERS = "3.9"
+                    args.python_versions = "3.9" 
 
 def _check_ppc_arch(args):
     '''
