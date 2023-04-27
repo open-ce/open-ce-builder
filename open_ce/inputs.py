@@ -381,6 +381,14 @@ def _create_env_config_paths(args):
                 log.info("Unable to find '%s' locally. Attempting to use '%s'.", config_file, new_url)
                 args.env_config_file[index] = new_url
 
+def _check_cuda_versions(args):
+    if "build_types" in vars(args).keys() and args.build_types:
+        if "cuda_versions" in vars(args).keys() and args.cuda_versions:
+            if args.cuda_versions == "11.2":
+               if args.python_versions == "3.10":
+                   opence_globals.DEFAULT_PYTHON_VERS = "3.9"
+                   args.python_versions = "3.9" 
+
 def _check_ppc_arch(args):
     '''
     This will check if ppc_arch is p10 and set the corresponding
@@ -412,6 +420,7 @@ def parse_args(parser, arg_strings=None):
 
     if "container_build" not in vars(args).keys() or not args.container_build:
         _check_ppc_arch(args)
+        _check_cuda_versions(args)
 
     if "conda_build_configs" in vars(args).keys():
         if args.conda_build_configs is None:

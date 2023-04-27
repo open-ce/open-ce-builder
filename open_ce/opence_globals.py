@@ -17,6 +17,8 @@
 """
 
 from open_ce.constants import DEFAULT_PPC_ARCH
+from open_ce.constants import DEFAULT_PYTHON_VERS
 
 global PPC_ARCH_VARIANT        # pylint: disable=global-at-module-level
+global DEFAULT_PYTHON_VERS
 PPC_ARCH_VARIANT = DEFAULT_PPC_ARCH
