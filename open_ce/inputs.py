@@ -382,6 +382,10 @@ def _create_env_config_paths(args):
                 args.env_config_file[index] = new_url
 
 def _check_cuda_versions(args):
+    '''
+    This will check if build_types is cuda and cuda_versions is 11.2
+    then set default python_versions to 3.9
+    '''
     if "build_types" in vars(args).keys() and args.build_types:
         if "cuda_versions" in vars(args).keys() and args.cuda_versions:
             if args.cuda_versions == "11.2":
