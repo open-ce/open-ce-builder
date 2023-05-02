@@ -420,9 +420,9 @@ def parse_args(parser, arg_strings=None):
     args = parser.parse_args(arg_strings)
     _create_env_config_paths(args)
 
-    _check_and_create_fips_packages(args, arg_strings)
-
     _check_cuda_versions(args)
+
+    _check_and_create_fips_packages(args, arg_strings)
 
     if "container_build" not in vars(args).keys() or not args.container_build:
         _check_ppc_arch(args)
