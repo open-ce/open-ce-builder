@@ -117,7 +117,7 @@ https://github.com/open-ce/open-ce/blob/main/doc/README.yaml.md"""))
                                         type=str,
                                         default=constants.DEFAULT_CUDA_VERS,
                                         help='CUDA version to build for '
-                                             ', such as "11.2" or "11.4".'))
+                                             ', such as "11.2" or "11.8".'))
 
     CONTAINER_BUILD = (lambda parser: parser.add_argument(
                                         '--container_build',
@@ -381,6 +381,18 @@ def _create_env_config_paths(args):
                 log.info("Unable to find '%s' locally. Attempting to use '%s'.", config_file, new_url)
                 args.env_config_file[index] = new_url
 
+def _check_cuda_versions(args):
+    '''
+    This will check if build_types is cuda and cuda_versions is 11.2
+    then set default python_versions to 3.9
+    '''
+    if "build_types" in vars(args).keys() and args.build_types:
+        if "cuda_versions" in vars(args).keys() and args.cuda_versions:
+            if args.cuda_versions == "11.2":
+                if args.python_versions == "3.10":
+                    opence_globals.DEFAULT_PYTHON_VERS = "3.9"
+                    args.python_versions = "3.9"
+
 def _check_ppc_arch(args):
     '''
     This will check if ppc_arch is p10 and set the corresponding
@@ -407,6 +419,8 @@ def parse_args(parser, arg_strings=None):
     '''
     args = parser.parse_args(arg_strings)
     _create_env_config_paths(args)
+
+    _check_cuda_versions(args)
 
     _check_and_create_fips_packages(args, arg_strings)
 
