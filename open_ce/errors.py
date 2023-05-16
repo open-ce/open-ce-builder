@@ -96,6 +96,7 @@ class Error(Enum):
 
     GIT_TAG_MISSING = (41, "git_tag attribute is missing for '{}'")
     FIPS_PACKAGES_NOT_BUILT = (42, "FIPS Compliant OpenSSL env failed to build")
+    FFMPEG_PACKAGE_NOT_BUILT = (43, "ffmpeg env failed to build")
 
 class OpenCEError(Exception):
     """
