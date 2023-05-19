@@ -142,7 +142,7 @@ Once FIPS complaint Open-CE packages are installed in a conda environment, ensur
 
 One can build Open-CE packages with ffmpeg by providing `--build-ffmpeg` option to `open-ce build env` command. When this option is provided, Open-CE Builder builds [`envs/ffmpeg-env.yaml`](https://github.com/open-ce/open-ce/blob/main/envs/ffmpeg-env.yaml) internally and then builds the provided Open-CE environment file for which the build is requested.
 
-FIPS compliant packages are built by default with `ffmpeg-env.yaml`.
+FIPS compliant ffmpeg package is built by default via `openssl-env.yaml` when `--fips` is set.
 
 ### Building within a container
 
