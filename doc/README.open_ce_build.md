@@ -104,7 +104,7 @@ usage: open-ce build env [-h] [--conda_build_configs CONDA_BUILD_CONFIG]
                          [--python_versions PYTHON_VERSIONS]
                          [--build_types BUILD_TYPES] [--mpi_types MPI_TYPES]
                          [--cuda_versions CUDA_VERSIONS]
-                         [--skip_build_packages] [--fips] [--run_tests]
+                         [--skip_build_packages] [--fips] [--build_ffmpeg] [--run_tests]
                          [--container_build] [--git_location GIT_LOCATION]
                          [--git_tag_for_env GIT_TAG_FOR_ENV]
                          [--test_labels TEST_LABELS]
@@ -166,6 +166,7 @@ optional arguments:
   --skip_build_packages
                         Do not perform builds of packages. (default: False)
   --fips                Build FIPS compliant packages (default: False)
+  --build_ffmpeg        Build ffmpeg package (default: False)
   --run_tests           Run Open-CE tests for each potential conda environment
                         (default: False)
   --container_build, --docker_build

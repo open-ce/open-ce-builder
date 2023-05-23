@@ -145,6 +145,11 @@ https://github.com/open-ce/open-ce/blob/main/doc/README.yaml.md"""))
                                         action='store_true',
                                         help="Build FIPS compliant packages"))
 
+    BUILD_FFMPEG = (lambda parser: parser.add_argument(
+                                        '--build_ffmpeg',
+                                        action='store_true',
+                                        help="Build ffmpeg package"))
+
     RUN_TESTS = (lambda parser: parser.add_argument(
                                         '--run_tests',
                                         action='store_true',
@@ -422,7 +427,11 @@ def parse_args(parser, arg_strings=None):
 
     _check_cuda_versions(args)
 
-    _check_and_create_fips_packages(args, arg_strings)
+    #--fips and --build_ffmpeg together is not supported
+    if "fips" in vars(args).keys() and args.fips:
+        _create_fips_packages(args, arg_strings)
+    else:
+        _check_and_build_ffmpeg(args, arg_strings)
 
     if "container_build" not in vars(args).keys() or not args.container_build:
         _check_ppc_arch(args)
@@ -443,30 +452,58 @@ def parse_args(parser, arg_strings=None):
 
     return args
 
-def _check_and_create_fips_packages(args, arg_strings):
+def _create_fips_packages(args, arg_strings):
     '''
-    Checks if `--fips` is specified in the command, if so, build `openssl-env` silently
+    Build `openssl-env` silently
     '''
-    if "fips" in vars(args).keys() and args.fips:
+    if arg_strings is None:
+         arg_strings = sys.argv[1:]
+    arg_strings = [arg for arg in arg_strings if arg != "--fips"]
+    fips_arg_strings = copy.deepcopy(arg_strings)
+    fips_args = copy.deepcopy(args)
+    if "env_config_file" in vars(fips_args).keys():
+        for env_file in fips_args.env_config_file:
+            if env_file in fips_arg_strings:
+                fips_arg_strings.remove(env_file)
+
+    openssl_env_file = os.path.join(os.path.dirname(args.env_config_file[0]),
+                                                    constants.OPENSSL_ENV_FILE)
+    fips_arg_strings.append(openssl_env_file)
+    fips_args.__dict__["env_config_file"] = [openssl_env_file]
+    fips_args.__dict__["provided_env_files"] = [openssl_env_file]
+
+    cmd = f"open-ce " f"{args.command} {args.sub_command} {' '.join(fips_arg_strings[2:])}"
+    log.info("Started FIPS enabled build for provided open-ce environment file")
+    if not os.system(cmd):
+        log.info("FIPS compliant openssl-env is built")
+    else:
+        raise OpenCEError(Error.FIPS_PACKAGES_NOT_BUILT, cmd)
+
+def _check_and_build_ffmpeg(args, arg_strings):
+    '''
+    Checks if `--build_ffmpeg` is specified in the command, if so, build `ffmpeg-env` silently
+    '''
+    if "build_ffmpeg" in vars(args).keys() and args.build_ffmpeg:
         if arg_strings is None:
             arg_strings = sys.argv[1:]
-        arg_strings = [arg for arg in arg_strings if arg != "--fips"]
-        fips_arg_strings = copy.deepcopy(arg_strings)
-        fips_args = copy.deepcopy(args)
-        if "env_config_file" in vars(fips_args).keys():
-            for env_file in fips_args.env_config_file:
-                if env_file in fips_arg_strings:
-                    fips_arg_strings.remove(env_file)
+        arg_strings = [arg for arg in arg_strings if arg != "--build_ffmpeg"]
+        ffmpeg_arg_strings = copy.deepcopy(arg_strings)
+        ffmpeg_args = copy.deepcopy(args)
+        if "env_config_file" in vars(ffmpeg_args).keys():
+            for env_file in ffmpeg_args.env_config_file:
+                if env_file in ffmpeg_arg_strings:
+                    ffmpeg_arg_strings.remove(env_file)
 
-        openssl_env_file = os.path.join(os.path.dirname(args.env_config_file[0]),
-                                                        constants.OPENSSL_ENV_FILE)
-        fips_arg_strings.append(openssl_env_file)
-        fips_args.__dict__["env_config_file"] = [openssl_env_file]
-        fips_args.__dict__["provided_env_files"] = [openssl_env_file]
+        ffmpeg_env_file = os.path.join(os.path.dirname(args.env_config_file[0]),
+                                                        constants.FFMPEG_ENV_FILE)
+        ffmpeg_arg_strings.append(ffmpeg_env_file)
+        ffmpeg_args.__dict__["env_config_file"] = [ffmpeg_env_file]
+        ffmpeg_args.__dict__["provided_env_files"] = [ffmpeg_env_file]
 
-        cmd = f"open-ce " f"{args.command} {args.sub_command} {' '.join(fips_arg_strings[2:])}"
-        log.info("Started FIPS enabled build for provided open-ce environment file")
+        cmd = f"open-ce " f"{args.command} {args.sub_command} {' '.join(ffmpeg_arg_strings[2:])}"
+        log.info("Started ffmpeg build for provided open-ce environment file")
         if not os.system(cmd):
-            log.info("FIPS compliant openssl-env is built")
+            log.info("ffmpeg package is built")
         else:
-            raise OpenCEError(Error.FIPS_PACKAGES_NOT_BUILT, cmd)
+            raise OpenCEError(Error.FFMPEG_PACKAGE_NOT_BUILT, cmd)
+
