@@ -17,6 +17,8 @@
 """
 
 import os
+import sys
+import copy
 
 import argparse
 from enum import Enum, unique
@@ -452,7 +454,7 @@ def _check_and_build_ffmpeg(args, arg_strings):
                     ffmpeg_arg_strings.remove(env_file)
 
         ffmpeg_env_file = os.path.join(os.path.dirname(args.env_config_file[0]),
-                                                        constants.FFMPEG_ENV_FILE)
+                                                        utils.FFMPEG_ENV_FILE)
         ffmpeg_arg_strings.append(ffmpeg_env_file)
         ffmpeg_args.__dict__["env_config_file"] = [ffmpeg_env_file]
         ffmpeg_args.__dict__["provided_env_files"] = [ffmpeg_env_file]
