@@ -138,7 +138,6 @@ The system where FIPS compliant packages are to be installed must have Redhat's 
 Once FIPS complaint Open-CE packages are installed in a conda environment, ensure that the conda environment contains  `openssl` and `cryptography` also from the same conda channel.
 
 ### FFMPEG with reduced codecs and openssl
-#### Building packages with OpenCE ffmpeg
 
 One can build Open-CE packages with ffmpeg in two ways:
 
