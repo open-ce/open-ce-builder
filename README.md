@@ -140,9 +140,11 @@ Once FIPS complaint Open-CE packages are installed in a conda environment, ensur
 ### FFMPEG with reduced codecs and openssl
 #### Building packages with OpenCE ffmpeg
 
-One can build Open-CE packages with ffmpeg by providing `--build-ffmpeg` option to `open-ce build env` command. When this option is provided, Open-CE Builder builds [`envs/ffmpeg-env.yaml`](https://github.com/open-ce/open-ce/blob/main/envs/ffmpeg-env.yaml) internally and then builds the provided Open-CE environment file for which the build is requested.
+One can build Open-CE packages with ffmpeg in two ways:
 
-`--build_ffmpeg` is not supported with `--fips`. `ffmpeg` package is built by default via `openssl-env.yaml` when `--fips` is set.
+  - Provide `--build-ffmpeg` option to the `open-ce build env` command. When this option is provided, Open-CE Builder builds [`envs/ffmpeg-env.yaml`](https://github.com/open-ce/open-ce/blob/main/envs/ffmpeg-env.yaml) internally and then builds the provided Open-CE environment file for which the build is requested.
+
+  - Provide `--fips` option to the `open-ce build env` command. This will use the `openssl-env.yaml`, which includes `ffmpeg` by default.
 
 ### Building within a container
 
