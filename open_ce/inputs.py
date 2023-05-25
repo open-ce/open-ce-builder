@@ -17,6 +17,8 @@
 """
 
 import os
+import sys
+import copy
 
 import argparse
 from enum import Enum, unique
@@ -136,6 +138,11 @@ https://github.com/open-ce/open-ce/blob/main/doc/README.yaml.md"""))
                                         '--skip_build_packages',
                                         action='store_true',
                                         help="Do not perform builds of packages."))
+
+    BUILD_FFMPEG = (lambda parser: parser.add_argument(
+                                        '--build_ffmpeg',
+                                        action='store_true',
+                                        help="Build ffmpeg package"))
 
     RUN_TESTS = (lambda parser: parser.add_argument(
                                         '--run_tests',
@@ -404,6 +411,8 @@ def parse_args(parser, arg_strings=None):
     args = parser.parse_args(arg_strings)
     _create_env_config_paths(args)
 
+    _check_and_build_ffmpeg(args, arg_strings)
+
     if "container_build" not in vars(args).keys() or not args.container_build:
         _check_ppc_arch(args)
 
@@ -428,3 +437,31 @@ def parse_arg_list(arg_list):
     if isinstance(arg_list, list):
         return arg_list
     return arg_list.split(",") if not arg_list is None else list()
+
+def _check_and_build_ffmpeg(args, arg_strings):
+    '''
+    Checks if `--build_ffmpeg` is specified in the command, if so, build `ffmpeg-env` silently
+    '''
+    if "build_ffmpeg" in vars(args).keys() and args.build_ffmpeg:
+        if arg_strings is None:
+            arg_strings = sys.argv[1:]
+        arg_strings = [arg for arg in arg_strings if arg != "--build_ffmpeg"]
+        ffmpeg_arg_strings = copy.deepcopy(arg_strings)
+        ffmpeg_args = copy.deepcopy(args)
+        if "env_config_file" in vars(ffmpeg_args).keys():
+            for env_file in ffmpeg_args.env_config_file:
+                if env_file in ffmpeg_arg_strings:
+                    ffmpeg_arg_strings.remove(env_file)
+
+        ffmpeg_env_file = os.path.join(os.path.dirname(args.env_config_file[0]),
+                                                        utils.FFMPEG_ENV_FILE)
+        ffmpeg_arg_strings.append(ffmpeg_env_file)
+        ffmpeg_args.__dict__["env_config_file"] = [ffmpeg_env_file]
+        ffmpeg_args.__dict__["provided_env_files"] = [ffmpeg_env_file]
+
+        cmd = f"open-ce " f"{args.command} {args.sub_command} {' '.join(ffmpeg_arg_strings[2:])}"
+        log.info("Started ffmpeg build for provided open-ce environment file")
+        if not os.system(cmd):
+            log.info("ffmpeg package is built")
+        else:
+            raise OpenCEError(Error.FFMPEG_PACKAGE_NOT_BUILT, cmd)
