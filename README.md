@@ -26,7 +26,7 @@ The `open-ce` tool allows a user to build collections of conda recipes described
 
 * `conda` 
   * The conda tool can either be installed through [Anaconda](https://www.anaconda.com/products/individual#Downloads) or [Miniconda](https://docs.conda.io/en/latest/miniconda.html).
-* `conda-build` >= 3.21.7
+* `conda-build` >= 3.22
   * Once `conda` is installed, `conda-build` can be installed with the command: `conda install conda-build`
 * `networkx` >= 2.5
 * `python` >= 3.8
@@ -70,10 +70,12 @@ pip install -e .
 | Open-CE version         | Open-CE Builder version |
 |-------------------------|-------------------------|
 | All releases upto 1.5.2 | <=9.0.0                 |
-| >= 1.5.3                | 9.0.0                   |
-| 1.6.1                   | 10.0.2                  |
-| 1.7.5                   | >=11.0.4                |
+| 1.5.7 P10               | 9.0.1                   |
+| 1.5.7                   | 10.0.3                  |
+| 1.6.1                   | 10.0.3                  |
+| 1.7.8                   | >=11.0.4                |
 | 1.8.1                   | >=11.0.4                |
+| 1.9.0                   | >=12.0.0                |
 
 ### Building a Collection of Packages
 To build an entire integrated and functional conda channel using Open-CE, start by installing the needed tools in the [Requirements](#requirements) section above.
