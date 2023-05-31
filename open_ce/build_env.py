@@ -33,6 +33,7 @@ DESCRIPTION = 'Build conda environment as part of Open-CE'
 ARGUMENTS = ENV_BUILD_ARGS + \
             [Argument.SKIP_BUILD_PACKAGES,
              Argument.FIPS,
+             Argument.BUILD_FFMPEG,
              Argument.RUN_TESTS,
              Argument.CONTAINER_BUILD,
              Argument.TEST_LABELS,
