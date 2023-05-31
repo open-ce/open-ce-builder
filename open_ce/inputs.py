@@ -457,7 +457,7 @@ def _create_fips_packages(args, arg_strings):
     Build `openssl-env` silently
     '''
     if arg_strings is None:
-         arg_strings = sys.argv[1:]
+        arg_strings = sys.argv[1:]
     arg_strings = [arg for arg in arg_strings if arg != "--fips"]
     fips_arg_strings = copy.deepcopy(arg_strings)
     fips_args = copy.deepcopy(args)
@@ -506,4 +506,3 @@ def _check_and_build_ffmpeg(args, arg_strings):
             log.info("ffmpeg package is built")
         else:
             raise OpenCEError(Error.FFMPEG_PACKAGE_NOT_BUILT, cmd)
-
