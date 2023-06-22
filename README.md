@@ -22,6 +22,7 @@ The `open-ce` tool allows a user to build collections of conda recipes described
 
 ## GETTING STARTED
 
+
 ### Requirements
 
 * `conda` 
