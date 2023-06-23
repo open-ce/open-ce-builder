@@ -35,7 +35,7 @@ jobs:
           conda install -y pylint=2.12.2 \
                            conda-build \
                            networkx \
-                           matplotlib \
+                           matplotlib=3.5.* \
                            junit-xml \
                            pytest=6.2.4 \
                            pytest-cov=2.12.1 \
