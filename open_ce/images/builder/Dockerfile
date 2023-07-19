@@ -34,7 +34,9 @@ RUN export ARCH="$(uname -m)" && \
     mkdir -p $CONDA_HOME/conda-bld && \
     mkdir -p $HOME/.cache && \
     echo "export PYTHONPATH=${PYTHONPATH}:$HOME/open_ce" >> ${HOME}/.bashrc && \
-    chown -R ${BUILD_USER}:${CICD_GROUP} ${CONDA_HOME}
+    chown -R ${BUILD_USER}:${CICD_GROUP} ${CONDA_HOME} && \
+    git config --global http.version HTTP/1.1 && \
+    git config --global http.postBuffer 157286400
 
 USER ${BUILD_USER}
 RUN export PATH="${PATH}" && \
