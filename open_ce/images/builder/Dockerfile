@@ -42,5 +42,4 @@ RUN export PATH="${PATH}" && \
     mkdir -p $HOME/.cache && \
     echo ". $CONDA_HOME/etc/profile.d/conda.sh" >> ${HOME}/.bashrc && \
     echo "export PYTHONPATH=${PYTHONPATH}:$HOME/open_ce" >> ${HOME}/.bashrc && \
-    echo "export PATH=$HOME/open_ce/build_utils:$PATH" >> ${HOME}/.bashrc && \
     echo "conda activate base" >> ${HOME}/.bashrc
