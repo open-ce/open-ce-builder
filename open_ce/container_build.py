@@ -205,8 +205,9 @@ def build_in_container(image_name, args, arg_strings):
     _start_container(container_name, args.container_tool)
 
     # Execute build command
-    cmd = f"source $HOME/.bashrc; python {os.path.join(home_path, 'open_ce', 'open-ce')} " \
-          f"{args.command} {args.sub_command} {' '.join(arg_strings[0:])}"
+    cmd = f'echo "export PATH=$HOME/open_ce/build_utils:$PATH" >> $HOME/.bashrc;' \
+          f'source $HOME/.bashrc; python {os.path.join(home_path, "open_ce", "open-ce")} ' \
+          f'{args.command} {args.sub_command} {" ".join(arg_strings[0:])}'
     try:
         _execute_in_container(container_name, cmd, args.container_tool)
     finally:
