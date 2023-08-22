@@ -12,6 +12,9 @@ ARG GROUP_ID=1500
 ENV BUILD_USER=builder
 ARG BUILD_ID=1084
 
+ARG LIMIT_BUILD_RESOURCES=0
+ENV LIMIT_BUILD_RESOURCES=${LIMIT_BUILD_RESOURCES}
+
 RUN export ARCH="$(uname -m)" && \
     yum repolist && yum install -y rsync openssh-clients diffutils procps binutils git-lfs glibc-devel file psmisc openssl openssl-libs openssl-devel && \
     # Create CICD Group
@@ -34,6 +37,7 @@ RUN export ARCH="$(uname -m)" && \
     mkdir -p $CONDA_HOME/conda-bld && \
     mkdir -p $HOME/.cache && \
     echo "export PYTHONPATH=${PYTHONPATH}:$HOME/open_ce" >> ${HOME}/.bashrc && \
+    echo "export LIMIT_BUILD_RESOURCES=${LIMIT_BUILD_RESOURCES}" >> ${HOME}/.bashrc && \
     chown -R ${BUILD_USER}:${CICD_GROUP} ${CONDA_HOME} && \
     git config --global http.version HTTP/1.1 && \
     git config --global http.postBuffer 157286400
@@ -44,6 +48,7 @@ RUN export PATH="${PATH}" && \
     mkdir -p $HOME/.cache && \
     echo ". $CONDA_HOME/etc/profile.d/conda.sh" >> ${HOME}/.bashrc && \
     echo "export PYTHONPATH=${PYTHONPATH}:$HOME/open_ce" >> ${HOME}/.bashrc && \
+    echo "export LIMIT_BUILD_RESOURCES=${LIMIT_BUILD_RESOURCES}" >> ${HOME}/.bashrc && \
     echo "conda activate base" >> ${HOME}/.bashrc && \
     git config --global http.version HTTP/1.1 && \
     git config --global http.postBuffer 157286400
