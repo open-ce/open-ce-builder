@@ -1,4 +1,4 @@
-FROM docker.io/nvidia/cuda:11.2.2-devel-ubi8
+FROM docker.io/nvidia/cuda:12.2.0-devel-ubi8
 
 ENV CONDA_HOME=${CONDA_HOME:-/opt/conda}
 ENV PATH=$CONDA_HOME/bin:$PATH
@@ -54,7 +54,4 @@ RUN export PATH="${PATH}" && \
     echo ". $CONDA_HOME/etc/profile.d/conda.sh" >> ${HOME}/.bashrc && \
     echo "export PYTHONPATH=${PYTHONPATH}:$HOME/open_ce" >> ${HOME}/.bashrc && \
     echo "export LIMIT_BUILD_RESOURCES=${LIMIT_BUILD_RESOURCES}" >> ${HOME}/.bashrc && \
-    echo "conda activate base" >> ${HOME}/.bashrc && \
-    git config --global http.version HTTP/1.1 && \
-    git config --global http.postBuffer 157286400
-
+    echo "conda activate base" >> ${HOME}/.bashrc

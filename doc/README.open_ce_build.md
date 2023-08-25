@@ -62,6 +62,18 @@ One can change the cache directory location used by bazel in two ways as follows
 Also, in case the build fails, many a times, a stale process remains alive. And this could slow down subsequent builds.
 Make sure to kill this stale bazel process before retrying the builds.
 
+#### Running builds on low resource systems
+
+To execute successful builds on system that is low on resources (for e.g. 16 CPUs and/or 32-64GB RAM), environment variable `LIMIT_BUILD_RESOURCES` needs to be set to `1`. On normal resource rich systems `LIMIT_BUILD_RESOURCES` should be set to `0` before triggering the builds. 
+
+Manual variable setting can be avoided if you create the container in following way -
+
+```shell
+    podman build -t open-ce:build --build-arg LIMIT_BUILD_RESOURCES=1 .
+```
+
+If `--build-arg LIMIT_BUILD_RESOURCES=1` is not specified, the container will be created with `LIMIT_BUILD_RESOURCES=0` by default.
+
 ### Container build
 
 The `--container_build` option will build an image and run the build command
