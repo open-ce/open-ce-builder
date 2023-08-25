@@ -64,7 +64,8 @@ Make sure to kill this stale bazel process before retrying the builds.
 
 #### Running builds on low resource systems
 
-If the build system either container or baremetal has low number of CPUs or RAM, one can make the heavy builds like Tensorflow or OpenBLAS adjust the resources to be used during the build by setting an environment variable `LIMIT_BUILD_RESOURCES` to `1`. If the system is rich in resources, please set the variable to 0 before triggering the builds.
+To execute successful builds on system that is low on resources (for e.g. 16 CPUs and/or 32-64GB RAM), environment variable `LIMIT_BUILD_RESOURCES` needs to be set to `1`. On normal resource rich systems `LIMIT_BUILD_RESOURCES` should be set to `0` before triggering the builds. 
+
 Manual variable setting can be avoided if you create the container in following way -
 
 ```shell
