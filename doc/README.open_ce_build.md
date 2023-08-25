@@ -62,6 +62,17 @@ One can change the cache directory location used by bazel in two ways as follows
 Also, in case the build fails, many a times, a stale process remains alive. And this could slow down subsequent builds.
 Make sure to kill this stale bazel process before retrying the builds.
 
+#### Running builds on low resource systems
+
+If the build system either container or baremetal has low number of CPUs or RAM, one can make the heavy builds like Tensorflow or OpenBLAS adjust the resources to be used during the build by setting an environment variable `LIMIT_BUILD_RESOURCES` to `1`. If the system is rich in resources, please set the variable to 0 before triggering the builds.
+Manual variable setting can be avoided if you create the container in following way -
+
+```shell
+    podman build -t open-ce:build --build-arg LIMIT_BUILD_RESOURCES=1 .
+```
+
+If `--build-arg LIMIT_BUILD_RESOURCES=1` is not specified, the container will be created with `LIMIT_BUILD_RESOURCES=0` by default.
+
 ### Container build
 
 The `--container_build` option will build an image and run the build command
