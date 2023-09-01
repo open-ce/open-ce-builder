@@ -35,6 +35,7 @@ is a reference table below.
 | 1.7 | 11.2 \| 11.4 |
 | 1.8 | 11.2 \| 11.4 |
 | 1.9 | 11.2 \| 11.8 |
+| 1.10 | 11.8 \| 12.2 |
 
 It's important to install CUDA correctly. This procedure is dependent on the system
 type and CUDA version. It's advised to follow NVIDIA's [official installation documentation](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html)
