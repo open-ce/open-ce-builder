@@ -38,7 +38,7 @@ REQUIRED_PACKAGES = [
 # which is run in the PR check and it runs on x86. On ppc, matplotlib's pip package isn't working.
 
 if platform.machine() == 'x86_64':
-  REQUIRED_PACKAGES.append("matplotlib==3.5.0")
+  REQUIRED_PACKAGES.append("matplotlib==3.7.1")
 
 setup(
     name="open-ce-builder",
@@ -58,7 +58,7 @@ setup(
         ],
     },
 
-    python_requires=">= 3.8",
+    python_requires=">= 3.9",
     install_requires=REQUIRED_PACKAGES,
     tests_require=["pytest"],
     # PyPI package information.
@@ -68,9 +68,9 @@ setup(
         "Intended Audience :: Education",
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: Apache Software License",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11"
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Software Development :: Libraries",
     ],
