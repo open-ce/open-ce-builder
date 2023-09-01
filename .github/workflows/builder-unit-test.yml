@@ -13,7 +13,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.9", "3.10", "3.11"]
 
     steps:
       - uses: actions/checkout@v2
@@ -35,7 +35,7 @@ jobs:
           conda install -y pylint=2.12.2 \
                            conda-build \
                            networkx \
-                           matplotlib=3.5.* \
+                           matplotlib=3.7.* \
                            junit-xml \
                            pytest=6.2.4 \
                            pytest-cov=2.12.1 \

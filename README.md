@@ -33,7 +33,7 @@ The `open-ce` tool allows a user to build collections of conda recipes described
 * `junit-xml` >= 1.9
 * `docker` >= 1.13 or `podman` >= 2.0.5
   * docker or podman required only when building within a container (see below).
-* `matplotlib` >= 3.3
+* `matplotlib` == 3.7.1
   * Required only when exporting the dependency graph.
 
 ### CUDA Requirements
