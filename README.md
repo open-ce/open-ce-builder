@@ -109,7 +109,7 @@ The following commands will build version 1.1.4 of the open-ce environment file 
 open-ce build env --git_tag open-ce-v1.1.4 opence-env
 ```
 
-The following commands will use the `opence-env.yaml` Open-CE environment file from a specific Open-CE release to build all of the Open-CE packages for Python 3.9,3.10 and 3.11, including only CUDA builds. The commands should be run from within the same directory that contains `local_files`.
+The following commands will use the `opence-env.yaml` Open-CE environment file from a specific Open-CE release to build all of the Open-CE packages for Python 3.9, 3.10 and 3.11, including only CUDA builds. The commands should be run from within the same directory that contains `local_files`.
 
 ```bash
 # Build packages
