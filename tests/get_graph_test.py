@@ -37,7 +37,7 @@ def test_get_graph(caplog):
     output_folder = os.path.join(tmp_test.name, "output")
     opence._main(["get", get_graph.COMMAND, "xgboost-env.yaml",
                   "--output_folder", output_folder,
-                  "--python_versions", "3.8,3.9",
+                  "--python_versions", "3.10",
                   "--cuda_versions", "11.8",
                   "--build_types", "cuda,cpu",
                   "--repository_folder", os.path.join(tmp_test.name, "repos")])
