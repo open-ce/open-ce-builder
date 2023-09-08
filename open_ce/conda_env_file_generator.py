@@ -58,11 +58,16 @@ class CondaEnvFileGenerator():
 
         channels = _create_channels(self._channels, output_folder)
 
-        data = dict(
-            name = conda_env_name,
-            channels = channels,
-            dependencies = self._dependency_set,
-        )
+#        data = dict(
+#            name = conda_env_name,
+#            channels = channels,
+#            dependencies = self._dependency_set,
+#        ) 
+        data = {
+        'name': conda_env_name,
+        'channels': channels,
+        'dependencies': self._dependency_set,
+        }
         if not git_tag_for_env:
             # git_tag_for_env will be None in the case open-ce's main branch is used.
             # And, main branch means the latest code, hence open-ce version string should be `latest`.
