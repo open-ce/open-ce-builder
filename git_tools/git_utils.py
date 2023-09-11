@@ -120,7 +120,8 @@ def create_release(github_org, repo, token, tag_name, name, body, draft):# pylin
                             "name": name,
                             "body": body,
                             "draft": draft
-                            })
+                            },
+                           timeout=10)
     if result.status_code != 201:
         raise Exception("Error creating github release.")
     return yaml.safe_load(result.content)
@@ -134,7 +135,8 @@ def rename_branch(github_org, repo, token, old_name, new_name):# pylint: disable
                             headers={'Authorization' : f'token {token}'},
                             json={
                             "new_name": new_name
-                            })
+                            },
+                            timeout=10)
     if result.status_code != 201:
         raise Exception("Error renaming github release.")
     return yaml.safe_load(result.content)
@@ -151,7 +153,8 @@ def create_pr(github_org, repo, token, title, body, head, base):# pylint: disabl
                                "body": body,
                                "head": head,
                                "base": base
-                               })
+                               },
+                           timeout=10)
     if result.status_code != 201:
         raise Exception("Error creating PR.")
     return yaml.safe_load(result.content)
@@ -170,7 +173,8 @@ def request_pr_review(github_org, repo, token, pull_number, reviewers=None, team
                            json={
                                "reviewers": reviewers,
                                "team_reviewers": team_reviewers
-                               })
+                               },
+                           timeout=10)
     if result.status_code != 201:
         raise Exception(f"Error requesting PR review.:\n{result.content}")
     return yaml.safe_load(result.content)
