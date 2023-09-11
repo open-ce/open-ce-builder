@@ -62,7 +62,7 @@ class CondaEnvFileGenerator():
 #            name = conda_env_name,
 #            channels = channels,
 #            dependencies = self._dependency_set,
-#        ) 
+#        )
         data = {
         'name': conda_env_name,
         'channels': channels,
