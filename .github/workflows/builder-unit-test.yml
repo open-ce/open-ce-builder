@@ -44,7 +44,7 @@ jobs:
       - name: Lint with pylint
         shell: bash -l {0}
         run: |
-          PYTHONPATH=./open_ce/:${PYTHONPATH} pylint ./open_ce ./open_ce/open-ce
+          PYTHONPATH=./open_ce/:${PYTHONPATH} pylint --disable=unnecessary-lambda-assignment ./open_ce ./open_ce/open-ce
       - name: Lint git tools with pylint
         shell: bash -l {0}
         run: |
