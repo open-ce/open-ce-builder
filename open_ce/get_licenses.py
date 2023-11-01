@@ -163,7 +163,7 @@ class LicenseGenerator():
                         show_warning(Error.UNABLE_CLONE_SOURCE, info.name)
                 else:
                     try:
-                        res = requests.get(url)
+                        res = requests.get(url,timeout=300)
                         local_path = os.path.join(source_folder, os.path.basename(url))
                         with open(local_path, 'wb') as file_stream:
                             file_stream.write(res.content)
