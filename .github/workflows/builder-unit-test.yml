@@ -54,7 +54,7 @@ jobs:
         run: |
           PYTHONPATH=./open_ce/:./tests/:${PYTHONPATH} \
                   pylint \
-                    --disable=R,C,protected-access \
+                    --disable=R,C,protected-access,unnecessary-lambda-assignment,bad-continuation,unknown-option-value \
                     ./tests/*.py \
                     ./tests/**/*.py
       - name: Lint config files
