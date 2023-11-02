@@ -48,13 +48,13 @@ jobs:
       - name: Lint git tools with pylint
         shell: bash -l {0}
         run: |
-          PYTHONPATH=./open_ce/:${PYTHONPATH} pylint ./git_tools/*.py
+          PYTHONPATH=./open_ce/:${PYTHONPATH} pylint --disable=unnecessary-lambda-assignment ./git_tools/*.py
       - name: Lint all test files for warnings and errors only
         shell: bash -l {0}
         run: |
           PYTHONPATH=./open_ce/:./tests/:${PYTHONPATH} \
                   pylint \
-                    --disable=R,C,protected-access,unnecessary-lambda-assignment,bad-continuation,unknown-option-value \
+                    --disable=R,C,protected-access,unnecessary-lambda-assignment \
                     ./tests/*.py \
                     ./tests/**/*.py
       - name: Lint config files
