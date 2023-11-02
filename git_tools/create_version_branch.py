@@ -93,7 +93,7 @@ def _get_repo_version(repo_path, variants, variant_config_files=None):
                             return package_version, meta.meta['package']['name']
 
         os.chdir(saved_working_directory)
-    raise Exception("Error: Unable to determine current version of the feedstock")
+    raise ValueError("Error: Unable to determine current version of the feedstock")
 
 def _get_repo_name(repo_url):
     if not repo_url.endswith(".git"):
