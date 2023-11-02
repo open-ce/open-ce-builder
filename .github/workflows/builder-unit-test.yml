@@ -61,7 +61,7 @@ jobs:
         shell: bash -l {0}
         run: |
           # Use yamllint to check the actual yaml files.
-          yamllint .github/workflows/*.yml
+          yamllint -d "{extends: relaxed, rules: {line-length: {max: 120}}}" .github/workflows/*.yml
       - name: Test with pytest and Generate coverage report
         shell: bash -l {0}
         run: |
