@@ -135,7 +135,7 @@ def test_variant_specific_env_files():
                    "--cuda_versions", "11.4",
                    "--repository_folder", os.path.join(tmp_test.name, "repos"),
                    "--output_folder", os.path.join(tmp_test.name, "output"),
-                   "https://raw.githubusercontent.com/open-ce/open-ce/open-ce-r1.7/envs/tensorflow-env.yaml"]
+                   "https://raw.githubusercontent.com/open-ce/open-ce/open-ce-r1.10/envs/tensorflow-env.yaml"]
 
     opence._main(base_arg_strings + ["--build_types", "cuda,cpu"])
     file = open(glob.glob(os.path.join(tmp_test.name, "output", "*cpu*.yaml"))[0],mode='r',encoding='utf8')

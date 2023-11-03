@@ -97,7 +97,8 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals, too-many-stateme
         if env_file_tag != current_tag:
             message = f"Incorrect {env_config.Key.git_tag_for_env.name} '{env_file_tag}' found " \
                       f"in the following env_file:\n{env_file_content}"
-            raise Exception(message)
+#            raise Exception(message)
+            raise ValueError(message)
 
     if not git_utils.branch_exists(primary_repo_path, branch_name):
         print(f"--->Creating {branch_name} branch in {args.primary_repo}")

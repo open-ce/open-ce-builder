@@ -39,29 +39,30 @@ jobs:
                            junit-xml \
                            pytest=7.4.0 \
                            pytest-cov=4.0.0 \
-                           pytest-mock=3.10.0
+                           pytest-mock=3.10.0 \
+                           setuptools=65.6.3
           pip install yamllint==1.24.2
       - name: Lint with pylint
         shell: bash -l {0}
         run: |
-          PYTHONPATH=./open_ce/:${PYTHONPATH} pylint ./open_ce ./open_ce/open-ce
+          PYTHONPATH=./open_ce/:${PYTHONPATH} pylint --disable=unnecessary-lambda-assignment ./open_ce ./open_ce/open-ce
       - name: Lint git tools with pylint
         shell: bash -l {0}
         run: |
-          PYTHONPATH=./open_ce/:${PYTHONPATH} pylint ./git_tools/*.py
+          PYTHONPATH=./open_ce/:${PYTHONPATH} pylint --disable=unnecessary-lambda-assignment ./git_tools/*.py
       - name: Lint all test files for warnings and errors only
         shell: bash -l {0}
         run: |
           PYTHONPATH=./open_ce/:./tests/:${PYTHONPATH} \
                   pylint \
-                    --disable=R,C,protected-access \
+                    --disable=R,C,protected-access,unnecessary-lambda-assignment \
                     ./tests/*.py \
                     ./tests/**/*.py
       - name: Lint config files
         shell: bash -l {0}
         run: |
           # Use yamllint to check the actual yaml files.
-          yamllint .github/workflows/*.yml
+          yamllint -d "{extends: relaxed, rules: {line-length: {max: 120}}}" .github/workflows/*.yml
       - name: Test with pytest and Generate coverage report
         shell: bash -l {0}
         run: |

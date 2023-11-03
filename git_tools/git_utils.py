@@ -99,9 +99,9 @@ def get_all_repos(github_org, token):
     while True:
         options = f"sort=full_name&order=asc&page={page_index}&per_page=100"
         result = requests.get(f"{GITHUB_API}/orgs/{github_org}/repos?{options}",
-                              headers={'Authorization' : f'token {token}'})
+                              headers={'Authorization' : f'token {token}'},timeout=300)
         if result.status_code != 200:
-            raise Exception("Error loading repos.")
+            raise ValueError("Error loading repos.")
         yaml_result = yaml.safe_load(result.content)
         if not yaml_result:
             return retval
@@ -120,9 +120,9 @@ def create_release(github_org, repo, token, tag_name, name, body, draft):# pylin
                             "name": name,
                             "body": body,
                             "draft": draft
-                            })
+                            },timeout=300)
     if result.status_code != 201:
-        raise Exception("Error creating github release.")
+        raise ValueError("Error creating github release.")
     return yaml.safe_load(result.content)
 
 def rename_branch(github_org, repo, token, old_name, new_name):# pylint: disable=too-many-arguments
@@ -134,9 +134,9 @@ def rename_branch(github_org, repo, token, old_name, new_name):# pylint: disable
                             headers={'Authorization' : f'token {token}'},
                             json={
                             "new_name": new_name
-                            })
+                            },timeout=300)
     if result.status_code != 201:
-        raise Exception("Error renaming github release.")
+        raise ValueError("Error renaming github release.")
     return yaml.safe_load(result.content)
 
 def create_pr(github_org, repo, token, title, body, head, base):# pylint: disable=too-many-arguments
@@ -151,9 +151,9 @@ def create_pr(github_org, repo, token, title, body, head, base):# pylint: disabl
                                "body": body,
                                "head": head,
                                "base": base
-                               })
+                               },timeout=300)
     if result.status_code != 201:
-        raise Exception("Error creating PR.")
+        raise ValueError("Error creating PR.")
     return yaml.safe_load(result.content)
 
 def request_pr_review(github_org, repo, token, pull_number, reviewers=None, team_reviewers=None):# pylint: disable=too-many-arguments
@@ -170,9 +170,9 @@ def request_pr_review(github_org, repo, token, pull_number, reviewers=None, team
                            json={
                                "reviewers": reviewers,
                                "team_reviewers": team_reviewers
-                               })
+                               },timeout=300)
     if result.status_code != 201:
-        raise Exception(f"Error requesting PR review.:\n{result.content}")
+        raise ValueError(f"Error requesting PR review.:\n{result.content}")
     return yaml.safe_load(result.content)
 
 def clone_repo(git_url, repo_dir, git_tag=None):
@@ -196,7 +196,7 @@ def _execute_git_command(repo_path, git_cmd):
     result,std_out,_ = utils.run_command_capture(git_cmd, stderr=subprocess.STDOUT)
     os.chdir(saved_working_directory)
     if not result:
-        raise Exception(f"Git command failed: {git_cmd}\n{std_out}")
+        raise ValueError(f"Git command failed: {git_cmd}\n{std_out}")
     return std_out
 
 def create_tag(repo_path, tag_name, tag_msg):

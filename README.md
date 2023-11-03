@@ -73,10 +73,10 @@ pip install -e .
 | 1.5.7 P10               | 9.0.1                   |
 | 1.5.7                   | 10.0.3                  |
 | 1.6.1                   | 10.0.3                  |
-| 1.7.8                   | >=11.0.4                |
-| 1.8.1                   | >=11.0.4                |
-| 1.9.1                   | >=12.0.1                |
-| 1.10.0                  | >12.0.1                 |
+| 1.7.9                   | >=12.0.1                |
+| 1.8.1                   | >=12.0.1                |
+| 1.9.2                   | >=12.0.1                |
+| 1.10.0                  | >13.0.0                 |
 
 ### Building a Collection of Packages
 To build an entire integrated and functional conda channel using Open-CE, start by installing the needed tools in the [Requirements](#requirements) section above.
@@ -109,11 +109,11 @@ The following commands will build version 1.1.4 of the open-ce environment file 
 open-ce build env --git_tag open-ce-v1.1.4 opence-env
 ```
 
-The following commands will use the `opence-env.yaml` Open-CE environment file from a specific Open-CE release to build all of the Open-CE packages for Python 3.8 , 3.9 and 3.10, including only CUDA builds. The commands should be run from within the same directory that contains `local_files`.
+The following commands will use the `opence-env.yaml` Open-CE environment file from a specific Open-CE release to build all of the Open-CE packages for Python 3.9, 3.10 and 3.11, including only CUDA builds. The commands should be run from within the same directory that contains `local_files`.
 
 ```bash
 # Build packages
-open-ce build env --python_versions 3.8,3.9,3.10 --build_types cuda opence-env
+open-ce build env --python_versions 3.9,3.10,3.11 --build_types cuda opence-env
 ```
 
 Note that having _conda-forge_ in your channel list may sometime cause conflicts or unexpected errors due to dependencies' versions mismatch. So, it is recommended to avoid mixing the channels during the build as well as at runtime.
