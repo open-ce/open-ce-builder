@@ -5,7 +5,6 @@ ENV PATH=$CONDA_HOME/bin:$PATH
 
 ENV OPEN_CE_CONDA_BUILD=3.22.0
 ENV OPEN_CE_CONDA=4.14
-ENV OPENSSL_VER=3.*
 
 ENV CICD_GROUP=cicd
 ARG GROUP_ID=1500
@@ -13,7 +12,7 @@ ENV BUILD_USER=builder
 ARG BUILD_ID=1084
 
 RUN export ARCH="$(uname -m)" && \
-    yum repolist && yum install -y rsync openssh-clients diffutils procps binutils git-lfs glibc-devel file psmisc openssl openssl-libs openssl-devel && \
+    yum repolist && yum install -y rsync openssh-clients diffutils procps binutils git-lfs glibc-devel file psmisc libxcrypt-compat openssl-devel && \
     # Create CICD Group
     groupadd --non-unique --gid ${GROUP_ID} ${CICD_GROUP} && \
     # Adduser Builder
@@ -29,7 +28,6 @@ RUN export ARCH="$(uname -m)" && \
     $CONDA_HOME/bin/conda config --system --set always_yes true && \
     $CONDA_HOME/bin/conda config --system --set auto_update_conda false && \
     $CONDA_HOME/bin/conda config --system --set notify_outdated_conda false && \
-    $CONDA_HOME/bin/conda config --system --add create_default_packages openssl=${OPENSSL_VER} && \
     $CONDA_HOME/bin/conda --version && \
     mkdir -p $CONDA_HOME/conda-bld && \
     mkdir -p $HOME/.cache && \
