@@ -452,22 +452,22 @@ check the Dockerfile for details.
 * System: RHEL 8.5 or above
 * OS: Linux
 * Power Architecture: Power9/Power10
-* GCC Compiler: GCC11
+* GCC Compiler: GCC13
 
 One can build Power10 enabled packages with above system requirements. Note that Power10 is not required on your build system. The libraries can be built on Power9 as well.
-To install GCC 11, following command can be used -
+To install GCC 13, following command can be used -
 ```shell
-    yum install -y gcc-toolset-11
+    yum install -y gcc-toolset-13
 ```
 
-Set GCC_11_HOME environment variables to proceed with the builds on baremetal, if GCC11 is installed at a non-default location.
+Set GCC_HOME environment variables to proceed with the builds on baremetal, if GCC13 is installed at a non-default location.
 
 For example:
 ```shell
-    export GCC_11_HOME=/opt/rh/gcc-toolset-11/root/usr
+    export GCC_HOME=/opt/rh/gcc-toolset-13/root/usr
 ```
 
-GCC 11 setup is automated if the builds are done in a podman container using `--container_build` option. Please see [`Dockerfile`](https://github.com/open-ce/open-ce-builder/blob/main/open_ce/images/builder/Dockerfile-p10) used for containerized build of these packages.
+GCC 13 setup is automated if the builds are done in a podman container using `--container_build` option. Please see [`Dockerfile`](https://github.com/open-ce/open-ce-builder/blob/main/open_ce/images/builder/Dockerfile-p10) used for containerized build of these packages.
 
 #### Build packages
 Power10 MMA Optimization is applicable for cpu only builds. To build Power10 packages, use one of the following options:
