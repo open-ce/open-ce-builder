@@ -90,9 +90,9 @@ class Error(Enum):
     UNABLE_DOWNLOAD_SOURCE = (38, "Unable to download source for '{}'.")
     UNABLE_CLONE_SOURCE = (39, "Unable to clone source for '{}'.")
     GCC_COMPILER_NOT_FOUND = (40, "Please check if GCC is installed. If not, install" +
-                                       " gcc-toolset-13. Also, set environment variables" +
+                                       " gcc-toolset-12. Also, set environment variables" +
                                        " GCC_HOME to point to the installed location." +
-                                       " For e.g. GCC_HOME=\"/opt/rh/gcc-toolset-13/root/usr\"")
+                                       " For e.g. GCC_HOME=\"/opt/rh/gcc-toolset-12/root/usr\"")
 
     GIT_TAG_MISSING = (41, "git_tag attribute is missing for '{}'")
     FIPS_PACKAGES_NOT_BUILT = (42, "FIPS Compliant OpenSSL env failed to build")
