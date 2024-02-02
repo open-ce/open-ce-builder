@@ -89,10 +89,10 @@ class Error(Enum):
     TEMP_BUILD_IMAGE_FILES = (37, "Error removing temporary files created during build image.")
     UNABLE_DOWNLOAD_SOURCE = (38, "Unable to download source for '{}'.")
     UNABLE_CLONE_SOURCE = (39, "Unable to clone source for '{}'.")
-    GCC11_COMPILER_NOT_FOUND = (40, "Please check if GCC11 is installed. If not, install" +
-                                       " gcc-toolset-11. Also, set environment variables" +
-                                       " GCC_11_HOME to point to the installed location." +
-                                       " For e.g. GCC_11_HOME=\"/opt/rh/gcc-toolset-11/root/usr\"")
+    GCC_COMPILER_NOT_FOUND = (40, "Please check if GCC is installed. If not, install" +
+                                       " gcc-toolset-12. Also, set environment variables" +
+                                       " GCC_HOME to point to the installed location." +
+                                       " For e.g. GCC_HOME=\"/opt/rh/gcc-toolset-12/root/usr\"")
 
     GIT_TAG_MISSING = (41, "git_tag attribute is missing for '{}'")
     FIPS_PACKAGES_NOT_BUILT = (42, "FIPS Compliant OpenSSL env failed to build")

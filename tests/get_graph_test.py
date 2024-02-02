@@ -35,7 +35,7 @@ def test_get_graph(caplog):
     '''
     tmp_test = tempfile.TemporaryDirectory()
     output_folder = os.path.join(tmp_test.name, "output")
-    opence._main(["get", get_graph.COMMAND, "xgboost-env.yaml",
+    opence._main(["get", get_graph.COMMAND, "https://raw.githubusercontent.com/open-ce/open-ce/open-ce-r1.9/envs/xgboost-env.yaml",
                   "--output_folder", output_folder,
                   "--python_versions", "3.8,3.9",
                   "--cuda_versions", "11.8",
