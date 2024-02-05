@@ -33,7 +33,7 @@ jobs:
         shell: bash -l {0}
         # yamllint disable rule:line-length
         run: |
-          open-ce build env xgboost-env \
+          open-ce build env https://raw.githubusercontent.com/open-ce/open-ce/open-ce-r1.9/envs/xgboost-env.yaml \
                             --container_build \
                             --python_versions ${{ matrix.python-version }} \
                             --build_types cpu
