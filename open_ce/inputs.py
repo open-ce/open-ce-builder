@@ -388,15 +388,15 @@ def _create_env_config_paths(args):
 
 def _check_cuda_versions(args):
     '''
-    This will check if build_types is cuda and cuda_versions is 11.8
-    then set default python_versions to 3.10
+    This will check if build_types is cuda and cuda_versions is 11.2
+    then set default python_versions to 3.9
     '''
     if "build_types" in vars(args).keys() and args.build_types:
         if "cuda_versions" in vars(args).keys() and args.cuda_versions:
-            if args.cuda_versions == "11.8":
-                if args.python_versions == "3.9":
-                    opence_globals.DEFAULT_PYTHON_VERS = "3.10"
-                    args.python_versions = "3.10"
+            if args.cuda_versions == "11.2":
+                if args.python_versions == "3.10":
+                    opence_globals.DEFAULT_PYTHON_VERS = "3.9"
+                    args.python_versions = "3.9"
 
 def _check_ppc_arch(args):
     '''
