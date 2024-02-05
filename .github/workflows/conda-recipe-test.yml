@@ -2,7 +2,9 @@ name: Open-CE PR Tests for Conda recipe
 
 on:
   pull_request:
-    branches: [main]
+    branches:
+      - 'main'      # matches the main branch
+      - 'r*'        # matches every release branch
 
 jobs:
   required_tests:
