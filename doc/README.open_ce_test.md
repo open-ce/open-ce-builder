@@ -116,7 +116,7 @@ optional arguments:
                         current working directory. (default: )
   --python_versions PYTHON_VERSIONS
                         Comma delimited list of python versions to build for ,
-                        such as "3.8" or "3.9" or "3.10". (default: 3.10 when --build_types=cuda 11.8 or cpu) (default: 3.9 when --build_types=cuda 11.2) 
+                        such as "3.8" or "3.9" or "3.10". (default: 3.10 when --build_types=cuda 11.8 or cpu) 
   --build_types BUILD_TYPES
                         Comma delimited list of build types, such as "cpu" or
                         "cuda". (default: cpu,cuda)
@@ -124,7 +124,7 @@ optional arguments:
                         Comma delimited list of mpi types, such as "openmpi"
                         or "system". (default: openmpi)
   --cuda_versions CUDA_VERSIONS
-                        CUDA version to build for , such as "11.2" or "11.8".
+                        CUDA version to build for , such as "11.8".
                         (default: 11.8)
   --container_build, --docker_build
                         Perform a build within a container. NOTE: When

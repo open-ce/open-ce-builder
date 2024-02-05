@@ -66,7 +66,7 @@ Make sure to kill this stale bazel process before retrying the builds.
 
 The `--container_build` option will build an image and run the build command
 inside of a container based on the new image. The `--container_tool` option can
-be passed to specify container tool to be used. 
+be passed to specify container tool to be used.
 
 Along with `--container_build` option, `--container_build_args` can be passed
 to set container build options like environment variables or other settings
@@ -153,7 +153,7 @@ optional arguments:
                         current working directory. (default: )
   --python_versions PYTHON_VERSIONS
                         Comma delimited list of python versions to build for ,
-                        such as "3.8" or "3.9" or "3.10". (default: 3.10 when --build_types=cuda 11.8 or cpu) (default: 3.9 when --build_types=cuda 11.2) 
+                        such as "3.8" or "3.9" or "3.10". (default: 3.10 when --build_types=cuda 11.8 or cpu)
   --build_types BUILD_TYPES
                         Comma delimited list of build types, such as "cpu" or
                         "cuda". (default: cpu,cuda)
@@ -161,7 +161,7 @@ optional arguments:
                         Comma delimited list of mpi types, such as "openmpi"
                         or "system". (default: openmpi)
   --cuda_versions CUDA_VERSIONS
-                        CUDA version to build for , such as "11.2" or "11.8".
+                        CUDA version to build for , such as "11.8".
                         (default: 11.8)
   --skip_build_packages
                         Do not perform builds of packages. (default: False)
@@ -247,8 +247,8 @@ However, in some cases you may want to just build a selected individual package
 from its own feedstock repo.  In that case, you can run `open-ce build feedstock`
 directly.
 
-Note that a local clone of the desired feedstock repository will need to be present.  
-By contrast, if you were to use `open-ce build env`, the script will clone any necessary 
+Note that a local clone of the desired feedstock repository will need to be present.
+By contrast, if you were to use `open-ce build env`, the script will clone any necessary
 dependency repositories for you.
 
 In addition, note that the `open-ce build feedstock` command should be run from
@@ -271,7 +271,7 @@ usage: open-ce build feedstock [-h] [--conda_build_configs CONDA_BUILD_CONFIG]
                                [--local_src_dir LOCAL_SRC_DIR]
                                [--conda_pkg_format CONDA_PKG_FORMAT]
                                [--debug DEBUG]
-                               [--debug_output_id DEBUG_OUTPUT_ID] 
+                               [--debug_output_id DEBUG_OUTPUT_ID]
                                [--ppc_arch PPC_ARCH]
 optional arguments:
   -h, --help            show this help message and exit
@@ -295,7 +295,7 @@ optional arguments:
                         or "system". (default: openmpi)
   --cuda_versions CUDA_VERSIONS
                         CUDA version to build for ,
-                        such as "11.2" or "11.8". (default: 11.8)
+                        such as "11.8". (default: 11.8)
   --recipe-config-file RECIPE_CONFIG_FILE
                         Path to the recipe configuration YAML file. The configuration
                         file lists paths to recipes to be built within a feedstock.
@@ -368,7 +368,7 @@ For example, `opencv` recipe has multiple outputs. If we want to debug just `lib
 ```
 
 ###  Complications with feedstocks that have multiple recipes:
-Some feedstock repositories in the Open-CE project have more than one recipe included, often containing meta-packages or variant controls as defined in the `config/build-config.yaml` file. When using the `--debug` option on a feedstock with multiple recipes, a debug environment will be created for each included recipe. 
+Some feedstock repositories in the Open-CE project have more than one recipe included, often containing meta-packages or variant controls as defined in the `config/build-config.yaml` file. When using the `--debug` option on a feedstock with multiple recipes, a debug environment will be created for each included recipe.
 One further complication occurs when a feedstock includes multiple recipes, and one of them contains multiple outputs. In this case, since the `--debug_output_id` option is required and it would subsequently be passed to each included recipe in the feedstock, it's best to use the `--recipes` option to only choose the recipe desired to debug.
 
 ## `open-ce build image` sub command
@@ -378,7 +378,7 @@ packages (generated from `open-ce build env`) installed in it. This script takes
 as an input - local conda channel and conda environment file which are the output of `open-ce build env`
 script.
 
-The `--container_tool` option can be passed to specify container tool to be used. Additionally 
+The `--container_tool` option can be passed to specify container tool to be used. Additionally
 `--container_build_args` can be passed to set container build options like environment variables
  or other settings like cpusets.
 
