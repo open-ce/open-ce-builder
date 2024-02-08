@@ -16,7 +16,7 @@ ARG BUILD_ID=1084
 RUN rpm -e --nodeps --verbose gcc gcc-c++
 
 RUN export ARCH="$(uname -m)" && \
-    yum repolist && yum install -y rsync openssh-clients diffutils procps git-lfs file psmisc openssl openssl-libs openssl-devel && \
+    yum repolist && yum install -y rsync openssh-clients diffutils procps git-lfs file psmisc & \
     # Create CICD Group
     groupadd --non-unique --gid ${GROUP_ID} ${CICD_GROUP} && \
     # Adduser Builder
