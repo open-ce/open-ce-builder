@@ -1,11 +1,10 @@
-FROM registry.access.redhat.com/ubi8/ubi:8.5-214
+FROM registry.access.redhat.com/ubi9/ubi
 
 ENV CONDA_HOME=${CONDA_HOME:-/opt/conda}
 ENV PATH=$CONDA_HOME/bin:$PATH
 
 ENV OPEN_CE_CONDA_BUILD=3.22.0
 ENV OPEN_CE_CONDA=4.14
-ENV OPENSSL_VER=3.*
 
 ENV CICD_GROUP=cicd
 ARG GROUP_ID=1500
@@ -16,7 +15,9 @@ ARG LIMIT_BUILD_RESOURCES=0
 ENV LIMIT_BUILD_RESOURCES=${LIMIT_BUILD_RESOURCES}
 
 RUN export ARCH="$(uname -m)" && \
-    yum repolist && yum install -y rsync openssh-clients diffutils procps git-lfs gcc-toolset-11 glibc-devel file libtirpc-devel psmisc libX11-devel && \
+    yum install -y yum-utils rsync openssh-clients diffutils procps git-lfs gcc-toolset-12 glibc-devel file libxcrypt-compat psmisc libX11-devel openssl openssl-libs openssl-devel && \
+    yum-config-manager --set-enabled codeready-builder-for-rhel-9-ppc64le-rpms && \
+    yum install -y libtirpc-devel && \
     # Create CICD Group
     groupadd --non-unique --gid ${GROUP_ID} ${CICD_GROUP} && \
     # Adduser Builder
@@ -38,22 +39,22 @@ RUN export ARCH="$(uname -m)" && \
     mkdir -p $HOME/.cache && \
     echo "export PYTHONPATH=${PYTHONPATH}:$HOME/open_ce" >> ${HOME}/.bashrc && \
     echo "export LIMIT_BUILD_RESOURCES=${LIMIT_BUILD_RESOURCES}" >> ${HOME}/.bashrc && \
-    export PATH="/opt/rh/gcc-toolset-11/root/usr/bin:${PATH}" && \
-    export GCC_11_HOME="/opt/rh/gcc-toolset-11/root/usr" && \
+    export PATH="/opt/rh/gcc-toolset-12/root/usr/bin:${PATH}" && \
+    export GCC_HOME="/opt/rh/gcc-toolset-12/root/usr" && \
     echo "PATH="${PATH}"" >> ${HOME}/.profile && \
     echo "PATH="${PATH}"" >> ${HOME}/.bashrc && \
-    echo "GCC_11_HOME="${GCC_11_HOME}"" >> ${HOME}/.bashrc && \
+    echo "GCC_HOME="${GCC_HOME}"" >> ${HOME}/.bashrc && \
     chown -R ${BUILD_USER}:${CICD_GROUP} ${CONDA_HOME} && \
     git config --global http.version HTTP/1.1 && \
     git config --global http.postBuffer 157286400
 
 
 USER ${BUILD_USER}
-RUN export PATH="/opt/rh/gcc-toolset-11/root/usr/bin:${PATH}" && \
-    export GCC_11_HOME="/opt/rh/gcc-toolset-11/root/usr" && \
+RUN export PATH="/opt/rh/gcc-toolset-12/root/usr/bin:${PATH}" && \
+    export GCC_HOME="/opt/rh/gcc-toolset-12/root/usr" && \
     echo "PATH="${PATH}"" >> ${HOME}/.profile && \
     echo "PATH="${PATH}"" >> ${HOME}/.bashrc && \
-    echo "GCC_11_HOME="${GCC_11_HOME}"" >> ${HOME}/.bashrc && \
+    echo "GCC_HOME="${GCC_HOME}"" >> ${HOME}/.bashrc && \
     mkdir -p $HOME/.cache && \
     echo ". $CONDA_HOME/etc/profile.d/conda.sh" >> ${HOME}/.bashrc && \
     echo "export PYTHONPATH=${PYTHONPATH}:$HOME/open_ce" >> ${HOME}/.bashrc && \
