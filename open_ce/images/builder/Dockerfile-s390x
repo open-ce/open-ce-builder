@@ -12,6 +12,9 @@ ARG GROUP_ID=1500
 ENV BUILD_USER=builder
 ARG BUILD_ID=1084
 
+ARG LIMIT_BUILD_RESOURCES=0
+ENV LIMIT_BUILD_RESOURCES=${LIMIT_BUILD_RESOURCES}
+
 RUN export ARCH="$(uname -m)" && \
     yum repolist && yum install -y rsync openssh-clients diffutils procps binutils git-lfs glibc-devel file psmisc openssl openssl-libs openssl-devel && \
     # Create CICD Group
