@@ -46,7 +46,7 @@ def _make_parser():
         '--github-org',
         type=str,
         default="open-ce",
-        help="""Org to cut an Open-CE Python release in.""")
+        help="""Org to cut an Open-CE Common release in.""")
 
     parser.add_argument(
         '--primary-repo',
@@ -72,7 +72,7 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals, too-many-stateme
 
     primary_repo_path = "./"
 
-    open_ce_py_env_file = os.path.abspath(os.path.join(primary_repo_path, "envs", "python-env.yaml"))
+    open_ce_py_env_file = os.path.abspath(os.path.join(primary_repo_path, "envs", "opence-common-env.yaml"))
     if not git_utils.has_git_tag_changed(primary_repo_path, args.branch, open_ce_py_env_file):
         print("--->The python-env git_tag has not changed.")
         print("--->No release is needed.")
@@ -188,8 +188,6 @@ def _create_release_notes(repos, version, release_number, bug_fix, current_tag, 
         except Exception as exc:# pylint: disable=broad-except
             print("Error trying to find bug fix changes: ", exc)
         retval += "\n"
-    retval += "## Python Versions\n"
-    retval += "\n"
     retval += "A release of Open-CE Common provides common packages for OpenCE."
     retval += "The following packages are part of this release:\n"
     retval += "\n"
