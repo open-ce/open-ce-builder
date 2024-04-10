@@ -72,14 +72,14 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals, too-many-stateme
 
     primary_repo_path = "./"
 
-    open_ce_py_env_file = os.path.abspath(os.path.join(primary_repo_path, "envs", "opence-common-env.yaml"))
-    if not git_utils.has_git_tag_changed(primary_repo_path, args.branch, open_ce_py_env_file):
-        print("--->The python-env git_tag has not changed.")
+    open_ce_cmn_env_file = os.path.abspath(os.path.join(primary_repo_path, "envs", "opence-common-env.yaml"))
+    if not git_utils.has_git_tag_changed(primary_repo_path, args.branch, open_ce_cmn_env_file):
+        print("--->The opence-common-env git_tag has not changed.")
         print("--->No release is needed.")
         return
-    print("--->The python-env git_tag has changed!")
-    current_tag = git_utils.get_git_tag_from_env_file(open_ce_py_env_file)
-    previous_tag = git_utils.get_previous_git_tag_from_env_file(primary_repo_path, args.branch, open_ce_py_env_file)
+    print("--->The opence-common-env git_tag has changed!")
+    current_tag = git_utils.get_git_tag_from_env_file(open_ce_cmn_env_file)
+    previous_tag = git_utils.get_previous_git_tag_from_env_file(primary_repo_path, args.branch, open_ce_cmn_env_file)
     version = _git_tag_to_version(current_tag)
     release_number = ".".join(version.split(".")[:-1])
     bug_fix = version.split(".")[-1]
@@ -90,7 +90,7 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals, too-many-stateme
     variants = utils.ALL_VARIANTS()
     env_file_contents = []
     for variant in variants:
-        env_file_contents += env_config.load_env_config_files([open_ce_py_env_file],
+        env_file_contents += env_config.load_env_config_files([open_ce_cmn_env_file],
                                                           [variant], ignore_urls=True)
     for env_file_content in env_file_contents:
         env_file_tag = env_file_content.get(env_config.Key.git_tag_for_env.name, None)
