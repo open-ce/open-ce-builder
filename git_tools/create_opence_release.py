@@ -87,11 +87,10 @@ def _main(arg_strings=None): # pylint: disable=too-many-locals, too-many-stateme
     version_msg = f"Open-CE Version {version}"
     release_name = f"v{version}"
 
-    openssl_env = os.path.abspath(os.path.join(primary_repo_path, "envs", "openssl-env.yaml"))
     variants = utils.ALL_VARIANTS()
     env_file_contents = []
     for variant in variants:
-        env_file_contents += env_config.load_env_config_files([open_ce_env_file, openssl_env],
+        env_file_contents += env_config.load_env_config_files([open_ce_env_file],
                                                           [variant], ignore_urls=True)
     for env_file_content in env_file_contents:
         env_file_tag = env_file_content.get(env_config.Key.git_tag_for_env.name, None)
