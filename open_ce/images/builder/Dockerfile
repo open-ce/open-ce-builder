@@ -5,6 +5,7 @@ ENV PATH=$CONDA_HOME/bin:$PATH
 
 ENV OPEN_CE_CONDA_BUILD=3.22.0
 ENV OPEN_CE_CONDA=4.14
+ENV OPENSSL_VER=3.*
 
 ENV CICD_GROUP=cicd
 ARG GROUP_ID=1500
@@ -32,6 +33,7 @@ RUN export ARCH="$(uname -m)" && \
     $CONDA_HOME/bin/conda config --system --set auto_update_conda false && \
     $CONDA_HOME/bin/conda config --system --set notify_outdated_conda false && \
     $CONDA_HOME/bin/conda --version && \
+    $CONDA_HOME/bin/conda install openssl=3 && \
     mkdir -p $CONDA_HOME/conda-bld && \
     mkdir -p $HOME/.cache && \
     echo "export PYTHONPATH=${PYTHONPATH}:$HOME/open_ce" >> ${HOME}/.bashrc && \
