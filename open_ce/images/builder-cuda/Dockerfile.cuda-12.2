@@ -37,7 +37,7 @@ RUN export ARCH="$(uname -m)" && \
     $CONDA_HOME/bin/conda config --system --set auto_update_conda false && \
     $CONDA_HOME/bin/conda config --system --set notify_outdated_conda false && \
     $CONDA_HOME/bin/conda --version && \
-    $CONDA_HOME/bin/conda install openssl=3 && \
+    $CONDA_HOME/bin/conda install openssl=${OPENSSL_VER} && \
     mkdir -p $CONDA_HOME/conda-bld && \
     mkdir -p $HOME/.cache && \
     echo "export PYTHONPATH=${PYTHONPATH}:$HOME/open_ce" >> ${HOME}/.bashrc && \
