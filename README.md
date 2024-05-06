@@ -5,8 +5,8 @@
 </p>
 
 [![Installation Options](https://img.shields.io/badge/Install%20with-conda%20%7C%20pip-brightgreen)](#installing-the-open-ce-build-tools)
-[![Python Support](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C3.10-blue.svg)](#requirements)
-[![Cuda Support](https://img.shields.io/badge/cuda-11.2%20%7C%2011.8%20-blue)](doc/README.cuda_support.md)
+[![Python Support](https://img.shields.io/badge/python-3.10%20%7C%203.11-blue.svg)](#requirements)
+[![Cuda Support](https://img.shields.io/badge/cuda-11.8%20%7C%2012.2%20-blue)](doc/README.cuda_support.md)
 
 [![Builder Unit Tests](https://github.com/open-ce/open-ce/workflows/Open-CE%20Builder%20Unit%20Tests/badge.svg)](https://github.com/open-ce/open-ce-builder/actions?query=workflow%3A%22Open-CE+Builder+Unit+Tests%22+branch%3Amain)
 [![Builder Unit Test Coverage](https://codecov.io/gh/open-ce/open-ce-builder/branch/main/graph/badge.svg)](https://codecov.io/gh/open-ce/open-ce-builder)
@@ -77,6 +77,7 @@ pip install -e .
 | 1.8.1                   | 12.0.2                  |
 | 1.9.4                   | 12.0.3                  |
 | 1.10.0                  | 13.0.0                  |
+| 1.11.0                  | 13.0.0                  |
 
 ### Building a Collection of Packages
 To build an entire integrated and functional conda channel using Open-CE, start by installing the needed tools in the [Requirements](#requirements) section above.
@@ -102,18 +103,18 @@ open-ce build env opence-env
 
 A specific version of an environment file from the open-ce repo can be built using the `--git_tag` flag.
 
-The following commands will build version 1.1.4 of the open-ce environment file provided within the open-ce [repo](https://github.com/open-ce/open-ce):
+The following commands will build version 1.11.0 of the open-ce environment file provided within the open-ce [repo](https://github.com/open-ce/open-ce):
 
 ```bash
 # Build packages
-open-ce build env --git_tag open-ce-v1.1.4 opence-env
+open-ce build env --git_tag open-ce-v1.11.0 opence-env
 ```
 
-The following commands will use the `opence-env.yaml` Open-CE environment file from a specific Open-CE release to build all of the Open-CE packages for Python 3.9, 3.10 and 3.11, including only CUDA builds. The commands should be run from within the same directory that contains `local_files`.
+The following commands will use the `opence-env.yaml` Open-CE environment file from a specific Open-CE release to build all of the Open-CE packages for Python 3.10 and 3.11, including only CUDA builds. The commands should be run from within the same directory that contains `local_files`.
 
 ```bash
 # Build packages
-open-ce build env --python_versions 3.9,3.10,3.11 --build_types cuda opence-env
+open-ce build env --python_versions 3.10,3.11 --build_types cuda opence-env
 ```
 
 Note that having _conda-forge_ in your channel list may sometime cause conflicts or unexpected errors due to dependencies' versions mismatch. So, it is recommended to avoid mixing the channels during the build as well as at runtime.
