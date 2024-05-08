@@ -69,15 +69,11 @@ pip install -e .
 #### Open-CE compatibility with Open-CE Builder
 | Open-CE version         | Open-CE Builder version |
 |-------------------------|-------------------------|
-| All releases upto 1.5.2 | <=9.0.0                 |
-| 1.5.7 P10               | 9.0.1                   |
-| 1.5.7                   | 10.0.3                  |
-| 1.6.1                   | 10.0.3                  |
 | 1.7.10                  | 12.0.2                  |
 | 1.8.1                   | 12.0.2                  |
 | 1.9.4                   | 12.0.3                  |
-| 1.10.0                  | 13.0.0                  |
-| 1.11.0                  | 13.0.0                  |
+| 1.10.0                  | 12.0.3                  |
+| 1.11.0                  | 13.0.1                  |
 
 ### Building a Collection of Packages
 To build an entire integrated and functional conda channel using Open-CE, start by installing the needed tools in the [Requirements](#requirements) section above.
@@ -130,24 +126,11 @@ For details, please see [`doc/README.open_ce_build.md`](doc/README.open_ce_build
 
 These packages will work on Power9 or Power10, but not on Power8.
 
-### FIPS Compliant Packages
-#### Building FIPS Compliant Packages
-
-One can build Open-CE packages that are FIPS compliant by providing `--fips` option to `open-ce build env` command. When this option is provided, Open-CE Builder builds [`envs/openssl-env.yaml`](https://github.com/open-ce/open-ce/blob/main/envs/openssl-env.yaml) internally and then builds the provided Open-CE environment file for which the build is requested. FIPS compliant `openssl` and `cryptography` conda packages are built by `openssl-env.yaml` and then other Open-CE packages are built using these two packages.
-
-#### Installing FIPS Compliant Packages
-
-The system where FIPS compliant packages are to be installed must have Redhat's `openssl` and `openssl-libs` packages installed. These can be installed using `yum install openssl openssl-libs openssl-devel`.
-
-Once FIPS complaint Open-CE packages are installed in a conda environment, ensure that the conda environment contains  `openssl` and `cryptography` also from the same conda channel.
-
 ### FFMPEG with reduced codecs and openssl
 
 One can build Open-CE packages with ffmpeg in two ways:
 
   - Provide `--build-ffmpeg` option to the `open-ce build env` command. When this option is provided, Open-CE Builder builds [`envs/ffmpeg-env.yaml`](https://github.com/open-ce/open-ce/blob/main/envs/ffmpeg-env.yaml) internally and then builds the provided Open-CE environment file for which the build is requested.
-
-  - Provide `--fips` option to the `open-ce build env` command. This will use the `openssl-env.yaml`, which includes `ffmpeg` by default.
 
 ### Building within a container
 
