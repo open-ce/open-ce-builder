@@ -126,7 +126,7 @@ For details, please see [`doc/README.open_ce_build.md`](doc/README.open_ce_build
 
 These packages will work on Power9 or Power10, but not on Power8.
 
-### FFMPEG with reduced codecs and openssl
+### FFMPEG with reduced codecs
 
 One can build Open-CE packages with ffmpeg in two ways:
 
