@@ -15,7 +15,7 @@ jobs:
       - uses: conda-incubator/setup-miniconda@v2.0.0
         with:
           auto-update-conda: false
-          python-version: "3.9"
+          python-version: "3.11"
       - name: Build and upload the conda package
         id: build_upload
         env:
