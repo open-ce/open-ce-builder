@@ -8,7 +8,7 @@ the builds are taking place. This can be accomplished in two ways (see below).
 directory where CUDA has been installed.**
 
 The standard CUDA installation location is in `/usr/local/cuda` which is typically 
-a symbolic link to either `/usr/local/cuda-11.2` or `/usr/local/cuda-11.8`. Most of
+a symbolic link to either `/usr/local/cuda-11.8` or `/usr/local/cuda-12.2`. Most of
 the code bases that are built in Open-CE are flexible enough to tolerate CUDA
 installations in non-standard locations, but not all of them. The reference table below
 includes the recipes that will not work when CUDA is installed elsewhere.
@@ -103,7 +103,7 @@ The tag can also be used per line shown in this example for the xgboost [meta.ya
 The `--cuda_versions` flag can be passed to `open-ce` to specify which version of CUDA to build conda packages for.
 
 ```shell
-open-ce build env --build_types cuda --cuda_versions 11.2 envs/opence-env.yaml
+open-ce build env --build_types cuda --cuda_versions 12.2 envs/opence-env.yaml
 ```
 
 Only one CUDA version can be specified at a time. To build for both on the same system, the build must be run twice in one of the following ways:
