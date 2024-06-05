@@ -1,8 +1,7 @@
-FROM docker.io/nvidia/cuda:12.2.2-devel-ubi8
+FROM registry.access.redhat.com/ubi8/ubi
 
 ENV CONDA_HOME=${CONDA_HOME:-/opt/conda}
 ENV PATH=$CONDA_HOME/bin:$PATH
-ENV CUDA_HOME=/usr/local/cuda
 
 ENV OPEN_CE_CONDA_BUILD=3.22.0
 ENV OPEN_CE_CONDA=4.14
@@ -16,11 +15,8 @@ ARG BUILD_ID=1084
 ARG LIMIT_BUILD_RESOURCES=0
 ENV LIMIT_BUILD_RESOURCES=${LIMIT_BUILD_RESOURCES}
 
-# Remove preinclude system compilers
-RUN rpm -e --nodeps --verbose gcc gcc-c++
-
 RUN export ARCH="$(uname -m)" && \
-    yum repolist && yum install -y rsync openssh-clients diffutils procps git-lfs file psmisc openssl-devel && \
+    yum repolist && yum install -y rsync openssh-clients diffutils procps binutils git-lfs glibc-devel file psmisc openssl-devel && \
     # Create CICD Group
     groupadd --non-unique --gid ${GROUP_ID} ${CICD_GROUP} && \
     # Adduser Builder
@@ -46,7 +42,6 @@ RUN export ARCH="$(uname -m)" && \
     git config --global http.version HTTP/1.1 && \
     git config --global http.postBuffer 157286400
 
-
 USER ${BUILD_USER}
 RUN export PATH="${PATH}" && \
     echo "PATH="${PATH}"" >> ${HOME}/.profile && \
@@ -57,3 +52,4 @@ RUN export PATH="${PATH}" && \
     echo "conda activate base" >> ${HOME}/.bashrc && \
     git config --global http.version HTTP/1.1 && \
     git config --global http.postBuffer 157286400
+
