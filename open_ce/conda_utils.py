@@ -113,7 +113,7 @@ def _make_hashable_args(function):
 
 @_make_hashable_args
 @functools.lru_cache(maxsize=1024)
-def get_latest_package_info(channels, package):
+def get_latest_package_info(channels, package):# pylint: disable=too-many-branches
     '''
     Get the latest conda package info with the following priority:
       1. Most Specific Channel
