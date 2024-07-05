@@ -17,6 +17,7 @@
 """
 import os
 import pathlib
+import platform
 from logging import ERROR, getLogger
 from datetime import datetime
 import functools
@@ -112,7 +113,7 @@ def _make_hashable_args(function):
 
 @_make_hashable_args
 @functools.lru_cache(maxsize=1024)
-def get_latest_package_info(channels, package):
+def get_latest_package_info(channels, package):# pylint: disable=too-many-branches
     '''
     Get the latest conda package info with the following priority:
       1. Most Specific Channel
@@ -123,6 +124,9 @@ def get_latest_package_info(channels, package):
 
     # Skip virtual packages (these have leading "__" in the name)
     if package.startswith("__"):
+        return ""
+
+    if package == "package_has_been_revoked" and (platform.machine() == 'x86_64' or platform.machine() == 's390x'):
         return ""
 
     channel_args = sum(([["--override-channels", "-c", channel]] for channel in channels), [])
