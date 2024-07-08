@@ -73,7 +73,8 @@ pip install -e .
 | 1.8.1                   | 12.0.1                  |
 | 1.9.4                   | 12.0.3                  |
 | 1.10.0                  | 12.0.3                  |
-| 1.11.0                  | 13.0.1                  |
+| 1.11.0/1.11.1           | 13.0.1                  |
+| 1.11.2                  | 13.0.2
 
 ### Building a Collection of Packages
 To build an entire integrated and functional conda channel using Open-CE, start by installing the needed tools in the [Requirements](#requirements) section above.
