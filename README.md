@@ -76,6 +76,7 @@ pip install -e .
 | 1.7.10                  | 12.0.2                  |
 | 1.8.1                   | 12.0.2                  |
 | 1.9.4                   | 12.0.3                  |
+| 1.9.5-cpd               | 12.0.3                  |
 
 
 ### Building a Collection of Packages
@@ -118,6 +119,13 @@ open-ce build env --python_versions 3.8,3.9,3.10 --build_types cuda opence-env
 
 Note that having _conda-forge_ in your channel list may sometime cause conflicts or unexpected errors due to dependencies' versions mismatch. So, it is recommended to avoid mixing the channels during the build as well as at runtime.
 
+### Note:
+Ensure CONDA_ADD_PIP_AS_PYTHON_DEPENDENCY=0 is set before building setuptools v72.1.0
+The steps to build setuptools with this environment variable and before other packages are:
+1. Set export CONDA_ADD_PIP_AS_PYTHON_DEPENDENCY=0
+2. Build common-deps.yaml
+3. unset CONDA_ADD_PIP_AS_PYTHON_DEPENDENCY
+4. Build opence-env.yaml.
 
 ### Power10 MMA Optimization
 #### Building Packages
