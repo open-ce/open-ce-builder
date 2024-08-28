@@ -119,6 +119,13 @@ open-ce build env --python_versions 3.8,3.9,3.10 --build_types cuda opence-env
 
 Note that having _conda-forge_ in your channel list may sometime cause conflicts or unexpected errors due to dependencies' versions mismatch. So, it is recommended to avoid mixing the channels during the build as well as at runtime.
 
+### Note:
+Ensure CONDA_ADD_PIP_AS_PYTHON_DEPENDENCY=0 is set before building setuptools v72.1.0
+The steps to build setuptools with this environment variable and before other packages are:
+1. Set export CONDA_ADD_PIP_AS_PYTHON_DEPENDENCY=0
+2. Build common-deps.yaml
+3. unset CONDA_ADD_PIP_AS_PYTHON_DEPENDENCY
+4. Build opence-env.yaml.
 
 ### Power10 MMA Optimization
 #### Building Packages
@@ -148,11 +155,6 @@ One can build Open-CE packages with ffmpeg in two ways:
   - Provide `--build-ffmpeg` option to the `open-ce build env` command. When this option is provided, Open-CE Builder builds [`envs/ffmpeg-env.yaml`](https://github.com/open-ce/open-ce/blob/main/envs/ffmpeg-env.yaml) internally and then builds the provided Open-CE environment file for which the build is requested.
 
   - Provide `--fips` option to the `open-ce build env` command. This will use the `openssl-env.yaml`, which includes `ffmpeg` by default.
-
-### Build instructions for ppc (p9 and p10)
-Setuptools v72.1.0 (The default Conda channel does not have the CVE patch version available) can be build on ppc p9 and p10
-1. Set `export CONDA_ADD_PIP_AS_PYTHON_DEPENDENCY=0` and then build common-deps.yaml
-2. `unset CONDA_ADD_PIP_AS_PYTHON_DEPENDENCY` and then build opence-env.yaml.
 
 ### Building within a container
 
