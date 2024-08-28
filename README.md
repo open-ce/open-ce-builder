@@ -76,6 +76,7 @@ pip install -e .
 | 1.7.10                  | 12.0.2                  |
 | 1.8.1                   | 12.0.2                  |
 | 1.9.4                   | 12.0.3                  |
+| 1.9.5-cpd               | 12.0.3                  |
 
 
 ### Building a Collection of Packages
@@ -147,6 +148,11 @@ One can build Open-CE packages with ffmpeg in two ways:
   - Provide `--build-ffmpeg` option to the `open-ce build env` command. When this option is provided, Open-CE Builder builds [`envs/ffmpeg-env.yaml`](https://github.com/open-ce/open-ce/blob/main/envs/ffmpeg-env.yaml) internally and then builds the provided Open-CE environment file for which the build is requested.
 
   - Provide `--fips` option to the `open-ce build env` command. This will use the `openssl-env.yaml`, which includes `ffmpeg` by default.
+
+### Build instructions for ppc (p9 and p10)
+Setuptools v72.1.0 (The default Conda channel does not have the CVE patch version available) can be build on ppc p9 and p10
+1. Set `export CONDA_ADD_PIP_AS_PYTHON_DEPENDENCY=0` and then build common-deps.yaml
+2. `unset CONDA_ADD_PIP_AS_PYTHON_DEPENDENCY` and then build opence-env.yaml.
 
 ### Building within a container
 
