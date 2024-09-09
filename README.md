@@ -73,7 +73,7 @@ pip install -e .
 | 1.8.1                   | 12.0.1                  |
 | 1.9.4                   | 12.0.3                  |
 | 1.10.0                  | 12.0.3                  |
-| 1.11.2                  | 13.0.2                  |
+| 1.11.3                  | 13.0.2                  |
 
 ### Building a Collection of Packages
 To build an entire integrated and functional conda channel using Open-CE, start by installing the needed tools in the [Requirements](#requirements) section above.
@@ -115,6 +115,13 @@ open-ce build env --python_versions 3.10,3.11 --build_types cuda opence-env
 
 Note that having _conda-forge_ in your channel list may sometime cause conflicts or unexpected errors due to dependencies' versions mismatch. So, it is recommended to avoid mixing the channels during the build as well as at runtime.
 
+### Note:
+Ensure CONDA_ADD_PIP_AS_PYTHON_DEPENDENCY=0 is set before building setuptools v72.1.0
+The steps to build setuptools with this environment variable and before other packages are:
+1. Set export CONDA_ADD_PIP_AS_PYTHON_DEPENDENCY=0
+2. Build common-deps.yaml
+3. unset CONDA_ADD_PIP_AS_PYTHON_DEPENDENCY
+4. Build opence-env.yaml.
 
 ### Power10 MMA Optimization
 #### Building Packages
