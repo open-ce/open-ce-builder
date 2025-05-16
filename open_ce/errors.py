@@ -89,9 +89,9 @@ class Error(Enum):
     TEMP_BUILD_IMAGE_FILES = (37, "Error removing temporary files created during build image.")
     UNABLE_DOWNLOAD_SOURCE = (38, "Unable to download source for '{}'.")
     UNABLE_CLONE_SOURCE = (39, "Unable to clone source for '{}'.")
-    GCC12_COMPILER_NOT_FOUND = (40, "Please check if GCC12 is installed. If not, install" +
-                                       " gcc-toolset-11. Also, set environment variables" +
-                                       " GCC_HOME to point to the installed location." +
+    GCC12_13_COMPILER_NOT_FOUND = (40, "Please check if GCC12 and GCC13 are installed. If not, install" +
+                                       " gcc-toolset-12 and gcc-toolset-13. Also, set environment variables" +
+                                       " GCC_HOME and GCC_13_HOME to point to the installed location." +
                                        " For e.g. GCC_HOME=\"/opt/rh/gcc-toolset-11/root/usr\"")
 
     GIT_TAG_MISSING = (41, "git_tag attribute is missing for '{}'")
