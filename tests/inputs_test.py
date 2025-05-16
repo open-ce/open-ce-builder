@@ -117,5 +117,5 @@ def test_check_ppc_arch_for_p10_with_no_gcc_path(mocker):
 
     with pytest.raises(OpenCEError) as exc:
         _check_ppc_arch(args)
-    assert Error.GCC12_COMPILER_NOT_FOUND.value[1] in str(exc.value)
+    assert Error.GCC12_13_COMPILER_NOT_FOUND.value[1] in str(exc.value)
 
