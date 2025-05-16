@@ -412,11 +412,11 @@ def _check_ppc_arch(args):
                 os.environ["PATH"] = f"{os.path.join(os.environ['GCC_HOME'], 'bin')}:{PATH}"
                 print("Path variable set to : ", os.environ["PATH"])
             if not os.path.exists(constants.DEFAULT_GCC_HOME_DIR):
-                raise OpenCEError(Error.GCC12_COMPILER_NOT_FOUND)
+                raise OpenCEError(Error.GCC12_13_COMPILER_NOT_FOUND)
             if "GCC_13_HOME" not in os.environ:
                 os.environ["GCC_13_HOME"] = constants.DEFAULT_GCC_13_HOME_DIR
             if not os.path.exists(constants.DEFAULT_GCC_13_HOME_DIR):
-                raise OpenCEError(Error.GCC13_COMPILER_NOT_FOUND)
+                raise OpenCEError(Error.GCC12_13_COMPILER_NOT_FOUND)
 
 
 def parse_args(parser, arg_strings=None):
