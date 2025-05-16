@@ -415,7 +415,7 @@ def _check_ppc_arch(args):
                 raise OpenCEError(Error.GCC12_COMPILER_NOT_FOUND)
             if "GCC_13_HOME" not in os.environ:
                 os.environ["GCC_13_HOME"] = constants.DEFAULT_GCC_13_HOME_DIR
-            if not os.path.exists(constants.DEFAULT_GCC_HOME_DIR):
+            if not os.path.exists(constants.DEFAULT_GCC_13_HOME_DIR):
                 raise OpenCEError(Error.GCC13_COMPILER_NOT_FOUND)
 
 
