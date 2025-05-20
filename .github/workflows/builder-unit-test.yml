@@ -33,7 +33,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda install -y pylint=2.16.2 \
-                           conda-build \
+                           conda-build=24.9.0 \
                            networkx \
                            matplotlib=3.7.* \
                            junit-xml \
