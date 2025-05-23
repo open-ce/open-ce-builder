@@ -17,7 +17,7 @@ ARG LIMIT_BUILD_RESOURCES=0
 ENV LIMIT_BUILD_RESOURCES=${LIMIT_BUILD_RESOURCES}
 
 RUN export ARCH="$(uname -m)" && \
-    yum install -y yum-utils rsync openssh-clients diffutils procps git-lfs gcc-toolset-12 glibc-devel file psmisc libX11-devel openssl openssl-libs openssl-devel && \
+    yum install -y yum-utils rsync openssh-clients diffutils procps git-lfs gcc-toolset-12 gcc-toolset-13 glibc-devel file psmisc libX11-devel openssl openssl-libs openssl-devel && \
     yum install -y libtirpc-devel && \
     # Create CICD Group
     groupadd --non-unique --gid ${GROUP_ID} ${CICD_GROUP} && \
@@ -43,9 +43,11 @@ RUN export ARCH="$(uname -m)" && \
     echo "export LIMIT_BUILD_RESOURCES=${LIMIT_BUILD_RESOURCES}" >> ${HOME}/.bashrc && \
     export PATH="/opt/rh/gcc-toolset-12/root/usr/bin:${PATH}" && \
     export GCC_HOME="/opt/rh/gcc-toolset-12/root/usr" && \
+    export GCC_13_HOME="/opt/rh/gcc-toolset-13/root/usr" && \
     echo "PATH="${PATH}"" >> ${HOME}/.profile && \
     echo "PATH="${PATH}"" >> ${HOME}/.bashrc && \
     echo "GCC_HOME="${GCC_HOME}"" >> ${HOME}/.bashrc && \
+    echo "GCC_13_HOME="${GCC_13_HOME}"" >> ${HOME}/.bashrc && \
     chown -R ${BUILD_USER}:${CICD_GROUP} ${CONDA_HOME} && \
     git config --global http.version HTTP/1.1 && \
     git config --global http.postBuffer 157286400
@@ -54,9 +56,11 @@ RUN export ARCH="$(uname -m)" && \
 USER ${BUILD_USER}
 RUN export PATH="/opt/rh/gcc-toolset-12/root/usr/bin:${PATH}" && \
     export GCC_HOME="/opt/rh/gcc-toolset-12/root/usr" && \
+    export GCC_13_HOME="/opt/rh/gcc-toolset-13/root/usr" && \
     echo "PATH="${PATH}"" >> ${HOME}/.profile && \
     echo "PATH="${PATH}"" >> ${HOME}/.bashrc && \
     echo "GCC_HOME="${GCC_HOME}"" >> ${HOME}/.bashrc && \
+    echo "GCC_13_HOME="${GCC_13_HOME}"" >> ${HOME}/.bashrc && \
     mkdir -p $HOME/.cache && \
     echo ". $CONDA_HOME/etc/profile.d/conda.sh" >> ${HOME}/.bashrc && \
     echo "export PYTHONPATH=${PYTHONPATH}:$HOME/open_ce" >> ${HOME}/.bashrc && \

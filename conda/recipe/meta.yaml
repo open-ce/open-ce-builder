@@ -1,5 +1,5 @@
 {% set name = "open-ce-builder" %}
-{% set version = "13.0.3" %}
+{% set version = "13.0.4" %}
 
 package:
   name: {{ name }}
@@ -16,7 +16,7 @@ build:
 requirements:
   build:
     - python
-    - setuptools
+    - setuptools 75.*
   run:
     - conda-build
     - conda
