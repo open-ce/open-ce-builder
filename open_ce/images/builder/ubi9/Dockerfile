@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9/ubi
+FROM registry.access.redhat.com/ubi9/ubi:9.6
 
 ENV CONDA_HOME=${CONDA_HOME:-/opt/conda}
 ENV PATH=$CONDA_HOME/bin:$PATH
@@ -16,7 +16,7 @@ ARG LIMIT_BUILD_RESOURCES=0
 ENV LIMIT_BUILD_RESOURCES=${LIMIT_BUILD_RESOURCES}
 
 RUN export ARCH="$(uname -m)" && \
-    yum repolist && yum install -y rsync openssh-clients diffutils procps binutils git-lfs glibc-devel file psmisc libxcrypt-compat openssl-devel && \
+    yum repolist && yum install -y rsync openssh-clients diffutils procps binutils git-lfs glibc-devel file psmisc libxcrypt-compat openssl-devel java-11-openjdk-devel && \
     # Create CICD Group
     groupadd --non-unique --gid ${GROUP_ID} ${CICD_GROUP} && \
     # Adduser Builder
