@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9/ubi
+FROM registry.access.redhat.com/ubi9/ubi:9.6
 
 ENV CONDA_HOME=${CONDA_HOME:-/opt/conda}
 ENV PATH=$CONDA_HOME/bin:$PATH
@@ -16,7 +16,7 @@ ARG LIMIT_BUILD_RESOURCES=0
 ENV LIMIT_BUILD_RESOURCES=${LIMIT_BUILD_RESOURCES}
 
 RUN export ARCH="$(uname -m)" && \
-    yum install -y yum-utils rsync openssh-clients diffutils procps git-lfs gcc-toolset-12 gcc-toolset-13 glibc-devel file libxcrypt-compat psmisc libX11-devel openssl openssl-libs openssl-devel && \
+    yum install -y yum-utils rsync openssh-clients diffutils procps git-lfs gcc-toolset-12 gcc-toolset-13 glibc-devel file libxcrypt-compat psmisc libX11-devel openssl openssl-libs openssl-devel java-11-openjdk-devel && \
     yum-config-manager --set-enabled codeready-builder-for-rhel-9-ppc64le-rpms && \
     yum install -y libtirpc-devel && \
     # Create CICD Group
